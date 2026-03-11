@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
+import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/src/sales/views/start_order_view.dart';
 import 'package:lottie/lottie.dart';
+
+import '../../../inject_container.dart';
 
 class HomeSalesView extends StatefulWidget {
   const HomeSalesView({super.key,});
@@ -30,13 +33,8 @@ class _HomeSalesViewState extends State<HomeSalesView> {
     if (_isNavigating) return;
 
     _isNavigating = true;
-    Navigator.push(context, MaterialPageRoute(builder: (context) => StartOrderView(),),
-    ).then((_) {
-      _isNavigating = false;
-      if (mounted) {
-        _focusNode.requestFocus();
-      }
-    });
+    NavigationService navigationService = locator();
+    navigationService.navigateTo(StartOrderView());
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
@@ -82,7 +80,7 @@ class _HomeSalesViewState extends State<HomeSalesView> {
                   ),
                   const SizedBox(height: 20),
                   Lottie.asset(
-                    AppLotties.scan,
+                    AppLotties.glass_water,
                     width: 350,
                     height: 350,
                     fit: BoxFit.fill,

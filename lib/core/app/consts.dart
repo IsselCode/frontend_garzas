@@ -4,6 +4,8 @@ class AppLotties {
   static const _baseLotties = "assets/lotties";
 
   static const scan = "$_baseLotties/scan.json"; // https://lottiefiles.com/es/free-animation/document-ocr-scan-xjHvcgGQ7G
+  static const glass_water = "$_baseLotties/glass_water.json"; // https://lottiefiles.com/free-animation/water-KjMVMduwqB
+  static const water_indicator = "$_baseLotties/water_indicator.json"; // https://lottiefiles.com/free-animation/water-KjMVMduwqB
 }
 
 class AppAssets {

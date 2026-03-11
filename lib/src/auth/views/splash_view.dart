@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/src/auth/views/sign_in_view.dart';
 
 import '../../../core/app/consts.dart';
+import '../../../inject_container.dart';
 
 
 class SplashView extends StatefulWidget {
@@ -56,7 +58,8 @@ class _SplashScreenViewState extends State<SplashView> with TickerProviderStateM
       await Future.delayed(const Duration(seconds: 1));
 
       //* Se navega al LoginView
-      Navigator.push(context, MaterialPageRoute(builder: (context) => SignInView(),));
+      NavigationService navigationService = locator();
+      navigationService.pushAndRemoveUntil(SignInView());
 
     });
   }
