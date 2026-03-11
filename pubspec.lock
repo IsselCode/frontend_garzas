@@ -192,10 +192,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: d2b193a57ded50f36563afd8212091227f1a806b
+      resolved-ref: "721269723bae99e48a6b53568c517dcbdc5ea812"
       url: "https://github.com/IsselCode/issel_code_widgets"
     source: git
-    version: "0.0.14"
+    version: "0.0.16"
   json_annotation:
     dependency: transitive
     description:

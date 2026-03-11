@@ -22,6 +22,7 @@ ThemeData darkTheme = ThemeData(
       onError: AppColors.white,
       surface: AppColors.darkBackSurface,
       onSurface: AppColors.white,
+      outline: AppColors.grey
     ),
 
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -73,6 +74,7 @@ ThemeData lightTheme = ThemeData(
       onError: AppColors.black,
       surface: AppColors.whiteBackSurface,
       onSurface: AppColors.black,
+      outline: AppColors.grey
     ),
 
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
