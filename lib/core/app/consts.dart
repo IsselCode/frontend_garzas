@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class AppLotties {
   static const _baseLotties = "assets/lotties";
+
+  static const scan = "$_baseLotties/scan.json"; // https://lottiefiles.com/es/free-animation/document-ocr-scan-xjHvcgGQ7G
 }
 
 class AppAssets {
