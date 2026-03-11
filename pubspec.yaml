@@ -41,6 +41,8 @@ dependencies:
   toastification: ^3.0.3
   loader_overlay: ^5.0.0
   equatable: ^2.0.8
+  window_manager: ^0.5.1
+  snap_layouts: ^0.2.0
 
 
 dev_dependencies:
