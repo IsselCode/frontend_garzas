@@ -34,7 +34,9 @@ class _HomeSalesViewState extends State<HomeSalesView> {
 
     _isNavigating = true;
     NavigationService navigationService = locator();
-    navigationService.navigateTo(StartOrderView());
+    navigationService.navigateTo(StartOrderView.init(context));
+
+    _isNavigating = false;
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
