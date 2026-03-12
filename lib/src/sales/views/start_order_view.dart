@@ -51,6 +51,7 @@ class StartOrderView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text("Comenzar Orden", style: textTheme.displayLarge,),
+
                 Text("Selecciona el tipo de agua", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
                 IsselTabSwitcher(
                   state: orderController.state,
@@ -58,7 +59,9 @@ class StartOrderView extends StatelessWidget {
                   rightText: "Pozo",
                   onChanged: (value) => orderController.state = value,
                 ),
+
                 Text("Ingresa la cantidad a vender en litros", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
+
                 IsselTextFormField(
                   hintText: "1000",
                   controller: orderController.quantityController,
@@ -72,7 +75,7 @@ class StartOrderView extends StatelessWidget {
                     return null;
                   },
                   onSubmitted: (value) => finishOrder(context),
-                )
+                ),
               ],
 
             ),
@@ -89,7 +92,7 @@ class StartOrderView extends StatelessWidget {
     }
 
     NavigationService navigationService = locator();
-    navigationService.navigateTo(FinishOrderView());
+    navigationService.navigateTo(FinishOrderView.init(context));
 
   }
 

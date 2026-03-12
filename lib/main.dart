@@ -6,6 +6,7 @@ import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/app/consts.dart';
@@ -47,41 +48,43 @@ class MyApp extends StatelessWidget {
       child: Consumer<TitleBarController>(
         builder: (context, controller, child) {
           NavigationService navigationService = locator();
-          return MaterialApp(
-            title: 'Flutter Demo',
-            debugShowCheckedModeBanner: false,
-            theme: controller.currentTheme,
-            navigatorKey: navigationService.navigatorKey,
-            builder: (context, child) {
-              return Stack(
-                children: [
-                  child!,
-                  SizedBox(
-                    height: Size.fromHeight(kWindowCaptionHeight).height,
-                    child: IsselSnapLayoutsCaption(
-                      icon: Image.asset(AppAssets.logo),
-                      title: Material(
-                        color: Colors.transparent,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(controller.title.isNotEmpty ? "¡Hola, ${controller.title}!" : "", style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.primary),),
-                            IsselToggle(
-                              onChanged: (value) => controller.toggleTheme(),
-                              value: controller.isDarkMode,
-                              height: 35,
-                              width: 45,
-                              backColor: Theme.of(context).colorScheme.surface,
-                            )
-                          ],
+          return ToastificationWrapper(
+            child: MaterialApp(
+              title: 'Flutter Demo',
+              debugShowCheckedModeBanner: false,
+              theme: controller.currentTheme,
+              navigatorKey: navigationService.navigatorKey,
+              builder: (context, child) {
+                return Stack(
+                  children: [
+                    child!,
+                    SizedBox(
+                      height: Size.fromHeight(kWindowCaptionHeight).height,
+                      child: IsselSnapLayoutsCaption(
+                        icon: Image.asset(AppAssets.logo),
+                        title: Material(
+                          color: Colors.transparent,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(controller.title.isNotEmpty ? "¡Hola, ${controller.title}!" : "", style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.primary),),
+                              IsselToggle(
+                                onChanged: (value) => controller.toggleTheme(),
+                                value: controller.isDarkMode,
+                                height: 35,
+                                width: 45,
+                                backColor: Theme.of(context).colorScheme.surface,
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            },
-            home: HomeSalesView(),
+                  ],
+                );
+              },
+              home: HomeSalesView(),
+            ),
           );
         },
       ),
