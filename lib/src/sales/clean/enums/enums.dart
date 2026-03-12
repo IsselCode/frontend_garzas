@@ -3,11 +3,11 @@ import 'package:issel_code_widgets/issel_code_widgets.dart';
 
 enum WaterType {
 
-  potable(name: "Potable"),
-  pozo(name: "Pozo");
+  potable(display: "Potable"),
+  pozo(display: "Pozo");
 
-  final String name;
-  const WaterType({required this.name});
+  final String display;
+  const WaterType({required this.display});
 
   static WaterType fromTabSwitcher(TabSwitcherAlignStates state)
     => state == TabSwitcherAlignStates.left ? WaterType.potable : WaterType.pozo;

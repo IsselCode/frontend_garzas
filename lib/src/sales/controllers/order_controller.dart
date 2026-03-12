@@ -21,6 +21,8 @@ class OrderController extends ChangeNotifier {
   double total = 0;
   double totalRemaining = 0;
 
+  SaleInfoEntity? _saleInfoEntity;
+
   //! Login Methods
   CtrlResponse calculateTotalRemaining() {
     try {
@@ -78,13 +80,18 @@ class OrderController extends ChangeNotifier {
 
       print(dto.toString());
 
-
+      return CtrlResponse(success: true);
       throw AppException(message: "Controlador no implementado");
 
     } on AppException catch(e) {
       return CtrlResponse(success: false, message: e.message);
     }
 
+  }
+
+  // TODO: Implementar Driver Impresora
+  Future<void> printTicket() async {
+    await Future.delayed(const Duration(seconds: 5));
   }
 
   @override

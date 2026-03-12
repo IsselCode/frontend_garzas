@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
+import 'package:frontend_garzas/src/sales/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/sales/controllers/order_controller.dart';
 import 'package:frontend_garzas/src/sales/views/generate_ticket_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -13,12 +14,13 @@ import '../../../core/services/regex_service.dart';
 import '../../../inject_container.dart';
 
 class FinishOrderView extends StatelessWidget {
-  FinishOrderView({super.key});
+
+  FinishOrderView._();
 
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: context.read<OrderController>(),
-      child: FinishOrderView(),
+      child: FinishOrderView._(),
     );
   }
 
@@ -61,7 +63,7 @@ class FinishOrderView extends StatelessWidget {
                         Text("Tipo de agua", style: textTheme.titleMedium,),
                         IsselTextFormField(
                           hintText: "Tipo de agua",
-                          controller: orderController.quantityController,
+                          controller: TextEditingController(text: WaterType.fromTabSwitcher(orderController.state).display),
                           readOnly: true,
                         ),
                         Text("Litros a vender", style: textTheme.titleMedium),
@@ -151,7 +153,7 @@ class FinishOrderView extends StatelessWidget {
 
     if (response.success){
       NavigationService navigationService = locator();
-      navigationService.pushAndRemoveUntil(GenerateTicketView());
+      navigationService.pushAndRemoveUntil(GenerateTicketView.init(context));
     } else {
       ToastService toastService = locator();
       toastService.error(response.message!);
