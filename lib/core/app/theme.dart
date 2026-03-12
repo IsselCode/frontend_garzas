@@ -21,6 +21,7 @@ ThemeData darkTheme = ThemeData(
       error: AppColors.red,
       onError: AppColors.white,
       surface: AppColors.darkBackSurface,
+      surfaceContainer: AppColors.darkBackground,
       onSurface: AppColors.white,
       outline: AppColors.grey
     ),
@@ -73,6 +74,7 @@ ThemeData lightTheme = ThemeData(
       error: AppColors.red,
       onError: AppColors.black,
       surface: AppColors.whiteBackSurface,
+      surfaceContainer: AppColors.lightBackground,
       onSurface: AppColors.black,
       outline: AppColors.grey
     ),

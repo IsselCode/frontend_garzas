@@ -113,6 +113,7 @@ class _IsselSnapLayoutsCaptionState extends State<IsselSnapLayoutsCaption>
               ),
             ),
           ),
+          const SizedBox(width: 5,),
           widget.actions.isNotEmpty
               ? Padding(
                   padding: const EdgeInsets.only(right: 2),
