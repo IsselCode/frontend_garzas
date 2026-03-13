@@ -14,6 +14,11 @@ class AppAssets {
 
   static const logo = "$_baseImages/logo.png";
   static const logoText = "$_baseImages/logo_text.png";
+
+  static const configs = "$_baseImages/configs.png";
+  static const customers = "$_baseImages/customers.png";
+  static const statistics = "$_baseImages/statistics.png";
+  static const users = "$_baseImages/users.png";
 }
 
 class AppColors {

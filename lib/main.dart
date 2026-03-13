@@ -3,6 +3,7 @@ import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
+import 'package:frontend_garzas/src/admin/views/home_admin_view.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
 import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -99,7 +100,7 @@ class MyApp extends StatelessWidget {
                     ],
                   );
                 },
-                home: HomeSalesView(),
+                home: HomeAdminView(),
               ),
             ),
           );
