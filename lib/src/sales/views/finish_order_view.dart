@@ -41,16 +41,9 @@ class FinishOrderView extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // AppBara3
-          Positioned(
-            top: kWindowCaptionHeight,
-            left: 10,
-            child: TextBackButton()
-          ),
           // Body
           Row(
             children: [
-
               //* Left
               Expanded(
                 child: Center(
@@ -60,6 +53,12 @@ class FinishOrderView extends StatelessWidget {
                       spacing: 20,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        Text("Cliente", style: textTheme.titleMedium,),
+                        IsselTextFormField(
+                          hintText: "Nombre del cliente",
+                          controller: TextEditingController(text: orderController.selectedClient?.user),
+                          readOnly: true,
+                        ),
                         Text("Tipo de agua", style: textTheme.titleMedium,),
                         IsselTextFormField(
                           hintText: "Tipo de agua",
@@ -128,6 +127,12 @@ class FinishOrderView extends StatelessWidget {
               )
 
             ],
+          ),
+          // AppBar
+          Positioned(
+              top: kWindowCaptionHeight,
+              left: 10,
+              child: TextBackButton()
           ),
         ],
       ),

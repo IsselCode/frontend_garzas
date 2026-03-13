@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
+import 'package:frontend_garzas/src/sales/clean/entities/client_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/enums/enums.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 
@@ -23,7 +24,20 @@ class OrderController extends ChangeNotifier {
 
   SaleInfoEntity? _saleInfoEntity;
 
-  //! Login Methods
+  ClientEntity? _selectedClient;
+  ClientEntity? get selectedClient => _selectedClient;
+  set selectedClient(ClientEntity? value) {
+    if (value == _selectedClient) {
+      _selectedClient = null;
+    } else {
+      _selectedClient = value;
+    }
+    notifyListeners();
+  }
+  List<ClientEntity> clients = [];
+  List<ClientEntity> showedClients = [];
+
+  //! Logic Methods
   CtrlResponse calculateTotalRemaining() {
     try {
 
@@ -49,6 +63,68 @@ class OrderController extends ChangeNotifier {
   }
 
   // Model Methods
+
+  // TODO: Obtener clientes más frecuentes
+  Future<void> getClients() async {
+
+    try {
+
+      List<ClientEntity> fakeClients = [
+        ClientEntity(id: 599878, user: "Juan", phone: 8344281215),
+        ClientEntity(id: 599879, user: "Maria", phone: 8344281216),
+        ClientEntity(id: 599880, user: "Carlos", phone: 8344281217),
+        ClientEntity(id: 599881, user: "Ana", phone: 8344281218),
+        ClientEntity(id: 599882, user: "Luis", phone: 8344281219),
+        ClientEntity(id: 599883, user: "Sofia", phone: 8344281220),
+        ClientEntity(id: 599884, user: "Pedro", phone: 8344281221),
+        ClientEntity(id: 599885, user: "Lucia", phone: 8344281222),
+        ClientEntity(id: 599886, user: "Diego", phone: 8344281223),
+        ClientEntity(id: 599887, user: "Elena", phone: 8344281224),
+      ];
+
+
+      List<ClientEntity> tempClients = await Future.delayed(const Duration(milliseconds: 500), () => fakeClients,);
+      clients = tempClients;
+      showedClients = tempClients;
+
+      notifyListeners();
+
+    } on AppException catch(e) {
+     rethrow;
+    }
+
+  }
+
+  // TODO: Implementar con método obtener clientes por número de teléfono
+  Future<void> getSearchClients(String phone) async {
+
+    if (phone.isEmpty) {
+      showedClients = clients;
+      notifyListeners();
+      return ;
+    };
+
+    try {
+
+      List<ClientEntity> fakeClients = [
+        ClientEntity(id: 599881, user: "Ana", phone: 8344281218),
+        ClientEntity(id: 599883, user: "Sofia", phone: 8344281220),
+        ClientEntity(id: 599884, user: "Pedro", phone: 8344281221),
+        ClientEntity(id: 599887, user: "Elena", phone: 8344281224),
+      ];
+
+
+      List<ClientEntity> tempClients = await Future.delayed(const Duration(milliseconds: 500), () => fakeClients,);
+      showedClients = tempClients;
+
+      notifyListeners();
+
+    } on AppException catch(e) {
+      rethrow;
+    }
+
+  }
+
   // TODO: Implementar con método de módelo
   Future<CtrlResponse<double>> calculateTotal() async {
 
@@ -70,12 +146,14 @@ class OrderController extends ChangeNotifier {
 
     try {
 
+
       SaleInfoDto dto = SaleInfoDto(
-        quantity: double.parse(quantityController.text),
+        quantity: double.tryParse(quantityController.text),
         waterType: WaterType.fromTabSwitcher(state),
         estimateTotal: total,
-        clientMoney: double.parse(clientMoneyCtrl.text),
-        totalRemaining: totalRemaining
+        clientMoney: double.tryParse(clientMoneyCtrl.text),
+        totalRemaining: totalRemaining,
+        customerPhone: selectedClient?.phone,
       );
 
       print(dto.toString());
