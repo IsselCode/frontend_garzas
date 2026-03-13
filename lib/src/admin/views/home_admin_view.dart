@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
-import 'package:frontend_garzas/src/admin/clean/button_container.dart';
+import 'package:frontend_garzas/src/admin/clean/widgets/button_container.dart';
 import 'package:frontend_garzas/src/admin/views/config_view.dart';
 import 'package:frontend_garzas/src/admin/views/customers_view.dart';
 import 'package:frontend_garzas/src/admin/views/reports_and_logs_view.dart';
-import 'package:frontend_garzas/src/admin/views/users_view.dart';
+import 'package:frontend_garzas/src/admin/views/user_management_view.dart';
 
 import '../../../inject_container.dart';
 
@@ -55,7 +55,7 @@ class HomeAdminView extends StatelessWidget {
                 ButtonContainer(
                   title: "Gestionar usuarios",
                   asset: AppAssets.users,
-                  onTap: () => navigationService.navigateTo(UsersView()),
+                  onTap: () => navigationService.navigateTo(UserManagementView()),
                 ),
 
                 ButtonContainer(

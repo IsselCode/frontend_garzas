@@ -19,6 +19,10 @@ class AppAssets {
   static const customers = "$_baseImages/customers.png";
   static const statistics = "$_baseImages/statistics.png";
   static const users = "$_baseImages/users.png";
+
+  static const admin = "$_baseImages/admin.png";
+  static const cashRegister = "$_baseImages/cash_register.png";
+  static const waterTank = "$_baseImages/water_tank.png";
 }
 
 class AppColors {
