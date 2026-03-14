@@ -46,8 +46,8 @@ class ConfigDialog extends StatelessWidget {
                   child: IsselActionBox(
                     asset: AppAssets.configs,
                     title: "Configuración General",
-                    height: 128,
-                    width: 128,
+                    height: 150,
+                    width: 150,
                     color: colorScheme.surfaceContainer,
                     onTap: () => Navigator.pop(context, ConfigType.general,),
                   ),
@@ -56,8 +56,8 @@ class ConfigDialog extends StatelessWidget {
                   child: IsselActionBox(
                     asset: AppAssets.waterTank,
                     title: "Configurar Garzas",
-                    height: 128,
-                    width: 128,
+                    height: 150,
+                    width: 150,
                     color: colorScheme.surfaceContainer,
                     onTap: () => Navigator.pop(context, ConfigType.garzas,),
                   ),
