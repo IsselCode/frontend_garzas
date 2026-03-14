@@ -221,7 +221,7 @@ class _UserListState extends State<_UserList> {
             );
           }
 
-          if (!snapshot.data!.success) {
+          if (!snapshot.hasData) {
             return Center(child: Text("No se encontraron usuarios"),);
           }
 

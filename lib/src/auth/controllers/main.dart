@@ -16,4 +16,8 @@ class AuthController extends ChangeNotifier {
     throw UnimplementedError();
   }
 
+  Future<CtrlResponse> insertNormalUser(String username, String password, AppRole role) async {
+    throw UnimplementedError();
+  }
+
 }

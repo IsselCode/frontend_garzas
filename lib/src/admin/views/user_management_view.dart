@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
+import 'package:window_manager/window_manager.dart';
 
+import '../../../commons/text_back_button.dart';
 import '../../../core/app/consts.dart';
 import '../pages/user_management/create_user_page.dart';
 import '../pages/user_management/update_user_page.dart';
@@ -26,53 +28,66 @@ class _UserManagementViewState extends State<UserManagementView> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Center(
-          child: Container(
-            width: 455,
-            height: 589,
-            padding: EdgeInsets.symmetric(vertical: 20),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(24)
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 30,
-              children: [
-
-                // Cabecera
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Flex(
-                    spacing: 30,
-                    direction: Axis.vertical,
-                    children: [
-                      IsselAssetContainer(asset: AppAssets.logo, width: 64, height: 64,),
-                      IsselTabSwitcher(
-                        state: state,
-                        leftText: "Crear",
-                        rightText: "Actualizar",
-                        onChanged: changePage,
-                        color: theme.scaffoldBackgroundColor,
-                      ),
-                    ],
-                  ),
+        child: Stack(
+          children: [
+            //* Body
+            Center(
+              child: Container(
+                width: 455,
+                height: 589,
+                padding: EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(24)
                 ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 30,
+                  children: [
 
-                // Paginas
-                Expanded(
-                  child: PageView(
-                    physics: NeverScrollableScrollPhysics(),
-                    controller: pageController,
-                    children: [
-                      CreateUserPage(),
-                      // UpdateUserPage()
-                    ],
-                  ),
-                )
-              ],
+                    // Cabecera
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Flex(
+                        spacing: 30,
+                        direction: Axis.vertical,
+                        children: [
+                          IsselAssetContainer(asset: AppAssets.logo, width: 64, height: 64,),
+                          IsselTabSwitcher(
+                            state: state,
+                            leftText: "Crear",
+                            rightText: "Actualizar",
+                            onChanged: changePage,
+                            color: theme.scaffoldBackgroundColor,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Paginas
+                    Expanded(
+                      child: PageView(
+                        physics: NeverScrollableScrollPhysics(),
+                        controller: pageController,
+                        children: [
+                          CreateUserPage(),
+                          UpdateUserPage()
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ),
-          ),
+
+            //* AppBar
+            Positioned(
+              top: kWindowCaptionHeight,
+              left: 10,
+              child: TextBackButton()
+            ),
+
+          ],
         ),
       ),
     );
