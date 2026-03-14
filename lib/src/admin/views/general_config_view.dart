@@ -3,8 +3,8 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../../commons/text_back_button.dart';
 
-class ReportsAndLogsView extends StatelessWidget {
-  const ReportsAndLogsView({super.key});
+class GeneralConfigView extends StatelessWidget {
+  const GeneralConfigView({super.key});
 
   @override
   Widget build(BuildContext context) {

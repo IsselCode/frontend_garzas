@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/text_back_button.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../../commons/text_back_button.dart';
-
-class ReportsAndLogsView extends StatelessWidget {
-  const ReportsAndLogsView({super.key});
+class ConfigGarzasView extends StatelessWidget {
+  const ConfigGarzasView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,5 +18,4 @@ class ReportsAndLogsView extends StatelessWidget {
       ),
     );
   }
-
 }
