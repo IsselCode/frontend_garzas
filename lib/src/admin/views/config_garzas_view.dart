@@ -1,149 +1,164 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/text_back_button.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/config_garza_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
+import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
+import 'package:issel_code_widgets/issel_code_widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 class ConfigGarzasView extends StatefulWidget {
-  ConfigGarzasView({super.key});
+  const ConfigGarzasView({super.key});
 
   @override
   State<ConfigGarzasView> createState() => _ConfigGarzasViewState();
 }
 
 class _ConfigGarzasViewState extends State<ConfigGarzasView> {
+  late Future<CtrlResponse> _loadConfigsGarzas;
 
-  // TODO: Crear un loader para implementar valores iniciales
-  // TODO: Analizar creación de entidad para configuración de garzas
-
-  GarzaType garzaType1 = GarzaType.manual;
-  WaterType waterType1 = WaterType.potable;
-  UnitOfMeasurement unitOfMeasurement1 = UnitOfMeasurement.gallons;
-
-  GarzaType garzaType2 = GarzaType.manual;
-  WaterType waterType2 = WaterType.potable;
-  UnitOfMeasurement unitOfMeasurement2 = UnitOfMeasurement.gallons;
-
-  GarzaType garzaType3 = GarzaType.manual;
-  WaterType waterType3 = WaterType.potable;
-  UnitOfMeasurement unitOfMeasurement3 = UnitOfMeasurement.gallons;
-
-  GarzaType garzaType4 = GarzaType.manual;
-  WaterType waterType4 = WaterType.potable;
-  UnitOfMeasurement unitOfMeasurement4 = UnitOfMeasurement.gallons;
+  @override
+  void initState() {
+    super.initState();
+    ConfigGarzasController configGarzasController = context.read();
+    _loadConfigsGarzas = configGarzasController.loadConfigGarzas();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // theme
+    // Theme
     ThemeData theme = Theme.of(context);
-    ColorScheme colorScheme = theme.colorScheme;
     TextTheme textTheme = theme.textTheme;
+    ColorScheme colorScheme = theme.colorScheme;
+
+    // Controllers
+    ConfigGarzasController configGarzasController = context.watch();
 
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.only(top: kWindowCaptionHeight, left: 10, right: 10, bottom: 10),
+        padding: EdgeInsets.only(
+          top: kWindowCaptionHeight,
+          left: 10,
+          right: 10,
+          bottom: 10,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextBackButton(),
-            const SizedBox(height: 10,),
+            const SizedBox(height: 10),
             // Body
-            Column(
-              spacing: 20,
-              children: [
+            Expanded(
+              child: FutureBuilder(
+                future: _loadConfigsGarzas,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return LayoutBuilder(
+                      builder: (context, gridConstraints) {
+                        const columns = 3;
+                        const rows = 2;
+                        const spacing = 16.0;
 
-                // 1,2,3,
-                Row(
-                  spacing: 20,
-                  children: [
-                    ConfigGarzaContainer(
-                      title: "Garza 1",
-                      garzaType: garzaType1,
-                      waterType: waterType1,
-                      unitOfMeasurement: unitOfMeasurement1,
-                      onGarzaTypeChanged: (newValue) {
-                        garzaType1 = newValue;
-                        setState(() {});
-                      },
-                      onUnitOfMeasurement: (newValue) {
-                        unitOfMeasurement1 = newValue;
-                        setState(() {});
-                      },
-                      onWaterTypeChanged: (newValue) {
-                        waterType1 = newValue;
-                        setState(() {});
-                      },
-                    ),
-                    ConfigGarzaContainer(
-                      title: "Garza 2",
-                      garzaType: garzaType2,
-                      waterType: waterType2,
-                      unitOfMeasurement: unitOfMeasurement2,
-                      onGarzaTypeChanged: (newValue) {
-                        garzaType2 = newValue;
-                        setState(() {});
-                      },
-                      onUnitOfMeasurement: (newValue) {
-                        unitOfMeasurement2 = newValue;
-                        setState(() {});
-                      },
-                      onWaterTypeChanged: (newValue) {
-                        waterType2 = newValue;
-                        setState(() {});
-                      },
-                    ),
-                    ConfigGarzaContainer(
-                      title: "Garza 3",
-                      garzaType: garzaType3,
-                      waterType: waterType3,
-                      unitOfMeasurement: unitOfMeasurement3,
-                      onGarzaTypeChanged: (newValue) {
-                        garzaType3 = newValue;
-                        setState(() {});
-                      },
-                      onUnitOfMeasurement: (newValue) {
-                        unitOfMeasurement3 = newValue;
-                        setState(() {});
-                      },
-                      onWaterTypeChanged: (newValue) {
-                        waterType3 = newValue;
-                        setState(() {});
-                      },
-                    ),
-                  ],
-                ),
+                        final itemWidth = (gridConstraints.maxWidth - (spacing * (columns - 1))) / columns;
+                        final itemHeight = (gridConstraints.maxHeight - (spacing * (rows - 1))) / rows;
 
-                // 4
-                Row(
-                  spacing: 20,
-                  children: [
-                    ConfigGarzaContainer(
-                      title: "Garza 4",
-                      garzaType: garzaType4,
-                      waterType: waterType4,
-                      unitOfMeasurement: unitOfMeasurement4,
-                      onGarzaTypeChanged: (newValue) {
-                        garzaType4 = newValue;
-                        setState(() {});
+                        return GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: columns * rows,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: columns,
+                            crossAxisSpacing: spacing,
+                            mainAxisSpacing: spacing,
+                            childAspectRatio: itemWidth / itemHeight,
+                          ),
+                          itemBuilder: (context, index) {
+                            return IsselShimmer(
+                              width: double.infinity,
+                              height: double.infinity,
+                            );
+                          },
+                        );
                       },
-                      onUnitOfMeasurement: (newValue) {
-                        unitOfMeasurement4 = newValue;
-                        setState(() {});
-                      },
-                      onWaterTypeChanged: (newValue) {
-                        waterType4 = newValue;
-                        setState(() {});
-                      },
-                    ),
-                    Spacer(),
-                    Spacer()
-                  ],
-                )
+                    );
+                  }
 
-              ],
-            )
+                  if (configGarzasController.configGarzas.isEmpty) {
+                    return Center(child: Text("No hay garzas disponibles"));
+                  }
+
+                  List<ConfigGarzaEntity> configs = configGarzasController.configGarzas;
+
+                  ConfigGarzaEntity config1 = configs[0];
+                  ConfigGarzaEntity config2 = configs[1];
+                  ConfigGarzaEntity config3 = configs[2];
+                  ConfigGarzaEntity config4 = configs[3];
+
+                  return SingleChildScrollView(
+                    child: Column(
+                      spacing: 20,
+                      children: [
+                        // 1,2,3,
+                        Row(
+                          spacing: 20,
+                          children: [
+                            ConfigGarzaContainer(
+                              title: "Garza 1",
+                              garzaType: config1.garzaType,
+                              waterType: config1.waterType,
+                              unitOfMeasurement: config1.unitOfMeasurement,
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config1.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config1.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config1.number, unitOfMeasurement: newValue),
+                            ),
+                            ConfigGarzaContainer(
+                              title: "Garza 2",
+                              garzaType: config2.garzaType,
+                              waterType: config2.waterType,
+                              unitOfMeasurement: config2.unitOfMeasurement,
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config2.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config2.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config2.number, unitOfMeasurement: newValue),
+                            ),
+                            ConfigGarzaContainer(
+                              title: "Garza 3",
+                              garzaType: config3.garzaType,
+                              waterType: config3.waterType,
+                              unitOfMeasurement: config3.unitOfMeasurement,
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config3.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config3.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config3.number, unitOfMeasurement: newValue),
+                            ),
+                          ],
+                        ),
+                        // 4
+                        Row(
+                          spacing: 20,
+                          children: [
+                            ConfigGarzaContainer(
+                              title: "Garza 4",
+                              garzaType: config4.garzaType,
+                              waterType: config4.waterType,
+                              unitOfMeasurement: config4.unitOfMeasurement,
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config4.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config4.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config4.number, unitOfMeasurement: newValue),
+                            ),
+                            Spacer(),
+                            Spacer(),
+                          ],
+                        )
+                      ]
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+
+
 }

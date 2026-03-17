@@ -7,7 +7,7 @@ import '../../../../commons/ctrl_response.dart';
 import '../../../../core/app/consts.dart';
 import '../../../../core/services/toast_service.dart';
 import '../../../../inject_container.dart';
-import '../../../auth/controllers/main.dart';
+import '../../../auth/controllers/auth_controller.dart';
 import '../../clean/enums/enums.dart';
 
 class CreateUserPage extends StatefulWidget {

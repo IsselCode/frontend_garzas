@@ -8,7 +8,7 @@ import '../../../../commons/user_entity.dart';
 import '../../../../core/app/consts.dart';
 import '../../../../core/services/toast_service.dart';
 import '../../../../inject_container.dart';
-import '../../../auth/controllers/main.dart';
+import '../../../auth/controllers/auth_controller.dart';
 import '../../clean/enums/enums.dart';
 
 class UpdateUserPage extends StatefulWidget {
