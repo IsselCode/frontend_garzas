@@ -50,8 +50,8 @@ ThemeData darkTheme = ThemeData(
       titleSmall: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
       bodyLarge: GoogleFonts.roboto(fontSize: 18),
       bodyMedium: GoogleFonts.roboto(fontSize: 16),
-      labelLarge: GoogleFonts.roboto(fontSize: 13),
-      labelMedium: GoogleFonts.roboto(fontSize: 12),
+      labelLarge: GoogleFonts.roboto(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.grey),
+      labelMedium: GoogleFonts.roboto(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.grey),
       labelSmall: GoogleFonts.roboto(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.grey),
     )
 
@@ -104,8 +104,8 @@ ThemeData lightTheme = ThemeData(
       titleSmall: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
       bodyLarge: GoogleFonts.roboto(fontSize: 18),
       bodyMedium: GoogleFonts.roboto(fontSize: 16),
-      labelLarge: GoogleFonts.roboto(fontSize: 13),
-      labelMedium: GoogleFonts.roboto(fontSize: 12),
+      labelLarge: GoogleFonts.roboto(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.grey),
+      labelMedium: GoogleFonts.roboto(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.grey),
       labelSmall: GoogleFonts.roboto(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.grey),
     )
 

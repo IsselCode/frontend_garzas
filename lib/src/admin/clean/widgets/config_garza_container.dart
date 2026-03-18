@@ -43,11 +43,12 @@ enum WaterType {
 }
 
 enum UnitOfMeasurement {
-  gallons(dp: "Galones"),
-  liters(dp: "Litros");
+  gallons(dp: "Galones", abbr: "gal"),
+  liters(dp: "Litros", abbr: "L");
 
   final String dp;
-  const UnitOfMeasurement({required this.dp});
+  final String abbr;
+  const UnitOfMeasurement({required this.dp, required this.abbr});
 
   static UnitOfMeasurement fromString(String type) {
     switch (type) {

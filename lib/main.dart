@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/views/home_admin_view.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
-import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -46,13 +47,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => TitleBarController(),),
-        ChangeNotifierProvider(create: (context) => locator<AuthController>(),),
-        ChangeNotifierProvider(create: (context) => locator<ConfigGarzasController>(),),
-        ChangeNotifierProvider(create: (context) => locator<GeneralConfigController>(),),
+        ChangeNotifierProvider(create: (context) => TitleBarController()),
+        ChangeNotifierProvider(create: (context) => locator<AuthController>()),
+        ChangeNotifierProvider(
+          create: (context) => locator<ConfigGarzasController>(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => locator<GeneralConfigController>(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => locator<StatisticsController>(),
+        ),
       ],
       child: Consumer<TitleBarController>(
         builder: (context, controller, child) {
@@ -63,6 +70,17 @@ class MyApp extends StatelessWidget {
                 title: 'Flutter Demo',
                 debugShowCheckedModeBanner: false,
                 theme: controller.currentTheme,
+                locale: const Locale('es', 'MX'),
+                supportedLocales: const [
+                  Locale('es', 'MX'),
+                  Locale('es'),
+                  Locale('en'),
+                ],
+                localizationsDelegates: const [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
                 navigatorKey: navigationService.navigatorKey,
                 builder: (context, child) {
                   return Stack(
@@ -77,13 +95,26 @@ class MyApp extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(controller.title.isNotEmpty ? "¡Hola, ${controller.title}!" : "", style: Theme.of(context).textTheme.titleSmall?.copyWith(color: Theme.of(context).colorScheme.primary),),
+                                Text(
+                                  controller.title.isNotEmpty
+                                      ? "¡Hola, ${controller.title}!"
+                                      : "",
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                ),
                                 IsselToggle(
-                                  onChanged: (value) => controller.toggleTheme(),
+                                  onChanged: (value) =>
+                                      controller.toggleTheme(),
                                   value: controller.isDarkMode,
                                   height: 35,
                                   width: 45,
-                                  backColor: Theme.of(context).colorScheme.surface,
+                                  backColor: Theme.of(
+                                    context,
+                                  ).colorScheme.surface,
                                 ),
                               ],
                             ),
@@ -92,14 +123,16 @@ class MyApp extends StatelessWidget {
                             IsselWindowCaptionAction(
                               icon: Icon(Icons.print_outlined),
                               onPressed: () {
-                                final dialogContext = navigationService.navigatorKey.currentContext;
+                                final dialogContext = navigationService
+                                    .navigatorKey
+                                    .currentContext;
                                 if (dialogContext == null) return;
                                 showDialog(
                                   context: dialogContext,
                                   builder: (context) => ConfigPrinterDialog(),
                                 );
                               },
-                            )
+                            ),
                           ],
                         ),
                       ),
