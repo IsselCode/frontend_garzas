@@ -4,6 +4,7 @@ import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/views/home_admin_view.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
@@ -50,7 +51,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => TitleBarController(),),
         ChangeNotifierProvider(create: (context) => locator<AuthController>(),),
-        ChangeNotifierProvider(create: (context) => locator<ConfigGarzasController>(),)
+        ChangeNotifierProvider(create: (context) => locator<ConfigGarzasController>(),),
+        ChangeNotifierProvider(create: (context) => locator<GeneralConfigController>(),),
       ],
       child: Consumer<TitleBarController>(
         builder: (context, controller, child) {

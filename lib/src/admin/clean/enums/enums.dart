@@ -23,3 +23,14 @@ enum AppRole {
   }
 
 }
+
+enum GeneralConfigLogField {
+  loadData,
+  userCreated,
+  userDeleted,
+  login,
+  logout,
+  clientCreated,
+  clientDeleted,
+  clientModified,
+}

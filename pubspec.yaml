@@ -49,6 +49,7 @@ dependencies:
   printing: ^5.14.2
   shared_preferences: ^2.5.4
   unorm_dart: ^0.3.2
+  barcode: ^2.2.9
 
 
 dev_dependencies:
