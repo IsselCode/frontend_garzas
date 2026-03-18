@@ -110,11 +110,9 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return Expanded(
-                                child: IsselShimmer(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                ),
+                              return IsselShimmer(
+                                width: double.infinity,
+                                height: double.infinity,
                               );
                             }
 
@@ -124,8 +122,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                               );
                             }
 
-                            return Expanded(
-                              child: Container(
+                            return Container(
                                 padding: EdgeInsets.all(20),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
@@ -260,7 +257,6 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                     ),
                                   ],
                                 ),
-                              ),
                             );
                           },
                         ),
@@ -270,11 +266,9 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return Expanded(
-                                child: IsselShimmer(
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                ),
+                              return IsselShimmer(
+                                width: double.infinity,
+                                height: double.infinity,
                               );
                             }
 
@@ -284,8 +278,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                               );
                             }
 
-                            return Expanded(
-                              child: Container(
+                            return Container(
                                 padding: EdgeInsets.all(20),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
@@ -384,7 +377,6 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                     ),
                                   ],
                                 ),
-                              ),
                             );
                           },
                         ),

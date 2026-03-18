@@ -8,6 +8,7 @@ class SellEntity extends Equatable {
   String employee;
   double quantity;
   WaterType waterType;
+  UnitOfMeasurement unitOfMeasurement;
   double total;
   DateTime date;
 
@@ -17,6 +18,7 @@ class SellEntity extends Equatable {
     required this.employee,
     required this.quantity,
     required this.waterType,
+    required this.unitOfMeasurement,
     required this.total,
     required this.date
   });
@@ -28,12 +30,13 @@ class SellEntity extends Equatable {
       employee: data["employee"],
       quantity: data["quantity"],
       waterType: WaterType.fromString(data["water_type"]),
+      unitOfMeasurement: UnitOfMeasurement.fromString(data["unit_of_measurement"]),
       total: data["total"],
       date: DateTime.fromMillisecondsSinceEpoch(data["date"], isUtc: true).toLocal()
     );
   }
 
   @override
-  List<Object?> get props => [id, numberGarza, employee, quantity, waterType, total, date];
+  List<Object?> get props => [id, numberGarza, employee, quantity, waterType, unitOfMeasurement, total, date];
 
 }
