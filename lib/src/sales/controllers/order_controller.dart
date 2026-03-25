@@ -70,16 +70,16 @@ class OrderController extends ChangeNotifier {
     try {
 
       List<ClientEntity> fakeClients = [
-        ClientEntity(id: 599878, user: "Juan", phone: 8344281215),
-        ClientEntity(id: 599879, user: "Maria", phone: 8344281216),
-        ClientEntity(id: 599880, user: "Carlos", phone: 8344281217),
-        ClientEntity(id: 599881, user: "Ana", phone: 8344281218),
-        ClientEntity(id: 599882, user: "Luis", phone: 8344281219),
-        ClientEntity(id: 599883, user: "Sofia", phone: 8344281220),
-        ClientEntity(id: 599884, user: "Pedro", phone: 8344281221),
-        ClientEntity(id: 599885, user: "Lucia", phone: 8344281222),
-        ClientEntity(id: 599886, user: "Diego", phone: 8344281223),
-        ClientEntity(id: 599887, user: "Elena", phone: 8344281224),
+        ClientEntity(id: 599878, user: "Juan", phone: 8344281215, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599879, user: "Maria", phone: 8344281216, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599880, user: "Carlos", phone: 8344281217, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599881, user: "Ana", phone: 8344281218, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599882, user: "Luis", phone: 8344281219, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599883, user: "Sofia", phone: 8344281220, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599884, user: "Pedro", phone: 8344281221, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599885, user: "Lucia", phone: 8344281222, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599886, user: "Diego", phone: 8344281223, galPricing: 2.5, literPricing: 1.2),
+        ClientEntity(id: 599887, user: "Elena", phone: 8344281224, galPricing: 2.5, literPricing: 1.2),
       ];
 
 
@@ -107,10 +107,10 @@ class OrderController extends ChangeNotifier {
     try {
 
       List<ClientEntity> fakeClients = [
-        ClientEntity(id: 599881, user: "Ana", phone: 8344281218),
-        ClientEntity(id: 599883, user: "Sofia", phone: 8344281220),
-        ClientEntity(id: 599884, user: "Pedro", phone: 8344281221),
-        ClientEntity(id: 599887, user: "Elena", phone: 8344281224),
+        ClientEntity(id: 599881, user: "Ana", phone: 8344281218, literPricing: 1.2, galPricing: 2.5),
+        ClientEntity(id: 599883, user: "Sofia", phone: 8344281220, literPricing: 1.2, galPricing: 2.5),
+        ClientEntity(id: 599884, user: "Pedro", phone: 8344281221, literPricing: 1.2, galPricing: 2.5),
+        ClientEntity(id: 599887, user: "Elena", phone: 8344281224, literPricing: 1.2, galPricing: 2.5),
       ];
 
 

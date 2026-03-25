@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/src/admin/clean/dialogs/confirm_delete_user_dialog.dart';
+import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -22,12 +24,14 @@ class UpdateUserPage extends StatefulWidget {
 class _UpdateUserPageState extends State<UpdateUserPage> {
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  TextEditingController displayName = TextEditingController();
+  TextEditingController username = TextEditingController();
+  TextEditingController password = TextEditingController();
+  AppRole selectedRole = AppRole.admin;
+
   PageController pageController = PageController();
   int indexPage = 0;
   UserEntity? selectedUser;
-
-  String? newUsername;
-  AppRole? newAppRole;
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +58,14 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                   Form(
                     key: formKey,
                     child: _UserUpdate(
+                      displayName: displayName,
+                      selectedRole: selectedRole,
+                      username: username,
+                      password: password,
                       userEntity: selectedUser!,
-                      onChanged: (username, role) {
-                        newAppRole = role;
-                        newUsername = username;
+                      onChanged: (role) {
+                        selectedRole = role;
+                        setState(() {});
                       },
                     ),
                   )
@@ -108,11 +116,20 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
 
   void deleteUser() async {
 
-    AuthController authController = context.read();
+    bool? dialogResponse = await showDialog(
+      context: context,
+      builder: (context) => ConfirmDeleteUserDialog(username: selectedUser!.username),
+    );
+
+    if (dialogResponse == null || dialogResponse == false) {
+      return;
+    }
+
+    UsersController usersController = context.read();
     ToastService toastService = locator();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await authController.deleteUserById(selectedUser!.id);
+    CtrlResponse response = await usersController.deleteUserById(selectedUser!.uid);
     context.loaderOverlay.hide();
 
     if (response.success) {
@@ -134,11 +151,17 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
       return ;
     }
 
-    AuthController authController = context.read();
+    UsersController usersController = context.read();
     ToastService toastService = locator();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await authController.updateUser(selectedUser!.id, newUsername!, newAppRole!);
+    CtrlResponse response = await usersController.updateUser(
+      selectedUser!.uid,
+      username.text,
+      displayName.text,
+      password.text,
+      selectedRole
+    );
     context.loaderOverlay.hide();
 
     if (response.success) {
@@ -161,6 +184,9 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
     Curve curve = Curves.linearToEaseOut;
     ToastService toastService = locator();
     if (selectedUser != null) {
+      displayName.text = selectedUser!.displayName;
+      username.text = selectedUser!.username;
+      selectedRole = selectedUser!.role;
       pageController.animateToPage(1, duration: duration, curve: curve);
       indexPage = 1;
       setState(() {});
@@ -195,8 +221,8 @@ class _UserListState extends State<_UserList> {
   @override
   void initState() {
     super.initState();
-    AuthController authController = context.read();
-    _future = authController.getUsers();
+    UsersController usersController = context.read();
+    _future = usersController.getUsers(null);
   }
 
   @override
@@ -204,6 +230,8 @@ class _UserListState extends State<_UserList> {
     ThemeData theme = Theme.of(context);
     ColorScheme colorScheme = theme.colorScheme;
     TextTheme textTheme = theme.textTheme;
+
+    UsersController usersController = context.watch();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -225,7 +253,11 @@ class _UserListState extends State<_UserList> {
             return Center(child: Text("No se encontraron usuarios"),);
           }
 
-          List<UserEntity> users = snapshot.data!.element;
+          if (snapshot.data != null && snapshot.data!.message != null) {
+            return Center(child: Text(snapshot.data!.message!),);
+          }
+
+          List<UserEntity> users = usersController.showedUsers;
 
           return ListView.separated(
             itemCount: users.length,
@@ -239,7 +271,7 @@ class _UserListState extends State<_UserList> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 tileColor: theme.scaffoldBackgroundColor,
                 selectedTileColor: colorScheme.primary,
-                title: Text(user.name, style: textTheme.bodyMedium?.copyWith(color: selected ? colorScheme.onPrimary : AppColors.grey),),
+                title: Text(user.displayName, style: textTheme.bodyMedium?.copyWith(color: selected ? colorScheme.onPrimary : AppColors.grey),),
                 trailing: Text(user.role.label, style: textTheme.labelSmall?.copyWith(color: selected ? colorScheme.onPrimary : AppColors.grey),),
                 selected: selected,
                 onTap: () => widget.onChanged(user),
@@ -257,12 +289,20 @@ class _UserListState extends State<_UserList> {
 class _UserUpdate extends StatefulWidget {
 
   final UserEntity userEntity;
-  final Function(String username, AppRole role) onChanged;
+  final Function(AppRole role) onChanged;
+  final TextEditingController displayName;
+  final TextEditingController username;
+  final TextEditingController password;
+  final AppRole selectedRole;
 
   const _UserUpdate({
     super.key,
     required this.userEntity,
     required this.onChanged,
+    required this.displayName,
+    required this.username,
+    required this.password,
+    required this.selectedRole
   });
 
   @override
@@ -270,18 +310,6 @@ class _UserUpdate extends StatefulWidget {
 }
 
 class _UserUpdateState extends State<_UserUpdate> {
-
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  TextEditingController username = TextEditingController();
-  TextEditingController password = TextEditingController();
-  AppRole selectedRole = AppRole.admin;
-
-  @override
-  void initState() {
-    super.initState();
-    username.text = widget.userEntity.name;
-    selectedRole = widget.userEntity.role;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -300,18 +328,24 @@ class _UserUpdateState extends State<_UserUpdate> {
               direction: Axis.vertical,
               spacing: 10,
               children: [
-                IsselFloatTextField(
-                  controller: username,
-                  hintText: "Nombre de usuario",
+                IsselTextFormField(
+                  controller: widget.displayName,
+                  hintText: "Nombre",
                   prefixIcon: Icons.person_outline,
                   fillColor: theme.scaffoldBackgroundColor,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) return "Campo requerido";
-                  },
-                  onSubmitted: (value) {
-                    widget.onChanged(value, selectedRole);
-                  },
                 ),
+                IsselTextFormField(
+                  controller: widget.username,
+                  hintText: "Usuario",
+                  prefixIcon: Icons.person_outline,
+                  fillColor: theme.scaffoldBackgroundColor,
+                ),
+                IsselTextFormField(
+                  controller: widget.password,
+                  hintText: "Contraseña",
+                  prefixIcon: Icons.password_outlined,
+                  fillColor: theme.scaffoldBackgroundColor,
+                )
               ],
             ),
             //* Roles
@@ -319,37 +353,34 @@ class _UserUpdateState extends State<_UserUpdate> {
               spacing: 20,
               children: [
                 IsselRadioCard(
-                    value: AppRole.admin,
-                    groupValue: selectedRole,
-                    label: "Administrador",
-                    asset: AppAssets.admin,
-                    surfaceColor: theme.scaffoldBackgroundColor,
-                    onChanged: (v) {
-                      setState(() => selectedRole = v);
-                      widget.onChanged(username.text, selectedRole);
-                    }
+                  value: AppRole.admin,
+                  groupValue: widget.selectedRole,
+                  label: "Administrador",
+                  asset: AppAssets.admin,
+                  surfaceColor: theme.scaffoldBackgroundColor,
+                  onChanged: (v) {
+                    widget.onChanged(v);
+                  }
                 ),
                 IsselRadioCard(
-                    value: AppRole.dispatcher,
-                    groupValue: selectedRole,
-                    label: "Despachador",
-                    asset: AppAssets.waterTank,
-                    surfaceColor: theme.scaffoldBackgroundColor,
-                    onChanged: (v) {
-                      setState(() => selectedRole = v);
-                      widget.onChanged(username.text, selectedRole);
-                    }
+                  value: AppRole.dispatch,
+                  groupValue: widget.selectedRole,
+                  label: "Despachador",
+                  asset: AppAssets.waterTank,
+                  surfaceColor: theme.scaffoldBackgroundColor,
+                  onChanged: (v) {
+                    widget.onChanged(v);
+                  }
                 ),
                 IsselRadioCard(
-                    value: AppRole.seller,
-                    groupValue: selectedRole,
-                    label: "Vendedor",
-                    asset: AppAssets.cashRegister,
-                    surfaceColor: theme.scaffoldBackgroundColor,
-                    onChanged: (v) {
-                      setState(() => selectedRole = v);
-                      widget.onChanged(username.text, selectedRole);
-                    }
+                  value: AppRole.seller,
+                  groupValue: widget.selectedRole,
+                  label: "Vendedor",
+                  asset: AppAssets.cashRegister,
+                  surfaceColor: theme.scaffoldBackgroundColor,
+                  onChanged: (v) {
+                    widget.onChanged(v);
+                  }
                 )
               ],
             ),

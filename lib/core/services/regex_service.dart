@@ -4,12 +4,12 @@ class RegexService {
   RegexService._();
 
   // Allowlist para nombres de usuario compuestos solo por letras.
-  static final RegExp usernamePattern = RegExp(r'^[A-Za-z]+$');
+  static final RegExp usernamePattern = RegExp(r'^[A-Za-z0-9]+$');
   static final RegExp positiveNumberPattern = RegExp(r'^\d+(\.\d+)?$');
   static final RegExp negativeNumberPattern = RegExp(r'^-?\d+(\.\d+)?$');
 
   // Formatter para impedir el ingreso de caracteres no permitidos.
-  static final TextInputFormatter usernameFormatter = FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]'));
+  static final TextInputFormatter usernameFormatter = FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]'));
 
   static final TextInputFormatter positiveNumberFormatter = TextInputFormatter.withFunction((oldValue, newValue) {
       final text = newValue.text;

@@ -34,7 +34,7 @@ class _UserManagementViewState extends State<UserManagementView> {
             Center(
               child: Container(
                 width: 455,
-                height: 589,
+                height: 651,
                 padding: EdgeInsets.symmetric(vertical: 20),
                 decoration: BoxDecoration(
                   color: colorScheme.surface,

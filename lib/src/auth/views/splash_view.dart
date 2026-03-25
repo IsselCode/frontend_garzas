@@ -1,21 +1,20 @@
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:frontend_garzas/core/services/navigation_service.dart';
-import 'package:frontend_garzas/src/auth/views/sign_in_view.dart';
+import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/app/consts.dart';
-import '../../../inject_container.dart';
-
 
 class SplashView extends StatefulWidget {
-
-  const SplashView({super.key,});
+  const SplashView({super.key});
 
   @override
   State<SplashView> createState() => _SplashScreenViewState();
 }
 
-class _SplashScreenViewState extends State<SplashView> with TickerProviderStateMixin {
+class _SplashScreenViewState extends State<SplashView>
+    with TickerProviderStateMixin {
   late final AnimationController _circleCtrl;
   late final AnimationController _textCtrl;
   late final Animation<double> _circleAnim;
@@ -29,38 +28,22 @@ class _SplashScreenViewState extends State<SplashView> with TickerProviderStateM
     Duration textDuration = const Duration(milliseconds: 1500);
     Duration startDelay = const Duration(milliseconds: 500);
 
-    _circleCtrl = AnimationController(
-      vsync: this,
-      duration: circleDuration,
-    );
+    _circleCtrl = AnimationController(vsync: this, duration: circleDuration);
+    _circleAnim = CurvedAnimation(parent: _circleCtrl, curve: Curves.easeOutCubic,);
 
-    _circleAnim = CurvedAnimation(
-      parent: _circleCtrl,
-      curve: Curves.easeOutCubic,
-    );
-
-    _textCtrl = AnimationController(
-      vsync: this,
-      duration: textDuration,
-    );
-    _textOpacity = CurvedAnimation(
-      parent: _textCtrl,
-      curve: Curves.easeOut,
-    );
-    _textScale = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _textCtrl, curve: Curves.easeOutBack),
-    );
+    _textCtrl = AnimationController(vsync: this, duration: textDuration);
+    _textOpacity = CurvedAnimation(parent: _textCtrl, curve: Curves.easeOut);
+    _textScale = Tween(begin: 0.0, end: 1.0,).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeOutBack));
 
     Future.delayed(startDelay, () async {
       _circleCtrl.forward();
-      await Future.delayed(Duration(milliseconds: (circleDuration.inMilliseconds * 0.4).toInt()));
+      await Future.delayed(Duration(milliseconds: (circleDuration.inMilliseconds * 0.4).toInt()),);
       await _textCtrl.forward();
       await Future.delayed(const Duration(seconds: 1));
 
-      //* Se navega al LoginView
-      NavigationService navigationService = locator();
-      navigationService.pushAndRemoveUntil(SignInView());
+      if (!mounted) return;
 
+      await context.read<AuthController>().restoreSession();
     });
   }
 
@@ -77,7 +60,9 @@ class _SplashScreenViewState extends State<SplashView> with TickerProviderStateM
     ColorScheme colorScheme = theme.colorScheme;
     final size = MediaQuery.of(context).size;
 
-    final fullRadius = math.sqrt(size.width * size.width + size.height * size.height,);
+    final fullRadius = math.sqrt(
+      size.width * size.width + size.height * size.height,
+    );
 
     return Scaffold(
       backgroundColor: colorScheme.primary,
@@ -98,7 +83,6 @@ class _SplashScreenViewState extends State<SplashView> with TickerProviderStateM
                   ),
                 ),
               ),
-
               ScaleTransition(
                 scale: _textScale,
                 child: FadeTransition(

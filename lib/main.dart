@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:frontend_garzas/commons/dialogs/exit_to_app_dialog.dart';
 import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
@@ -7,8 +8,9 @@ import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
-import 'package:frontend_garzas/src/admin/views/home_admin_view.dart';
+import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
+import 'package:frontend_garzas/src/auth/views/splash_view.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -49,17 +51,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => TitleBarController()),
+        ChangeNotifierProvider(create: (context) => locator<TitleBarController>(),),
         ChangeNotifierProvider(create: (context) => locator<AuthController>()),
-        ChangeNotifierProvider(
-          create: (context) => locator<ConfigGarzasController>(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => locator<GeneralConfigController>(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => locator<StatisticsController>(),
-        ),
+        ChangeNotifierProvider(create: (context) => locator<UsersController>()),
+        ChangeNotifierProvider(create: (context) => locator<ConfigGarzasController>(),),
+        ChangeNotifierProvider(create: (context) => locator<GeneralConfigController>(),),
+        ChangeNotifierProvider(create: (context) => locator<StatisticsController>(),),
       ],
       child: Consumer<TitleBarController>(
         builder: (context, controller, child) {
@@ -133,13 +130,24 @@ class MyApp extends StatelessWidget {
                                 );
                               },
                             ),
+                            IsselWindowCaptionAction(
+                              icon: Icon(Icons.exit_to_app, color: Colors.red,),
+                              onPressed: () {
+                                final dialogContext = navigationService.navigatorKey.currentContext;
+                                if (dialogContext == null) return;
+                                showDialog(
+                                  context: dialogContext,
+                                  builder: (context) => ExitToAppDialog(),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
                     ],
                   );
                 },
-                home: HomeAdminView(),
+                home: const SplashView(),
               ),
             ),
           );

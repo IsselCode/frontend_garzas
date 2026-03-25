@@ -3,7 +3,7 @@ import '../../../../core/errors/exceptions.dart';
 enum AppRole {
 
   admin(label: "Admin"),
-  dispatcher(label: "Despachador"),
+  dispatch(label: "Despachador"),
   seller(label: "Vendedor");
 
   final String label;
@@ -13,8 +13,8 @@ enum AppRole {
     switch (role) {
       case "admin":
         return AppRole.admin;
-      case "dispatcher":
-        return AppRole.dispatcher;
+      case "dispatch":
+        return AppRole.dispatch;
       case "seller":
         return AppRole.seller;
       default:

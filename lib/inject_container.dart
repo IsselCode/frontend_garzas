@@ -1,29 +1,51 @@
-
+import 'package:frontend_garzas/commons/title_bar_controller.dart';
+import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
+import 'package:frontend_garzas/src/admin/data/users_api.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
+import 'package:frontend_garzas/src/auth/data/auth_api.dart';
+import 'package:frontend_garzas/src/auth/data/auth_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 GetIt locator = GetIt.instance;
 
 Future<void> injectContainer() async {
+  final prefs = await SharedPreferences.getInstance();
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  locator.registerSingleton<SharedPreferences>(prefs);
 
-  locator.registerLazySingleton(() => NavigationService(),);
-  locator.registerLazySingleton(() => ToastService(),);
-  locator.registerLazySingleton(() => PrinterService(sharedPreferences: prefs),);
+  locator.registerLazySingleton(() => NavigationService());
+  locator.registerLazySingleton(() => ToastService());
+  locator.registerLazySingleton(() => TitleBarController());
+  locator.registerLazySingleton(() => PrinterService(sharedPreferences: locator()),);
 
-  // Global Controllers
-  locator.registerLazySingleton(() => AuthController(),);
-  locator.registerLazySingleton(() => ConfigGarzasController(),);
-  locator.registerLazySingleton(() => GeneralConfigController(),);
-  locator.registerLazySingleton(() => StatisticsController(),);
+  locator.registerLazySingleton(() => AuthStorage(sharedPreferences: locator()),);
+  locator.registerLazySingleton(() => ApiClient());
+  locator.registerLazySingleton(() => AuthApi(apiClient: locator()));
+  locator.registerLazySingleton(() => UsersApi(apiClient: locator()),);
 
+  // controllers
 
+  locator.registerLazySingleton(
+    () => AuthController(
+      authApi: locator(),
+      authStorage: locator(),
+      apiClient: locator(),
+      navigationService: locator(),
+      titleBarController: locator(),
+    ),
+  );
+
+  locator.registerLazySingleton(() => UsersController(usersApi: locator()),);
+
+  locator.registerLazySingleton(() => ConfigGarzasController());
+  locator.registerLazySingleton(() => GeneralConfigController());
+  locator.registerLazySingleton(() => StatisticsController());
 }

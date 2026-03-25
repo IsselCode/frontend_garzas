@@ -4,31 +4,34 @@ import '../src/admin/clean/enums/enums.dart';
 
 class UserEntity extends Equatable {
 
-  final int id;
-  final String name;
+  final String uid;
+  final String username;
+  final String displayName;
   final AppRole role;
+  final bool isActive;
   final DateTime createAt;
-  final String accessToken;
 
   UserEntity({
-    required this.id,
-    required this.name,
+    required this.uid,
+    required this.username,
+    required this.displayName,
     required this.role,
-    required this.createAt,
-    required this.accessToken,
+    required this.isActive,
+    required this.createAt
   });
 
   factory UserEntity.fromMap(Map<String, dynamic> map) {
     return UserEntity(
-      id: map["id"],
-      name: map["name"],
+      uid: map["uid"],
+      username: map["username"],
+      displayName: map["display_name"],
       role: AppRole.fromString(map["role"]),
-      createAt: DateTime.parse(map["create_at"]),
-      accessToken: map["access_token"]
+      isActive: map["is_active"],
+      createAt: DateTime.parse(map["created_at"]),
     );
   }
 
   @override
-  List<Object?> get props => [id, name, role];
+  List<Object?> get props => [uid, username, displayName, role, isActive, createAt];
 
 }

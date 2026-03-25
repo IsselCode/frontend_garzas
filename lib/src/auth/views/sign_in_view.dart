@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/services/regex_service.dart';
+import 'package:frontend_garzas/core/services/toast_service.dart';
+import 'package:frontend_garzas/inject_container.dart';
+import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:provider/provider.dart';
 
 class SignInView extends StatelessWidget {
   SignInView({super.key});
@@ -11,7 +17,6 @@ class SignInView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Theme
     ThemeData theme = Theme.of(context);
     TextTheme textTheme = theme.textTheme;
     ColorScheme colorScheme = theme.colorScheme;
@@ -19,7 +24,6 @@ class SignInView extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          //* Left
           Expanded(
             child: Center(
               child: SizedBox(
@@ -28,8 +32,7 @@ class SignInView extends StatelessWidget {
                   spacing: 30,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Inicio de sesión", style: textTheme.titleLarge,),
-                    //* Form
+                    Text("Inicio de sesi\u00f3n", style: textTheme.titleLarge),
                     Form(
                       key: formKey,
                       child: Flex(
@@ -37,33 +40,35 @@ class SignInView extends StatelessWidget {
                         spacing: 20,
                         children: [
                           IsselTextFormField(
+                            controller: email,
                             hintText: "Usuario",
                             height: 60,
                             inputFormatters: [RegexService.usernameFormatter],
                             validator: (value) => RegexService.usernameValidator(value),
                           ),
                           IsselTextFormField(
-                            hintText: "Contraseña",
+                            controller: password,
+                            hintText: "Contrase\u00f1a",
                             obscureText: true,
                             validator: (value) {
-                              if ((value ?? "").isEmpty) return 'La contraseña es obligatoria';
+                              if ((value ?? "").isEmpty) {
+                                return 'La contrase\u00f1a es obligatoria';
+                              }
                               return null;
                             },
                           ),
                           IsselButton(
                             text: "Ingresar",
                             onTap: () => signIn(context),
-                          )
+                          ),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
-            )
+            ),
           ),
-
-          //* Right
           Expanded(
             child: ColoredBox(
               color: colorScheme.primary,
@@ -71,33 +76,58 @@ class SignInView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 30,
                 children: [
-                  Text("¡Hola, Bienvenido!", style: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),),
+                  Text(
+                    "\u00a1Hola, Bienvenido!",
+                    style: textTheme.titleLarge?.copyWith(
+                      color: colorScheme.onPrimary,
+                    ),
+                  ),
                   SizedBox(
                     width: 400,
                     child: Text(
+                      "Accede con tus credenciales asignadas para ingresar al sistema.",
                       textAlign: TextAlign.center,
-                      style: textTheme.bodyLarge?.copyWith(color: colorScheme.onPrimary),
-                      "Accede con tus credenciales asignadas para ingresar al sistema."
-                    )
-                  )
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            )
-          )
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Methods
   void signIn(BuildContext context) async {
-
-    if(!formKey.currentState!.validate()){
-      return ;
+    if (!formKey.currentState!.validate()) {
+      return;
     }
 
-    print("ingresando");
+    context.loaderOverlay.show();
 
+    AuthController authController = context.read();
+    CtrlResponse response = await authController.signIn(
+      email.text.trim(),
+      password.text,
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    context.loaderOverlay.hide();
+
+    if (!response.success) {
+      ToastService toastService = locator();
+      toastService.error(
+        response.message ?? "No fue posible iniciar sesi\u00f3n",
+      );
+      return;
+    }
+
+    authController.navigateToHome();
   }
-
 }

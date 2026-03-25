@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class _CreateUserPageState extends State<CreateUserPage> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
+  TextEditingController displayName = TextEditingController();
   AppRole selectedRole = AppRole.admin;
 
   @override
@@ -44,8 +46,17 @@ class _CreateUserPageState extends State<CreateUserPage> {
                 spacing: 10,
                 children: [
                   IsselTextFormField(
+                    controller: displayName,
+                    hintText: "Nombre",
+                    prefixIcon: Icons.person_outline,
+                    fillColor: theme.scaffoldBackgroundColor,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return "Campo requerido";
+                    },
+                  ),
+                  IsselTextFormField(
                     controller: username,
-                    hintText: "Nombre de usuario",
+                    hintText: "Usuario",
                     prefixIcon: Icons.person_outline,
                     fillColor: theme.scaffoldBackgroundColor,
                     validator: (value) {
@@ -77,7 +88,7 @@ class _CreateUserPageState extends State<CreateUserPage> {
                   onChanged: (v) => setState(() => selectedRole = v)
                 ),
                 IsselRadioCard(
-                  value: AppRole.dispatcher,
+                  value: AppRole.dispatch,
                   groupValue: selectedRole,
                   label: "Despachador",
                   asset: AppAssets.waterTank,
@@ -113,15 +124,16 @@ class _CreateUserPageState extends State<CreateUserPage> {
 
 
     context.loaderOverlay.show();
-    AuthController authController = context.read();
-    CtrlResponse response = await authController.insertNormalUser(username.text, password.text, selectedRole);
+    UsersController usersController = context.read();
+    CtrlResponse response = await usersController.insertNormalUser(username.text, displayName.text, password.text, selectedRole);
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();
 
     if (response.success) {
-      toastService.success(response.message!);
+      toastService.success("Usuario creado correctamente");
       // Reiniciamos controladores
+      displayName.text = "";
       username.text = "";
       password.text = "";
       selectedRole = AppRole.admin;

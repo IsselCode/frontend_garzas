@@ -296,6 +296,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                           id: 1,
                                           user: "Cliente de ejemplo",
                                           phone: 6671234567,
+                                          galPricing: 2.5,
+                                          literPricing: 1.2,
                                         ),
                                         waterType: WaterType.potable,
                                         unitOfMeasurement: UnitOfMeasurement.gallons,
