@@ -1,4 +1,4 @@
-import 'package:frontend_garzas/commons/user_entity.dart';
+import 'package:frontend_garzas/commons/entities/user_entity.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 

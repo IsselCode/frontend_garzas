@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/src/admin/clean/dialogs/create_client_dialog.dart';
+import 'package:frontend_garzas/src/admin/pages/client_management/update_client_page.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -7,14 +9,14 @@ import '../../../core/app/consts.dart';
 import '../pages/user_management/create_user_page.dart';
 import '../pages/user_management/update_user_page.dart';
 
-class UserManagementView extends StatefulWidget {
-  const UserManagementView({super.key});
+class ClientManagementView extends StatefulWidget {
+  const ClientManagementView({super.key});
 
   @override
-  State<UserManagementView> createState() => _UserManagementViewState();
+  State<ClientManagementView> createState() => _UserManagementViewState();
 }
 
-class _UserManagementViewState extends State<UserManagementView> {
+class _UserManagementViewState extends State<ClientManagementView> {
 
   PageController pageController = PageController();
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
@@ -70,8 +72,7 @@ class _UserManagementViewState extends State<UserManagementView> {
                         physics: NeverScrollableScrollPhysics(),
                         controller: pageController,
                         children: [
-                          CreateUserPage(),
-                          UpdateUserPage()
+                          UpdateClientPage()
                         ],
                       ),
                     )

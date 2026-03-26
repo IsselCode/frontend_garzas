@@ -13,15 +13,15 @@ import '../../../../inject_container.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../../clean/enums/enums.dart';
 
-class UpdateUserPage extends StatefulWidget {
+class UpdateClientPage extends StatefulWidget {
 
-  UpdateUserPage({super.key});
+  UpdateClientPage({super.key});
 
   @override
-  State<UpdateUserPage> createState() => _UpdateUserPageState();
+  State<UpdateClientPage> createState() => _UpdateUserPageState();
 }
 
-class _UpdateUserPageState extends State<UpdateUserPage> {
+class _UpdateUserPageState extends State<UpdateClientPage> {
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController displayName = TextEditingController();

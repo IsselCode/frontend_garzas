@@ -3,10 +3,12 @@ import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
+import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
+import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 import 'package:frontend_garzas/src/admin/data/users_api.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/auth/data/auth_api.dart';
@@ -30,6 +32,7 @@ Future<void> injectContainer() async {
   locator.registerLazySingleton(() => ApiClient());
   locator.registerLazySingleton(() => AuthApi(apiClient: locator()));
   locator.registerLazySingleton(() => UsersApi(apiClient: locator()),);
+  locator.registerLazySingleton(() => ClientsApi(apiClient: locator()),);
 
   // controllers
 
@@ -44,6 +47,7 @@ Future<void> injectContainer() async {
   );
 
   locator.registerLazySingleton(() => UsersController(usersApi: locator()),);
+  locator.registerLazySingleton(() => ClientsController(clientsApi: locator()),);
 
   locator.registerLazySingleton(() => ConfigGarzasController());
   locator.registerLazySingleton(() => GeneralConfigController());

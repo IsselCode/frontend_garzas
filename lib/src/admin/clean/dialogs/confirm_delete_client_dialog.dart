@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
-import 'package:frontend_garzas/src/auth/data/auth_api.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
-import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/app/consts.dart';
-import '../../../../inject_container.dart';
+class ConfirmDeleteClientDialog extends StatefulWidget {
 
-class ConfirmDeleteUserDialog extends StatefulWidget {
+  String client;
 
-  String username;
-
-  ConfirmDeleteUserDialog({
+  ConfirmDeleteClientDialog({
     super.key,
-    required this.username
+    required this.client
   });
 
   @override
-  State<ConfirmDeleteUserDialog> createState() => _ConfigPrinterDialogState();
+  State<ConfirmDeleteClientDialog> createState() => _ConfigPrinterDialogState();
 }
 
-class _ConfigPrinterDialogState extends State<ConfirmDeleteUserDialog> {
+class _ConfigPrinterDialogState extends State<ConfirmDeleteClientDialog> {
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +43,13 @@ class _ConfigPrinterDialogState extends State<ConfirmDeleteUserDialog> {
                 children: [
                   //* Titulo
                   Text(
-                    "Eliminar usuario",
+                    "Eliminar cliente",
                     style: textTheme.headlineMedium,
                     textAlign: TextAlign.center,
                   ),
                   //* Description
                   Text(
-                    "¿Estas seguro que quieres eliminar al usuario: ${widget.username}?",
+                    "¿Estas seguro que quieres eliminar al cliente: ${widget.client}?",
                     style: textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),

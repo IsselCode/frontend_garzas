@@ -88,7 +88,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
 
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.only(top: kWindowCaptionHeight, left: 10, right: 10, bottom: 10),
+        padding: EdgeInsets.only(top: kWindowCaptionHeight + 10, left: 10, right: 10, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 20,

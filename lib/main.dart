@@ -5,6 +5,7 @@ import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
+import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
@@ -54,6 +55,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => locator<TitleBarController>(),),
         ChangeNotifierProvider(create: (context) => locator<AuthController>()),
         ChangeNotifierProvider(create: (context) => locator<UsersController>()),
+        ChangeNotifierProvider(create: (context) => locator<ClientsController>()),
+
         ChangeNotifierProvider(create: (context) => locator<ConfigGarzasController>(),),
         ChangeNotifierProvider(create: (context) => locator<GeneralConfigController>(),),
         ChangeNotifierProvider(create: (context) => locator<StatisticsController>(),),

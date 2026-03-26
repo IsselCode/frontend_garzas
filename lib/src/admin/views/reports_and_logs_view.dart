@@ -49,7 +49,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.only(
-          top: kWindowCaptionHeight,
+          top: kWindowCaptionHeight + 10,
           left: 10,
           right: 10,
           bottom: 10,

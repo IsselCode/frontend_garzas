@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../src/admin/clean/enums/enums.dart';
+import '../../src/admin/clean/enums/enums.dart';
 
 class UserEntity extends Equatable {
 

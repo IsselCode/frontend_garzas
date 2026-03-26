@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/src/admin/views/client_management_view.dart';
+import 'package:frontend_garzas/src/admin/views/clients_view.dart';
 import 'package:frontend_garzas/src/admin/views/config_garzas_view.dart';
-import 'package:frontend_garzas/src/admin/views/customers_view.dart';
 import 'package:frontend_garzas/src/admin/views/general_config_view.dart';
 import 'package:frontend_garzas/src/admin/views/reports_and_logs_view.dart';
 import 'package:frontend_garzas/src/admin/views/user_management_view.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 
 import '../../../inject_container.dart';
@@ -70,7 +70,7 @@ class HomeAdminView extends StatelessWidget {
                 IsselActionBox(
                   title: "Clientes",
                   asset: AppAssets.customers,
-                  onTap: () => navigationService.navigateTo(CustomersView()),
+                  onTap: () => navigationService.navigateTo(ClientsView()),
                   height: 230,
                   width: 200,
                 )

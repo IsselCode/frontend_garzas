@@ -152,7 +152,7 @@ class _StartOrderViewState extends State<StartOrderView> {
           ),
           // AppBar
           Positioned(
-              top: kWindowCaptionHeight,
+              top: kWindowCaptionHeight + 10,
               left: 10,
               child: TextBackButton()
           ),

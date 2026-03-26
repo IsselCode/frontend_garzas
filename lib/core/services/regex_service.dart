@@ -7,10 +7,19 @@ class RegexService {
   static final RegExp usernamePattern = RegExp(r'^[A-Za-z0-9]+$');
   static final RegExp positiveNumberPattern = RegExp(r'^\d+(\.\d+)?$');
   static final RegExp negativeNumberPattern = RegExp(r'^-?\d+(\.\d+)?$');
+  static final RegExp phonePattern = RegExp(r'^\d{7,12}$');
 
   // Formatter para impedir el ingreso de caracteres no permitidos.
   static final TextInputFormatter usernameFormatter = FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]'));
+  static final TextInputFormatter phoneFormatter = TextInputFormatter.withFunction((oldValue, newValue) {
+        final text = newValue.text;
 
+        if (text.isEmpty || (RegExp(r'^\d+$').hasMatch(text) && text.length <= 12)) {
+          return newValue;
+        }
+
+        return oldValue;
+      });
   static final TextInputFormatter positiveNumberFormatter = TextInputFormatter.withFunction((oldValue, newValue) {
       final text = newValue.text;
 
@@ -19,9 +28,7 @@ class RegexService {
       }
 
       return oldValue;
-    }
-  );
-
+    });
   static final TextInputFormatter signedNumberFormatter = TextInputFormatter.withFunction((oldValue, newValue) {
         final text = newValue.text;
 
@@ -32,10 +39,11 @@ class RegexService {
         return oldValue;
       });
 
+  // Validaciones
   static bool isValidUsername(String value) => usernamePattern.hasMatch(value);
   static bool isValidPositiveNumber(String value) => positiveNumberPattern.hasMatch(value);
   static bool isValidSignedNumber(String value) => negativeNumberPattern.hasMatch(value);
-
+  static bool isValidPhone(String value) => phonePattern.hasMatch(value);
   static String? usernameValidator(String? value) {
     final text = value?.trim() ?? '';
 

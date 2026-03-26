@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_garzas/src/admin/data/users_api.dart';
 
 import '../../../commons/ctrl_response.dart';
-import '../../../commons/user_entity.dart';
+import '../../../commons/entities/user_entity.dart';
 import '../../../core/errors/exceptions.dart';
 import '../clean/enums/enums.dart';
 
