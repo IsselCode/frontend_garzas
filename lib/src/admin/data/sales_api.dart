@@ -1,6 +1,7 @@
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/sale_info_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/statistics_entity.dart';
 
 class SalesApi {
   final ApiClient apiClient;
@@ -9,6 +10,7 @@ class SalesApi {
 
   final String _salesPath = "/sales";
   final String _salesByDateRangePath = "/sales/range";
+  final String _getMonthlyPaymentTotalsPath = "/sales/monthly-payment-totals";
 
   Future<List<SaleEntity>> listSales() async {
 
@@ -20,6 +22,24 @@ class SalesApi {
       );
 
       return response.map((e) => SaleEntity.fromMap(e),).toList();
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+
+  }
+
+  Future<StatisticsEntity> getMonthlyPaymentTotals() async {
+
+    try {
+
+      Map<String, dynamic> response = await apiClient.get(
+        _getMonthlyPaymentTotalsPath,
+        authRequired: true,
+      );
+
+      return StatisticsEntity.fromMap(response);
     } on AppException {
       rethrow;
     } catch (e) {

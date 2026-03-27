@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/garza_statistic_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/log_entity.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/sale_info_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/statistics_entity.dart';
 import 'package:frontend_garzas/src/admin/data/logs_api.dart';
 
 import '../data/sales_api.dart';
@@ -18,7 +18,7 @@ class StatisticsController extends ChangeNotifier {
     required this.salesApi
   });
 
-  List<GarzaStatisticEntity> garzaStatistics = [];
+  StatisticsEntity? statistics;
 
   List<SaleEntity> sales = [];
   List<SaleEntity> showedSales = [];
@@ -28,42 +28,14 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> getGarzasStatistics() async {
     try {
-      //Todo: Implementar con backend
-      List<GarzaStatisticEntity> fakeStatistics = [
-        GarzaStatisticEntity(
-          numberGarza: 1,
-          liters: 230,
-          gallons: 1000,
-          total: 45587,
-        ),
-        GarzaStatisticEntity(
-          numberGarza: 2,
-          liters: 43078,
-          gallons: 446,
-          total: 5456,
-        ),
-        GarzaStatisticEntity(
-          numberGarza: 3,
-          liters: 280,
-          gallons: 2385,
-          total: 364578,
-        ),
-        GarzaStatisticEntity(
-          numberGarza: 4,
-          liters: 790,
-          gallons: 125,
-          total: 1123589,
-        ),
-      ];
 
-      List<GarzaStatisticEntity> tempStatistics = await Future.delayed(
-        const Duration(seconds: 1),
-        () => fakeStatistics,
-      );
+      if (statistics != null) {
+        return CtrlResponse(success: true);
+      }
 
-      garzaStatistics = tempStatistics;
+      StatisticsEntity tempStatistics = await salesApi.getMonthlyPaymentTotals();
+      statistics = tempStatistics;
       notifyListeners();
-
       return CtrlResponse(success: true);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);

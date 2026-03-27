@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/sale_info_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/client_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/enums/enums.dart';

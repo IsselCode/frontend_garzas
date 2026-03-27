@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/date_range_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/statistic_garza_container.dart';
@@ -96,7 +97,15 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 300),
+                SizedBox(
+                  width: 300,
+                  child: Center(
+                    child: Text(
+                      "Ventas Mensuales",
+                      style: textTheme.titleMedium,
+                    ),
+                  ),
+                ),
               ],
             ),
 
@@ -185,6 +194,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                             "Cliente",
                                             "Cantidad",
                                             "Total",
+                                            "Método",
                                             "Fecha",
                                           ],
                                         ),
@@ -242,20 +252,39 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                     alignment:
                                                         Alignment.centerLeft,
                                                   ),
+                                                  // Total
                                                   IsselPill(
-                                                    color: colorScheme
-                                                        .surfaceContainer,
+                                                    color: colorScheme.surfaceContainer,
                                                     widget: Text(
                                                       "\$${sell.total.toStringAsFixed(2)}",
-                                                      style:
-                                                          textTheme.labelMedium,
+                                                      style: textTheme.labelMedium,
                                                       maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                                      overflow: TextOverflow.ellipsis,
                                                     ),
-                                                    alignment:
-                                                        Alignment.centerLeft,
+                                                    alignment: Alignment.centerLeft,
                                                   ),
+                                                  // Método de pago
+                                                  IsselPill(
+                                                    color: colorScheme.surfaceContainer,
+                                                    widget: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          sell.paymentMethod.label,
+                                                          style: textTheme.labelMedium,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                        Image.asset(
+                                                          sell.paymentMethod.image,
+                                                          width: 24,
+                                                          height: 24,
+                                                        )
+                                                      ],
+                                                    ),
+                                                    alignment: Alignment.centerLeft,
+                                                  ),
+                                                  // Fecha
                                                   IsselPill(
                                                     color: colorScheme.surfaceContainer,
                                                     padding: EdgeInsets.zero,
@@ -443,9 +472,6 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                             Expanded(
                               child: IsselShimmer(width: 300, height: 150),
                             ),
-                            Expanded(
-                              child: IsselShimmer(width: 300, height: 150),
-                            ),
                           ],
                         );
                       }
@@ -459,38 +485,23 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                         children: [
                           Expanded(
                             child: StatisticGarzaContainer(
-                              number: statistics.garzaStatistics[0].numberGarza,
-                              litersSold: statistics.garzaStatistics[0].liters,
-                              gallonsSold:
-                                  statistics.garzaStatistics[0].gallons,
-                              total: statistics.garzaStatistics[0].total,
+                              asset: AppAssets.cash,
+                              title: "Efectivo",
+                              total: statistics.statistics!.cashTotal,
                             ),
                           ),
                           Expanded(
                             child: StatisticGarzaContainer(
-                              number: statistics.garzaStatistics[1].numberGarza,
-                              litersSold: statistics.garzaStatistics[1].liters,
-                              gallonsSold:
-                                  statistics.garzaStatistics[1].gallons,
-                              total: statistics.garzaStatistics[1].total,
+                              asset: AppAssets.card,
+                              title: "Tarjeta",
+                              total: statistics.statistics!.cardTotal,
                             ),
                           ),
                           Expanded(
                             child: StatisticGarzaContainer(
-                              number: statistics.garzaStatistics[2].numberGarza,
-                              litersSold: statistics.garzaStatistics[2].liters,
-                              gallonsSold:
-                                  statistics.garzaStatistics[2].gallons,
-                              total: statistics.garzaStatistics[2].total,
-                            ),
-                          ),
-                          Expanded(
-                            child: StatisticGarzaContainer(
-                              number: statistics.garzaStatistics[3].numberGarza,
-                              litersSold: statistics.garzaStatistics[3].liters,
-                              gallonsSold:
-                                  statistics.garzaStatistics[3].gallons,
-                              total: statistics.garzaStatistics[3].total,
+                              asset: AppAssets.check,
+                              title: "Cheque",
+                              total: statistics.statistics!.checkTotal,
                             ),
                           ),
                         ],

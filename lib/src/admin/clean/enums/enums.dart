@@ -1,3 +1,5 @@
+import 'package:frontend_garzas/core/app/consts.dart';
+
 import '../../../../core/errors/exceptions.dart';
 
 enum AppRole {
@@ -26,12 +28,13 @@ enum AppRole {
 
 enum PaymentMethod {
 
-  cash(label: "Efectivo"),
-  card(label: "Tarjeta"),
-  check(label: "Cheque");
+  cash(label: "Efectivo", image: AppAssets.cash),
+  card(label: "Tarjeta", image: AppAssets.card),
+  check(label: "Cheque", image: AppAssets.check);
 
   final String label;
-  const PaymentMethod({required this.label});
+  final String image;
+  const PaymentMethod({required this.label, required this.image});
 
   static fromString(String role) {
     switch (role) {
