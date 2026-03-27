@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/sale_info_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/client_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/enums/enums.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 
 import '../../../commons/ctrl_response.dart';
-import '../clean/entities/sale_info_entity.dart';
 
 class OrderController extends ChangeNotifier {
 
@@ -22,7 +22,7 @@ class OrderController extends ChangeNotifier {
   double total = 0;
   double totalRemaining = 0;
 
-  SaleInfoEntity? _saleInfoEntity;
+  SaleEntity? _saleEntity;
 
   ClientEntity? _selectedClient;
   ClientEntity? get selectedClient => _selectedClient;
@@ -142,7 +142,7 @@ class OrderController extends ChangeNotifier {
   }
 
   // TODO: Implementar con método de módelo
-  Future<CtrlResponse<SaleInfoEntity>> createSell() async {
+  Future<CtrlResponse<SaleEntity>> createSell() async {
 
     try {
 

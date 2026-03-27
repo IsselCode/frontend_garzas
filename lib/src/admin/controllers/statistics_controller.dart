@@ -3,22 +3,25 @@ import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/garza_statistic_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/log_entity.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/sell_entity.dart';
-import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/sale_info_entity.dart';
 import 'package:frontend_garzas/src/admin/data/logs_api.dart';
+
+import '../data/sales_api.dart';
 
 class StatisticsController extends ChangeNotifier {
 
   LogsApi logsApi;
+  SalesApi salesApi;
 
   StatisticsController({
-    required this.logsApi
+    required this.logsApi,
+    required this.salesApi
   });
 
   List<GarzaStatisticEntity> garzaStatistics = [];
 
-  List<SellEntity> sells = [];
-  List<SellEntity> showedSells = [];
+  List<SaleEntity> sales = [];
+  List<SaleEntity> showedSales = [];
 
   List<LogEntity> logs = [];
   List<LogEntity> showedLogs = [];
@@ -69,96 +72,33 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> getSales() async {
     try {
-      List<SellEntity> fakeSells = [
-        SellEntity(
-          id: 1,
-          numberGarza: 1,
-          employee: "Hugo Torres Jimenez",
-          quantity: 50,
-          waterType: WaterType.pozo,
-          total: 58057,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        SellEntity(
-          id: 2,
-          numberGarza: 1,
-          employee: "Carlos Felipe",
-          quantity: 652,
-          waterType: WaterType.potable,
-          total: 15202,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.liters,
-        ),
-        SellEntity(
-          id: 3,
-          numberGarza: 3,
-          employee: "Juan Enrique Gonzalez",
-          quantity: 548,
-          waterType: WaterType.potable,
-          total: 11023,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        SellEntity(
-          id: 4,
-          numberGarza: 4,
-          employee: "Sergio Adrian Fernandez Martínez",
-          quantity: 50,
-          waterType: WaterType.pozo,
-          total: 1267,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        SellEntity(
-          id: 5,
-          numberGarza: 2,
-          employee: "Luis Quintero",
-          quantity: 123,
-          waterType: WaterType.potable,
-          total: 357,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.liters,
-        ),
-        SellEntity(
-          id: 6,
-          numberGarza: 1,
-          employee: "Miguel Jose",
-          quantity: 5987,
-          waterType: WaterType.pozo,
-          total: 6549,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        SellEntity(
-          id: 7,
-          numberGarza: 4,
-          employee: "Osiel Francisco",
-          quantity: 265,
-          waterType: WaterType.pozo,
-          total: 12679,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        SellEntity(
-          id: 8,
-          numberGarza: 2,
-          employee: "Hugo Torres Jimenez",
-          quantity: 127,
-          waterType: WaterType.potable,
-          total: 9875,
-          date: DateTime.now(),
-          unitOfMeasurement: UnitOfMeasurement.liters,
-        ),
-      ];
 
-      List<SellEntity> tempSells = await Future.delayed(
-        const Duration(seconds: 1),
-        () => fakeSells,
-      );
+      if (sales.isNotEmpty) {
+        return CtrlResponse(success: true);
+      }
 
-      sells = tempSells;
-      showedSells = tempSells;
+      List<SaleEntity> tempSells = await salesApi.listSales();
+
+      sales = tempSells;
+      showedSales = tempSells;
+      notifyListeners();
+
+      return CtrlResponse(success: true);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+  Future<CtrlResponse> findSaleByFolio(String folio) async {
+    try {
+
+      if (folio.isEmpty) {
+        clearSalesDateRange();
+        return CtrlResponse(success: true);
+      }
+
+      SaleEntity tempSale = await salesApi.findSaleByPhone(folio);
+      showedSales = [tempSale];
       notifyListeners();
 
       return CtrlResponse(success: true);
@@ -170,6 +110,10 @@ class StatisticsController extends ChangeNotifier {
   Future<CtrlResponse> getLogs() async {
     try {
 
+      if (logs.isNotEmpty){
+        return CtrlResponse(success: true);
+      }
+
       List<LogEntity> tempLogs = await logsApi.listLogs();
       logs = tempLogs;
       showedLogs = tempLogs;
@@ -180,20 +124,11 @@ class StatisticsController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> getSalesByDateRange({
-    required DateTime startDate,
-    required DateTime endDate,
-  }) async {
+  Future<CtrlResponse> getSalesByDateRange({required DateTime startDate, required DateTime endDate,}) async {
     try {
-      // TODO: Reemplazar con la consulta al backend.
-      List<SellEntity> tempSells = await Future.delayed(
-        const Duration(milliseconds: 300),
-        () => sells.where((sell) {
-          return !sell.date.isBefore(startDate) && !sell.date.isAfter(endDate);
-        }).toList(),
-      );
+      List<SaleEntity> tempSells = await salesApi.listByDateRange(startDate, endDate);
 
-      showedSells = tempSells;
+      showedSales = tempSells;
       notifyListeners();
 
       return CtrlResponse(success: true);
@@ -203,14 +138,11 @@ class StatisticsController extends ChangeNotifier {
   }
 
   void clearSalesDateRange() {
-    showedSells = sells;
+    showedSales = sales;
     notifyListeners();
   }
 
-  Future<CtrlResponse> getLogsByDateRange({
-    required DateTime startDate,
-    required DateTime endDate,
-  }) async {
+  Future<CtrlResponse> getLogsByDateRange({required DateTime startDate, required DateTime endDate,}) async {
     try {
       List<LogEntity> tempLogs = await logsApi.listByDateRange(startDate, endDate);
 

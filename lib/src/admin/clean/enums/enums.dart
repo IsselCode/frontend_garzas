@@ -24,6 +24,54 @@ enum AppRole {
 
 }
 
+enum PaymentMethod {
+
+  cash(label: "Efectivo"),
+  card(label: "Tarjeta"),
+  check(label: "Cheque");
+
+  final String label;
+  const PaymentMethod({required this.label});
+
+  static fromString(String role) {
+    switch (role) {
+      case "cash":
+        return PaymentMethod.cash;
+      case "card":
+        return PaymentMethod.card;
+      case "check":
+        return PaymentMethod.check;
+      default:
+        throw AppException(message: "Método no identificado");
+    }
+  }
+
+}
+
+enum DispatchStatus {
+
+  pending(label: "Pendiente"),
+  success(label: "Éxito"),
+  failed(label: "Error");
+
+  final String label;
+  const DispatchStatus({required this.label});
+
+  static fromString(String role) {
+    switch (role) {
+      case "pending":
+        return DispatchStatus.pending;
+      case "success":
+        return DispatchStatus.success;
+      case "failed":
+        return DispatchStatus.failed;
+      default:
+        throw AppException(message: "Estado no identificado");
+    }
+  }
+
+}
+
 enum GeneralConfigLogField {
   waterSupply,
   userCreated,
