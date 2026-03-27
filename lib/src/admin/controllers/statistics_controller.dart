@@ -5,11 +5,21 @@ import 'package:frontend_garzas/src/admin/clean/entities/garza_statistic_entity.
 import 'package:frontend_garzas/src/admin/clean/entities/log_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sell_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
+import 'package:frontend_garzas/src/admin/data/logs_api.dart';
 
 class StatisticsController extends ChangeNotifier {
+
+  LogsApi logsApi;
+
+  StatisticsController({
+    required this.logsApi
+  });
+
   List<GarzaStatisticEntity> garzaStatistics = [];
+
   List<SellEntity> sells = [];
   List<SellEntity> showedSells = [];
+
   List<LogEntity> logs = [];
   List<LogEntity> showedLogs = [];
 
@@ -159,25 +169,11 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> getLogs() async {
     try {
-      List<LogEntity> fakeLogs = [
-        LogEntity(
-          id: 1,
-          user: "Hugo Torres Jimenez",
-          type: "Inicio de sesión",
-          info: "Hugo Torres Jimenez",
-          date: DateTime.now(),
-        ),
-      ];
 
-      List<LogEntity> tempLogs = await Future.delayed(
-        const Duration(seconds: 1),
-        () => fakeLogs,
-      );
-
+      List<LogEntity> tempLogs = await logsApi.listLogs();
       logs = tempLogs;
       showedLogs = tempLogs;
       notifyListeners();
-
       return CtrlResponse(success: true);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
@@ -216,13 +212,7 @@ class StatisticsController extends ChangeNotifier {
     required DateTime endDate,
   }) async {
     try {
-      // TODO: Reemplazar con la consulta al backend.
-      List<LogEntity> tempLogs = await Future.delayed(
-        const Duration(milliseconds: 300),
-        () => logs.where((log) {
-          return !log.date.isBefore(startDate) && !log.date.isAfter(endDate);
-        }).toList(),
-      );
+      List<LogEntity> tempLogs = await logsApi.listByDateRange(startDate, endDate);
 
       showedLogs = tempLogs;
       notifyListeners();

@@ -19,6 +19,8 @@ class GeneralConfigController extends ChangeNotifier {
 
     try {
 
+      //TODO: HACER QUE NO CARGUE AL YA HABER CARGADO
+
       GeneralConfigEntity tempConfig = await generalApi.getConfig();
 
       generalConfigEntity = tempConfig;

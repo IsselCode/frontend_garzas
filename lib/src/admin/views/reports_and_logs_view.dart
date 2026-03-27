@@ -58,6 +58,8 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
           children: [
+
+            //* AppBar
             Row(
               spacing: 10,
               children: [
@@ -95,16 +97,20 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                 const SizedBox(width: 300),
               ],
             ),
+
+            //* Body
             Expanded(
               child: Row(
                 spacing: 10,
                 children: [
-                  // Ventas y Reportes
+
+                  //* Ventas y Reportes
                   Expanded(
                     child: PageView(
                       controller: pageController,
                       children: [
-                        // Ventas
+
+                        //* Ventas
                         FutureBuilder(
                           future: _loadSells,
                           builder: (context, snapshot) {
@@ -260,7 +266,8 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                             );
                           },
                         ),
-                        // LOGS
+
+                        //* LOGS
                         FutureBuilder(
                           future: _loadLogs,
                           builder: (context, snapshot) {
@@ -324,12 +331,12 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                     color: colorScheme.surfaceContainer,
                                                     padding: EdgeInsets.zero,
                                                     widget: Tooltip(
-                                                      message: log.type,
+                                                      message: log.tipo,
                                                       child: Container(
                                                         alignment: Alignment.centerLeft,
                                                         margin: EdgeInsets.symmetric(horizontal: 20,),
                                                         child: Text(
-                                                          log.type,
+                                                          log.tipo,
                                                           style: textTheme.labelMedium,
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
@@ -342,26 +349,40 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                   IsselPill(
                                                     color: colorScheme.surfaceContainer,
                                                     widget: Text(
-                                                      log.user,
+                                                      log.username,
                                                       style: textTheme.labelMedium, maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,),
                                                     alignment: Alignment.centerLeft,
                                                   ),
+                                                  // Información
                                                   IsselPill(
                                                     color: colorScheme.surfaceContainer,
-                                                    widget: Text(log.info, style: textTheme.labelMedium, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                                    padding: EdgeInsets.zero,
+                                                    widget: Tooltip(
+                                                      message: log.info,
+                                                      child: Container(
+                                                        alignment: Alignment.centerLeft,
+                                                        margin: EdgeInsets.symmetric(horizontal: 20,),
+                                                        child: Text(
+                                                          log.info,
+                                                          style: textTheme.labelMedium,
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                    ),
                                                     alignment: Alignment.centerLeft,
                                                   ),
                                                   IsselPill(
                                                     color: colorScheme.surfaceContainer,
                                                     padding: EdgeInsets.zero,
                                                     widget: Tooltip(
-                                                      message: DateFormat("dd/MM/yy hh:mm:ss a",).format(log.date),
+                                                      message: DateFormat("dd/MM/yy hh:mm:ss a",).format(log.createdAt),
                                                       child: Container(
                                                         alignment: Alignment.centerLeft,
                                                         margin: EdgeInsets.symmetric(horizontal: 20,),
                                                         child: Text(
-                                                          DateFormat("dd/MM/yy hh:mm:ss a",).format(log.date), style: textTheme.labelMedium,
+                                                          DateFormat("dd/MM/yy hh:mm:ss a",).format(log.createdAt), style: textTheme.labelMedium,
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
                                                         ),
@@ -380,10 +401,12 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                             );
                           },
                         ),
+
                       ],
                     ),
                   ),
-                  // Estadisticas de garzas
+
+                  //* Estadisticas de garzas
                   FutureBuilder(
                     future: _loadStatistics,
                     builder: (context, snapshot) {
@@ -529,15 +552,14 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
   Future<void> _openLogsDateRangeDialog() async {
     final StatisticsController statisticsController = context.read();
     final ToastService toastService = locator();
-    final DateRangeDialogResult? result =
-        await showDialog<DateRangeDialogResult>(
-          context: context,
-          builder: (context) => DateRangeDialog(
-            initialRange: _logsDateRange,
-            firstDate: DateTime(2020),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
-          ),
-        );
+    final DateRangeDialogResult? result = await showDialog<DateRangeDialogResult>(
+      context: context,
+      builder: (context) => DateRangeDialog(
+        initialRange: _logsDateRange,
+        firstDate: DateTime(2020),
+        lastDate: DateTime.now().add(const Duration(days: 365)),
+      ),
+    );
 
     if (result == null) return;
 

@@ -32,7 +32,7 @@ class SellEntity extends Equatable {
       waterType: WaterType.fromString(data["water_type"]),
       unitOfMeasurement: UnitOfMeasurement.fromString(data["unit_of_measurement"]),
       total: data["total"],
-      date: DateTime.fromMillisecondsSinceEpoch(data["date"], isUtc: true).toLocal()
+      date: DateTime.fromMillisecondsSinceEpoch(data["date"], isUtc: true)
     );
   }
 

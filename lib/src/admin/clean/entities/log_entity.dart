@@ -1,34 +1,49 @@
 import 'package:equatable/equatable.dart';
+import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 
 class LogEntity extends Equatable {
 
   int id;
-  String type;
-  String user;
+  String userUid;
+  String username;
+  String displayName;
+  AppRole role;
+  String tipo;
   String info;
-
-  DateTime date;
+  int statusCode;
+  double durationMs;
+  DateTime createdAt;
 
   LogEntity({
     required this.id,
-    required this.type,
-    required this.user,
+    required this.userUid,
+    required this.username,
+    required this.displayName,
+    required this.role,
+    required this.tipo,
     required this.info,
-    required this.date
+    required this.statusCode,
+    required this.durationMs,
+    required this.createdAt,
   });
 
   factory LogEntity.fromMap(Map<String, dynamic> data) {
     return LogEntity(
       id: data["id"],
-      type: data["type"],
-        user: data["user"],
+      userUid: data["user_uid"],
+      username: data["username"],
+      displayName: data["display_name"],
+      role: AppRole.fromString(data["role"]),
+      tipo: data["tipo"],
       info: data["info"],
-      date: DateTime.fromMillisecondsSinceEpoch(data["date"], isUtc: true).toLocal()
+      statusCode: data["status_code"],
+      durationMs: data["duration_ms"],
+      createdAt: DateTime.parse(data["created_at"])
     );
   }
 
   @override
-  List<Object?> get props => [id, type, user, info, date];
+  List<Object?> get props => [id, userUid, username, displayName, role, tipo, info, statusCode, durationMs, createdAt];
 
 }
