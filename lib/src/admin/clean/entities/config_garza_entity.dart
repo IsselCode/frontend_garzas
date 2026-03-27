@@ -21,9 +21,9 @@ class ConfigGarzaEntity extends Equatable {
     return ConfigGarzaEntity(
       title: map["title"],
       number: map["number"],
-      garzaType: map["garza_type"],
-      waterType: map["water_type"],
-      unitOfMeasurement: map["unit_of_measurement"],
+      garzaType: GarzaType.fromString(map["garza_type"]),
+      waterType: WaterType.fromString(map["water_type"]),
+      unitOfMeasurement: UnitOfMeasurement.fromString(map["unit_of_measurement"]),
     );
   }
 

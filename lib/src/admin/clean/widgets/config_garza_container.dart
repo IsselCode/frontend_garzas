@@ -31,9 +31,9 @@ enum WaterType {
 
   static WaterType fromString(String type) {
     switch (type) {
-      case "Potable":
+      case "potable":
         return WaterType.potable;
-      case "Pozo":
+      case "pozo":
         return WaterType.pozo;
       default:
         throw AppException(message: "Tipo de agua inexistente");
@@ -52,9 +52,9 @@ enum UnitOfMeasurement {
 
   static UnitOfMeasurement fromString(String type) {
     switch (type) {
-      case "Potable":
+      case "gallons":
         return UnitOfMeasurement.gallons;
-      case "Pozo":
+      case "liters":
         return UnitOfMeasurement.liters;
       default:
         throw AppException(message: "Tipo de medida inexistente");

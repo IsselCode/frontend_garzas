@@ -1,50 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
+import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/config_garza_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
+import 'package:frontend_garzas/src/admin/data/garzas_api.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+
+import '../../../inject_container.dart';
 
 class ConfigGarzasController extends ChangeNotifier {
+
+  GarzasApi garzasApi;
+
+  ConfigGarzasController({
+    required this.garzasApi,
+  });
+
   List<ConfigGarzaEntity> configGarzas = [];
 
   Future<CtrlResponse> loadConfigGarzas() async {
     try {
-      // TODO: CONECTAR CON BACKEND
-      List<ConfigGarzaEntity> fakeConfigGarzas = [
-        ConfigGarzaEntity(
-          title: "Garza 1",
-          number: 1,
-          garzaType: GarzaType.valvula,
-          waterType: WaterType.pozo,
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        ConfigGarzaEntity(
-          title: "Garza 2",
-          number: 2,
-          garzaType: GarzaType.valvula,
-          waterType: WaterType.pozo,
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        ConfigGarzaEntity(
-          title: "Garza 3",
-          number: 3,
-          garzaType: GarzaType.valvula,
-          waterType: WaterType.pozo,
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-        ConfigGarzaEntity(
-          title: "Garza 4",
-          number: 4,
-          garzaType: GarzaType.valvula,
-          waterType: WaterType.pozo,
-          unitOfMeasurement: UnitOfMeasurement.gallons,
-        ),
-      ];
 
-      List<ConfigGarzaEntity> tempConfigGarzas = await Future.delayed(
-        const Duration(seconds: 2),
-        () => fakeConfigGarzas,
-      );
+      if (configGarzas.isNotEmpty) {
+        return CtrlResponse(success: true);
+      }
+
+      List<ConfigGarzaEntity> tempConfigGarzas = await garzasApi.listGarzas();
       configGarzas = tempConfigGarzas;
       notifyListeners();
 
@@ -54,10 +36,9 @@ class ConfigGarzasController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> updateGarza(int number, {GarzaType? garzaType, WaterType? waterType, UnitOfMeasurement? unitOfMeasurement,}) async {
-    final indexConfig = configGarzas.indexWhere(
-      (element) => element.number == number,
-    );
+  Future<CtrlResponse> updateGarza(BuildContext context, int number, {GarzaType? garzaType, WaterType? waterType, UnitOfMeasurement? unitOfMeasurement,}) async {
+
+    final indexConfig = configGarzas.indexWhere((element) => element.number == number,);
 
     if (indexConfig == -1) {
       return CtrlResponse(
@@ -81,20 +62,20 @@ class ConfigGarzasController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Conectar con backend pasando un DTO
-      await Future.delayed(const Duration(seconds: 2));
+
+      await garzasApi.updateGarzaByNumber(newConfig.number, newConfig.garzaType, newConfig.waterType, newConfig.unitOfMeasurement);
 
       return CtrlResponse(success: true);
     } on AppException catch (e) {
       configGarzas[indexConfig] = previousConfig;
       notifyListeners();
+      ToastService toastService = locator();
+      toastService.error(e.message);
       return CtrlResponse(success: false, message: e.message);
     } catch (_) {
       configGarzas[indexConfig] = previousConfig;
       notifyListeners();
-      return CtrlResponse(
-        success: false,
-        message: "No fue posible actualizar la configuracion de la garza",
+      return CtrlResponse(success: false, message: "No fue posible actualizar la configuracion de la garza",
       );
     }
   }

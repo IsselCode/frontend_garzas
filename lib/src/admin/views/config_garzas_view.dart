@@ -83,6 +83,10 @@ class _ConfigGarzasViewState extends State<ConfigGarzasView> {
                     );
                   }
 
+                  if (!snapshot.data!.success) {
+                    return Center(child: Text(snapshot.data!.message!),);
+                  }
+
                   if (configGarzasController.configGarzas.isEmpty) {
                     return Center(child: Text("No hay garzas disponibles"));
                   }
@@ -107,27 +111,27 @@ class _ConfigGarzasViewState extends State<ConfigGarzasView> {
                               garzaType: config1.garzaType,
                               waterType: config1.waterType,
                               unitOfMeasurement: config1.unitOfMeasurement,
-                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config1.number, garzaType: newValue),
-                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config1.number, waterType: newValue),
-                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config1.number, unitOfMeasurement: newValue),
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(context, config1.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(context, config1.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(context, config1.number, unitOfMeasurement: newValue),
                             ),
                             ConfigGarzaContainer(
                               title: "Garza 2",
                               garzaType: config2.garzaType,
                               waterType: config2.waterType,
                               unitOfMeasurement: config2.unitOfMeasurement,
-                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config2.number, garzaType: newValue),
-                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config2.number, waterType: newValue),
-                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config2.number, unitOfMeasurement: newValue),
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(context, config2.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(context, config2.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(context, config2.number, unitOfMeasurement: newValue),
                             ),
                             ConfigGarzaContainer(
                               title: "Garza 3",
                               garzaType: config3.garzaType,
                               waterType: config3.waterType,
                               unitOfMeasurement: config3.unitOfMeasurement,
-                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config3.number, garzaType: newValue),
-                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config3.number, waterType: newValue),
-                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config3.number, unitOfMeasurement: newValue),
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(context, config3.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(context, config3.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(context, config3.number, unitOfMeasurement: newValue),
                             ),
                           ],
                         ),
@@ -140,9 +144,9 @@ class _ConfigGarzasViewState extends State<ConfigGarzasView> {
                               garzaType: config4.garzaType,
                               waterType: config4.waterType,
                               unitOfMeasurement: config4.unitOfMeasurement,
-                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(config4.number, garzaType: newValue),
-                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(config4.number, waterType: newValue),
-                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(config4.number, unitOfMeasurement: newValue),
+                              onGarzaTypeChanged: (newValue) => configGarzasController.updateGarza(context, config4.number, garzaType: newValue),
+                              onWaterTypeChanged: (newValue) => configGarzasController.updateGarza(context, config4.number, waterType: newValue),
+                              onUnitOfMeasurement: (newValue) => configGarzasController.updateGarza(context, config4.number, unitOfMeasurement: newValue),
                             ),
                             Spacer(),
                             Spacer(),
