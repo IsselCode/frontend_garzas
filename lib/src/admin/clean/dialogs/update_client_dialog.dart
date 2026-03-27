@@ -151,7 +151,7 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
                       IsselStepperField(
                         height: 50,
                         title: "Litro",
-                        onChanged: (value) => pozoLiterPricing,
+                        onChanged: (value) => pozoLiterPricing = value,
                         maxValue: 10000,
                         minValue: 0,
                         initValue: pozoLiterPricing,
@@ -161,7 +161,7 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
                       IsselStepperField(
                         height: 50,
                         title: "Galón",
-                        onChanged: (value) => pozoGallonPricing,
+                        onChanged: (value) => pozoGallonPricing = value,
                         maxValue: 10000,
                         minValue: 0,
                         initValue: pozoGallonPricing,

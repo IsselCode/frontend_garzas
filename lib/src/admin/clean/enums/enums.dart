@@ -25,12 +25,17 @@ enum AppRole {
 }
 
 enum GeneralConfigLogField {
-  loadData,
+  waterSupply,
   userCreated,
   userDeleted,
+  userModified,
   login,
   logout,
   clientCreated,
   clientDeleted,
   clientModified,
+  cashRegisterOpening,
+  cashRegisterClosing,
+  saleCreated,
+  dispatchCompleted,
 }

@@ -3,8 +3,15 @@ import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/general_config_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
+import 'package:frontend_garzas/src/admin/data/general_api.dart';
 
 class GeneralConfigController extends ChangeNotifier {
+
+  GeneralApi generalApi;
+
+  GeneralConfigController({
+    required this.generalApi,
+  });
 
   GeneralConfigEntity? generalConfigEntity;
 
@@ -12,22 +19,7 @@ class GeneralConfigController extends ChangeNotifier {
 
     try {
 
-      GeneralConfigEntity fakeConfig = GeneralConfigEntity(
-        loadData: false,
-        userCreated: false,
-        userDeleted: false,
-        login: false,
-        logout: false,
-        clientCreated: false,
-        clientDeleted: false,
-        clientModified: false,
-        businessName: "PABN PURIFICADORA AGUAS Y BEBIDAS",
-        businessAddress: "Monzón 8100 EL RUBI 220000",
-        extraInfo1: "Gracias por su compra.",
-        extraInfo2: "¡Vuelva Pronto!"
-      );
-
-      GeneralConfigEntity tempConfig = await Future.delayed(const Duration(seconds: 1), () => fakeConfig,);
+      GeneralConfigEntity tempConfig = await generalApi.getConfig();
 
       generalConfigEntity = tempConfig;
       notifyListeners();
@@ -46,14 +38,19 @@ class GeneralConfigController extends ChangeNotifier {
 
     GeneralConfigEntity previousConfig = generalConfigEntity!;
     GeneralConfigEntity newConfig = switch (field) {
-      GeneralConfigLogField.loadData => previousConfig.copyWith(loadData: value),
+      GeneralConfigLogField.waterSupply => previousConfig.copyWith(waterSupply: value),
       GeneralConfigLogField.userCreated => previousConfig.copyWith(userCreated: value),
       GeneralConfigLogField.userDeleted => previousConfig.copyWith(userDeleted: value),
+      GeneralConfigLogField.userModified => previousConfig.copyWith(userModified: value),
       GeneralConfigLogField.login => previousConfig.copyWith(login: value),
       GeneralConfigLogField.logout => previousConfig.copyWith(logout: value),
       GeneralConfigLogField.clientCreated => previousConfig.copyWith(clientCreated: value),
       GeneralConfigLogField.clientDeleted => previousConfig.copyWith(clientDeleted: value),
       GeneralConfigLogField.clientModified => previousConfig.copyWith(clientModified: value),
+      GeneralConfigLogField.cashRegisterOpening => previousConfig.copyWith(cashRegisterOpening: value),
+      GeneralConfigLogField.cashRegisterClosing => previousConfig.copyWith(cashRegisterClosing: value),
+      GeneralConfigLogField.saleCreated => previousConfig.copyWith(saleCreated: value),
+      GeneralConfigLogField.dispatchCompleted => previousConfig.copyWith(dispatchCompleted: value),
     };
 
     if (newConfig == previousConfig) {
@@ -64,11 +61,7 @@ class GeneralConfigController extends ChangeNotifier {
     notifyListeners();
 
     try {
-
-      // Todo: implementar método desde el backend
-      await Future.delayed(const Duration(seconds: 1));
-
-      throw AppException(message: "ERROR SIMULADO");
+      await generalApi.updateConfig(newConfig);
 
       return CtrlResponse(success: true);
     } on AppException catch(e) {
@@ -93,10 +86,7 @@ class GeneralConfigController extends ChangeNotifier {
 
     try {
 
-      // Todo: implementar método desde el backend
-      await Future.delayed(const Duration(seconds: 1));
-
-      throw AppException(message: "ERROR SIMULADO");
+      await generalApi.updateConfig(newConfig);
 
       return CtrlResponse(success: true);
     } on AppException catch(e) {
@@ -105,5 +95,35 @@ class GeneralConfigController extends ChangeNotifier {
       return CtrlResponse(success: false, message: e.message);
     }
   }
+
+  Future<CtrlResponse> updatePrices(double potableGalPricing, double potableLiterPricing, double pozoGalPricing, double pozoLiterPricing) async {
+
+    GeneralConfigEntity previousConfig = generalConfigEntity!;
+
+    GeneralConfigEntity newConfig = generalConfigEntity!.copyWith(
+      potableGalPricing: potableGalPricing,
+      potableLiterPricing: potableLiterPricing,
+      pozoGalPricing: pozoGalPricing,
+      pozoLiterPricing: pozoLiterPricing
+    );
+
+    if (newConfig == previousConfig) {
+      return CtrlResponse(success: true);
+    }
+
+    generalConfigEntity = newConfig;
+    notifyListeners();
+
+    try {
+      await generalApi.updateConfig(newConfig);
+      return CtrlResponse(success: true);
+    } on AppException catch(e) {
+      generalConfigEntity = previousConfig;
+      notifyListeners();
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+
 
 }

@@ -2,96 +2,175 @@ import 'package:equatable/equatable.dart';
 
 class GeneralConfigEntity extends Equatable {
 
-  bool loadData;
+  bool waterSupply;
   bool userCreated;
   bool userDeleted;
+  bool userModified;
   bool login;
   bool logout;
   bool clientCreated;
   bool clientDeleted;
   bool clientModified;
-
+  bool cashRegisterOpening;
+  bool cashRegisterClosing;
+  bool saleCreated;
+  bool dispatchCompleted;
   String businessName;
   String businessAddress;
   String extraInfo1;
   String extraInfo2;
+  double potableLiterPricing;
+  double potableGalPricing;
+  double pozoLiterPricing;
+  double pozoGalPricing;
 
   GeneralConfigEntity({
-    required this.loadData,
+    required this.waterSupply,
     required this.userCreated,
     required this.userDeleted,
+    required this.userModified,
     required this.login,
     required this.logout,
     required this.clientCreated,
     required this.clientDeleted,
     required this.clientModified,
+    required this.cashRegisterOpening,
+    required this.cashRegisterClosing,
+    required this.saleCreated,
+    required this.dispatchCompleted,
     required this.businessName,
     required this.businessAddress,
     required this.extraInfo1,
-    required this.extraInfo2
+    required this.extraInfo2,
+    required this.potableLiterPricing,
+    required this.potableGalPricing,
+    required this.pozoLiterPricing,
+    required this.pozoGalPricing,
   });
 
   factory GeneralConfigEntity.fromMap(Map<String, dynamic> map) {
     return GeneralConfigEntity(
-      loadData: map['load_data'],
+      waterSupply: map['water_supply'],
       userCreated: map['user_created'],
       userDeleted: map['user_deleted'],
+      userModified: map['user_modified'],
       login: map['login'],
       logout: map['logout'],
       clientCreated: map['client_created'],
       clientDeleted: map['client_deleted'],
       clientModified: map['client_modified'],
+      cashRegisterOpening: map['cash_register_opening'],
+      cashRegisterClosing: map['cash_register_closing'],
+      saleCreated: map['sale_created'],
+      dispatchCompleted: map['dispatch_completed'],
       businessName: map['business_name'],
       businessAddress: map['business_address'],
       extraInfo1: map['extra_info_1'],
       extraInfo2: map['extra_info_2'],
+      potableLiterPricing: map["potable_liter_pricing"],
+      potableGalPricing: map["potable_gal_pricing"],
+      pozoLiterPricing: map["pozo_liter_pricing"],
+      pozoGalPricing: map["pozo_gal_pricing"],
     );
   }
 
   GeneralConfigEntity copyWith({
-    bool? loadData,
+    bool? waterSupply,
     bool? userCreated,
     bool? userDeleted,
+    bool? userModified,
     bool? login,
     bool? logout,
     bool? clientCreated,
     bool? clientDeleted,
     bool? clientModified,
+    bool? cashRegisterOpening,
+    bool? cashRegisterClosing,
+    bool? saleCreated,
+    bool? dispatchCompleted,
     String? businessName,
     String? businessAddress,
     String? extraInfo1,
     String? extraInfo2,
+    double? potableLiterPricing,
+    double? potableGalPricing,
+    double? pozoLiterPricing,
+    double? pozoGalPricing,
   }) {
     return GeneralConfigEntity(
-      loadData: loadData ?? this.loadData,
+      waterSupply: waterSupply ?? this.waterSupply,
       userCreated: userCreated ?? this.userCreated,
       userDeleted: userDeleted ?? this.userDeleted,
+      userModified: userModified ?? this.userModified,
       login: login ?? this.login,
       logout: logout ?? this.logout,
       clientCreated: clientCreated ?? this.clientCreated,
       clientDeleted: clientDeleted ?? this.clientDeleted,
       clientModified: clientModified ?? this.clientModified,
+      cashRegisterOpening: cashRegisterOpening ?? this.cashRegisterOpening,
+      cashRegisterClosing: cashRegisterClosing ?? this.cashRegisterClosing,
+      saleCreated: saleCreated ?? this.saleCreated,
+      dispatchCompleted: dispatchCompleted ?? this.dispatchCompleted,
       businessName: businessName ?? this.businessName,
       businessAddress: businessAddress ?? this.businessAddress,
       extraInfo1: extraInfo1 ?? this.extraInfo1,
       extraInfo2: extraInfo2 ?? this.extraInfo2,
+      potableLiterPricing: potableLiterPricing ?? this.potableLiterPricing,
+      potableGalPricing: potableGalPricing ?? this.potableGalPricing,
+      pozoLiterPricing: pozoLiterPricing ?? this.pozoLiterPricing,
+      pozoGalPricing: pozoGalPricing ?? this.pozoGalPricing,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'water_supply': waterSupply,
+      'user_created': userCreated,
+      'user_deleted': userDeleted,
+      'user_modified': userModified,
+      'login': login,
+      'logout': logout,
+      'client_created': clientCreated,
+      'client_deleted': clientDeleted,
+      'client_modified': clientModified,
+      'cash_register_opening': cashRegisterOpening,
+      'cash_register_closing': cashRegisterClosing,
+      'sale_created': saleCreated,
+      'dispatch_completed': dispatchCompleted,
+      'business_name': businessName,
+      'business_address': businessAddress,
+      'extra_info_1': extraInfo1,
+      'extra_info_2': extraInfo2,
+      "potable_liter_pricing": potableLiterPricing,
+      "potable_gal_pricing": potableGalPricing,
+      "pozo_liter_pricing": pozoLiterPricing,
+      "pozo_gal_pricing": pozoGalPricing,
+    };
   }
 
   @override
   List<Object?> get props => [
-    loadData,
+    waterSupply,
     userCreated,
     userDeleted,
+    userModified,
     login,
     logout,
     clientCreated,
     clientDeleted,
     clientModified,
+    cashRegisterOpening,
+    cashRegisterClosing,
+    saleCreated,
+    dispatchCompleted,
     businessName,
     businessAddress,
     extraInfo1,
-    extraInfo2
+    extraInfo2,
+    potableLiterPricing,
+    potableGalPricing,
+    pozoLiterPricing,
+    pozoGalPricing,
   ];
 
 
