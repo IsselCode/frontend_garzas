@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/src/admin/clean/dialogs/users_dialog.dart';
+import 'package:frontend_garzas/src/admin/views/cash_register_view.dart';
 import 'package:frontend_garzas/src/admin/views/client_management_view.dart';
 import 'package:frontend_garzas/src/admin/views/clients_view.dart';
 import 'package:frontend_garzas/src/admin/views/config_garzas_view.dart';
@@ -52,28 +54,28 @@ class HomeAdminView extends StatelessWidget {
                 ),
 
                 IsselActionBox(
+                  title: "Cortes",
+                  asset: AppAssets.users,
+                  onTap: () => navigationService.navigateTo(CashRegisterView()),
+                  height: 230,
+                  width: 200,
+                ),
+
+                IsselActionBox(
+                  title: "Clientes y Usuarios",
+                  asset: AppAssets.customers,
+                  onTap: () => openUsersDialog(context),
+                  height: 230,
+                  width: 200,
+                ),
+
+                IsselActionBox(
                   title: "Configuración",
                   asset: AppAssets.configs,
                   onTap: () => openConfigDialog(context),
                   height: 230,
                   width: 200,
                 ),
-
-                IsselActionBox(
-                  title: "Gestionar usuarios",
-                  asset: AppAssets.users,
-                  onTap: () => navigationService.navigateTo(UserManagementView()),
-                  height: 230,
-                  width: 200,
-                ),
-
-                IsselActionBox(
-                  title: "Clientes",
-                  asset: AppAssets.customers,
-                  onTap: () => navigationService.navigateTo(ClientsView()),
-                  height: 230,
-                  width: 200,
-                )
 
               ],
             ),
@@ -82,6 +84,24 @@ class HomeAdminView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void openUsersDialog(BuildContext context) async {
+
+    UsersType? type = await showDialog<UsersType>(
+      context: context,
+      builder: (context) => UsersDialog(),
+    );
+
+    if (type == null) return;
+
+    NavigationService navigationService = locator();
+    if (type == UsersType.users) {
+      navigationService.navigateTo(UserManagementView());
+    } else {
+      navigationService.navigateTo(ClientsView());
+    }
+
   }
 
   void openConfigDialog(BuildContext context) async {

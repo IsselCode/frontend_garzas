@@ -75,6 +75,27 @@ enum DispatchStatus {
 
 }
 
+enum CashRegisterStatus {
+
+  open(label: "Abierto"),
+  closed(label: "Cerrado");
+
+  final String label;
+  const CashRegisterStatus({required this.label});
+
+  static fromString(String role) {
+    switch (role) {
+      case "open":
+        return CashRegisterStatus.open;
+      case "closed":
+        return CashRegisterStatus.closed;
+      default:
+        throw AppException(message: "Estado no identificado");
+    }
+  }
+
+}
+
 enum GeneralConfigLogField {
   waterSupply,
   userCreated,

@@ -3,11 +3,14 @@ import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
+import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
+import 'package:frontend_garzas/src/admin/data/cash_register_api.dart';
 import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 import 'package:frontend_garzas/src/admin/data/garzas_api.dart';
 import 'package:frontend_garzas/src/admin/data/general_api.dart';
@@ -41,6 +44,7 @@ Future<void> injectContainer() async {
   locator.registerLazySingleton(() => GeneralApi(apiClient: locator()),);
   locator.registerLazySingleton(() => LogsApi(apiClient: locator()),);
   locator.registerLazySingleton(() => SalesApi(apiClient: locator()),);
+  locator.registerLazySingleton(() => CashRegisterApi(apiClient: locator()),);
 
   // controllers
 
@@ -57,6 +61,7 @@ Future<void> injectContainer() async {
   locator.registerLazySingleton(() => UsersController(usersApi: locator()),);
   locator.registerLazySingleton(() => ClientsController(clientsApi: locator()),);
   locator.registerLazySingleton(() => ConfigGarzasController(garzasApi: locator()));
+  locator.registerLazySingleton(() => CashRegisterController(cashRegisterApi: locator()));
 
   locator.registerLazySingleton(() => GeneralConfigController(generalApi: locator()));
   locator.registerLazySingleton(() => StatisticsController(logsApi: locator(), salesApi: locator()));
