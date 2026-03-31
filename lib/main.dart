@@ -12,6 +12,7 @@ import 'package:frontend_garzas/src/admin/controllers/general_config_controller.
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
+import 'package:frontend_garzas/src/auth/views/open_cash_register_cut_view.dart';
 import 'package:frontend_garzas/src/auth/views/splash_view.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -152,7 +153,7 @@ class MyApp extends StatelessWidget {
                     ],
                   );
                 },
-                home: const SplashView(),
+                home: OpenCashRegisterCutView(),
               ),
             ),
           );

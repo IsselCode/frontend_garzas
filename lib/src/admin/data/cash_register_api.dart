@@ -1,3 +1,4 @@
+import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
@@ -12,7 +13,7 @@ class CashRegisterApi {
   final String _cashRegisterByDateRangePath = "/cash-register/range";
   final String _cashRegisterOpenPath = "/cash-register/open";
   final String _activeCashRegisterPath = "/cash-register/active";
-  final String _activeCashRegisterSummaryPath = "/cash-register/summary";
+  // final String _activeCashRegisterSummaryPath = "/cash-register/summary";
   String _cashRegisterSummaryById(int id) => "/cash-register/$id/summary";
   final String _cashRegisterClosePath = "/cash-register/close";
 
@@ -71,5 +72,66 @@ class CashRegisterApi {
     }
   }
 
+  Future<CashRegisterEntity> openCut(double openingAmount) async {
+
+    try {
+
+      Map<String, dynamic> response = await apiClient.get(
+        _cashRegisterOpenPath,
+        authRequired: true,
+      );
+
+      return CashRegisterEntity.fromMap(response);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+
+  }
+
+  Future<CashRegisterEntity> active() async {
+    try {
+
+      Map<String, dynamic> response = await apiClient.get(
+        _cashRegisterOpenPath,
+        authRequired: true,
+      );
+
+      return CashRegisterEntity.fromMap(response);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+  }
+
+  Future<CashRegisterEntity> closeCut(double cash, double card, double check) async {
+    try {
+
+      Map<String, dynamic> body = {
+        "declared_cash_total": cash,
+        "declared_card_total": card,
+        "declared_check_total": check
+      };
+
+      Map<String, dynamic> response = await apiClient.post(
+        _cashRegisterOpenPath,
+        authRequired: true,
+        body: body
+      );
+
+      return CashRegisterEntity.fromMap(response["cut"]);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+  }
+
+  // No utilizar: No es necesario en este momento
+  // Future<List<SummaryEntity>> getSummaries() async {
+  //   throw AppException(message: "Método no implementado");
+  // }
 
 }
