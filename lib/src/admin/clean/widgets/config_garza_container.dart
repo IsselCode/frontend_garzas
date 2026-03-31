@@ -29,6 +29,8 @@ enum WaterType {
   final String dp;
   const WaterType({required this.dp});
 
+  static WaterType fromTabSwitcher(TabSwitcherAlignStates state) => state == TabSwitcherAlignStates.left ? WaterType.potable : WaterType.pozo;
+
   static WaterType fromString(String type) {
     switch (type) {
       case "potable":
@@ -49,6 +51,8 @@ enum UnitOfMeasurement {
   final String dp;
   final String abbr;
   const UnitOfMeasurement({required this.dp, required this.abbr});
+
+  static UnitOfMeasurement fromTabSwitcher(TabSwitcherAlignStates state) => state == TabSwitcherAlignStates.left ? UnitOfMeasurement.liters : UnitOfMeasurement.gallons;
 
   static UnitOfMeasurement fromString(String type) {
     switch (type) {

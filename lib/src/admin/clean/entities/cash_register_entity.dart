@@ -60,7 +60,6 @@ class CashRegisterEntity extends Equatable {
   }
 
   @override
-  // TODO: implement props
   List<Object?> get props => [id, openedByUid, closedByUid, cashTotal, cardTotal, checkTotal];
 
 }

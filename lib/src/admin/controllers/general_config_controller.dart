@@ -18,8 +18,9 @@ class GeneralConfigController extends ChangeNotifier {
   Future<CtrlResponse> loadGeneralConfig() async {
 
     try {
-
-      //TODO: HACER QUE NO CARGUE AL YA HABER CARGADO
+      if (generalConfigEntity != null) {
+        return CtrlResponse(success: true);
+      }
 
       GeneralConfigEntity tempConfig = await generalApi.getConfig();
 

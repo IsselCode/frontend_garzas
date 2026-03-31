@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/text_back_button.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/regex_service.dart';
-import 'package:frontend_garzas/src/sales/clean/entities/client_entity.dart';
+import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/sales/controllers/order_controller.dart';
 import 'package:frontend_garzas/src/sales/views/finish_order_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -10,6 +11,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../../commons/entities/client_entity.dart';
 import '../../../inject_container.dart';
 
 class StartOrderView extends StatefulWidget {
@@ -18,7 +20,7 @@ class StartOrderView extends StatefulWidget {
 
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => OrderController(),
+      create: (context) => OrderController(salesApi: locator(), clientsApi: locator(), printerService: locator(), generalConfigController: context.read()),
       builder: (context, child) => StartOrderView._(),
     );
   }
@@ -82,7 +84,10 @@ class _StartOrderViewState extends State<StartOrderView> {
                                   builder: (context, snapshot) {
 
                                     if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return IsselShimmer(width: double.infinity, height: 50);
+                                      return IsselShimmer(
+                                        width: double.infinity,
+                                        height: 50
+                                      );
                                     }
 
                                     return IsselSearchDropdown<ClientEntity>(
@@ -90,7 +95,13 @@ class _StartOrderViewState extends State<StartOrderView> {
                                       items: orderController.showedClients.map((e) {
                                         return DropdownMenuItem(
                                             value: e,
-                                            child: Text(e.user)
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(e.name),
+                                                Text(e.phone.toString()),
+                                              ],
+                                            )
                                         );
                                       },).toList(),
                                       value: orderController.selectedClient,
@@ -116,6 +127,20 @@ class _StartOrderViewState extends State<StartOrderView> {
                                   leftText: "Potable",
                                   rightText: "Pozo",
                                   onChanged: (value) => orderController.state = value,
+                                ),
+                              ],
+                            ),
+
+                            //* Seleccionar La unidad de medida
+                            Column(
+                              spacing: 10,
+                              children: [
+                                Text("Selecciona el tipo de agua", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
+                                IsselTabSwitcher(
+                                  state: orderController.stateUnit,
+                                  leftText: "Litros",
+                                  rightText: "Galones",
+                                  onChanged: (value) => orderController.stateUnit = value,
                                 ),
                               ],
                             ),
@@ -165,8 +190,14 @@ class _StartOrderViewState extends State<StartOrderView> {
   void searchClients(BuildContext context, String value) async {
     OrderController orderController = context.read();
     context.loaderOverlay.show();
-    await orderController.getSearchClients(value);
+    CtrlResponse response = await orderController.getSearchClients(value);
     context.loaderOverlay.hide();
+
+    if (!response.success) {
+      ToastService toastService = locator();
+      toastService.error(response.message!);
+    }
+
   }
 
   void finishOrder(BuildContext context) async {

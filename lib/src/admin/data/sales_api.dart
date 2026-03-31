@@ -2,6 +2,9 @@ import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/statistics_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
+import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
+import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 
 class SalesApi {
   final ApiClient apiClient;
@@ -9,6 +12,7 @@ class SalesApi {
   SalesApi({required this.apiClient});
 
   final String _salesPath = "/sales";
+  final String _salesQuotePath = "/sales/quote";
   final String _salesByDateRangePath = "/sales/range";
   final String _getMonthlyPaymentTotalsPath = "/sales/monthly-payment-totals";
 
@@ -87,69 +91,37 @@ class SalesApi {
 
   }
 
+  Future<double> quotSale(WaterType waterType, UnitOfMeasurement unitOfMeasurement, double quantity, String? clientPhone) async {
 
-// Future<ClientEntity> getClientByPhone(String phone) async {
-  //
-  //   Map<String, dynamic> response = await apiClient.get(
-  //     "$_clientsPath/$phone",
-  //     authRequired: true,
-  //   );
-  //
-  //   return ClientEntity.fromMap(response);
-  //
-  // }
-  //
-  // Future<ClientEntity> createClient(String name, String phone, double potableGalPricing, double potableLiterPricing, double pozoGalPricing, double pozoLiterPricing) async {
-  //
-  //   Map<String, dynamic> body = {
-  //     "name": name,
-  //     "phone": phone,
-  //     "potable_gal_pricing": potableGalPricing,
-  //     "potable_liter_pricing": potableLiterPricing,
-  //     "pozo_gal_pricing": pozoGalPricing,
-  //     "pozo_liter_pricing": pozoLiterPricing,
-  //   };
-  //
-  //   Map<String, dynamic> response = await apiClient.post(
-  //     _clientsPath,
-  //     authRequired: true,
-  //     body: body
-  //   );
-  //
-  //   return ClientEntity.fromMap(response);
-  // }
-  //
-  // Future<void> deleteClientByPhone(String phone) async {
-  //
-  //   await apiClient.delete(
-  //     "$_clientsPath/$phone",
-  //     authRequired: true
-  //   );
-  //
-  // }
-  //
-  // Future<ClientEntity> updateClientByPhone(String clientPhone, String name, String newPhone, double potableGalPricing, double potableLiterPricing, double pozoGalPricing, double pozoLiterPricing) async {
-  //
-  //   Map<String, dynamic> body = {
-  //     "name": name,
-  //     "phone": newPhone,
-  //     "potable_gal_pricing": potableGalPricing,
-  //     "potable_liter_pricing": potableLiterPricing,
-  //     "pozo_gal_pricing": pozoGalPricing,
-  //     "pozo_liter_pricing": pozoLiterPricing,
-  //   };
-  //
-  //   body.removeWhere((key, value) => value == null || (value is String && value.isEmpty));
-  //
-  //   Map<String, dynamic> response = await apiClient.patch(
-  //     "$_clientsPath/$clientPhone",
-  //     authRequired: true,
-  //     body: body,
-  //   );
-  //
-  //   return ClientEntity.fromMap(response);
-  //
-  // }
+    Map<String, dynamic> body = {
+      "water_type": waterType.name,
+      "unit_of_measurement": unitOfMeasurement.name,
+      "quantity": quantity,
+    };
+
+    if (clientPhone != null) body["client_phone"] = clientPhone;
+
+    Map<String, dynamic> response = await apiClient.post(
+      _salesQuotePath,
+      authRequired: true,
+      body: body
+    );
+
+    return response["total"];
+
+  }
+
+  Future<SaleEntity> createSale(SaleInfoDto dto) async {
+
+    Map<String, dynamic> response = await apiClient.post(
+      _salesPath,
+      authRequired: true,
+      body: dto.toJson()
+    );
+
+    return SaleEntity.fromMap(response);
+
+  }
 
 
 }

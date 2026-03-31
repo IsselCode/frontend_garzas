@@ -61,7 +61,6 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => locator<UsersController>()),
         ChangeNotifierProvider(create: (context) => locator<ClientsController>()),
         ChangeNotifierProvider(create: (context) => locator<CashRegisterController>()),
-
         ChangeNotifierProvider(create: (context) => locator<ConfigGarzasController>(),),
         ChangeNotifierProvider(create: (context) => locator<GeneralConfigController>(),),
         ChangeNotifierProvider(create: (context) => locator<StatisticsController>(),),

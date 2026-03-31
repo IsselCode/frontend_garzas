@@ -263,7 +263,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                     ),
                                                     alignment: Alignment.centerLeft,
                                                   ),
-                                                  // Método de pago
+                                                  // Forma de pago
                                                   IsselPill(
                                                     color: colorScheme.surfaceContainer,
                                                     widget: Row(

@@ -6,13 +6,13 @@ import 'package:frontend_garzas/src/admin/clean/entities/general_config_entity.d
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
-import 'package:frontend_garzas/src/sales/clean/entities/client_entity.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../../commons/entities/client_entity.dart';
 import '../../../commons/text_back_button.dart';
 import '../../../inject_container.dart';
 
@@ -422,17 +422,17 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                     build: (format) {
                                       final config = _buildPreviewConfig(generalConfigController.generalConfigEntity!);
                                       final ticket = SellTicketEntity(
-                                        folio: 16383917445163345,
-                                        client: ClientEntity(
-                                          id: 1,
-                                          user: "Cliente de ejemplo",
-                                          phone: 6671234567,
-                                          galPricing: 2.5,
-                                          literPricing: 1.2,
-                                        ),
+                                        folio: "1839174451",
+                                        dispatchCode: "16383917445163345",
+                                        clientName: "Juan",
+                                        clientPhone: "6568794524",
+                                        total: 500,
+                                        amountPaid: 600,
+                                        changeAmount: 100,
                                         waterType: WaterType.potable,
                                         unitOfMeasurement: UnitOfMeasurement.gallons,
-                                        quantity: 3.5,
+                                        quantity: 125,
+                                        createdAt: DateTime.now()
                                       );
 
                                       return sellTicketPdf(config, ticket);

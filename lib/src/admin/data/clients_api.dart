@@ -9,12 +9,17 @@ class ClientsApi {
 
   final String _clientsPath = "/clients";
 
-  Future<List<ClientEntity>> listClients() async {
+  Future<List<ClientEntity>> listClients({int? limit}) async {
+
+    Map<String, dynamic>? queryParams;
+
+    if (limit != null) queryParams = {"limit": limit};
 
     try {
       List response = await apiClient.get(
         _clientsPath,
         authRequired: true,
+        queryParams:  queryParams
       );
 
       return response.map((e) => ClientEntity.fromMap(e),).toList();

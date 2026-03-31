@@ -152,9 +152,9 @@ class CashRegisterApi {
     }
   }
 
-  // No utilizar: No es necesario en este momento
+  // TODO: No utilizar: No es necesario en este momento
   // Future<List<SummaryEntity>> getSummaries() async {
-  //   throw AppException(message: "Método no implementado");
+  //   throw AppException(message: "Sin implementación");
   // }
 
 }

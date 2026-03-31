@@ -9,6 +9,7 @@ import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/data/cash_register_api.dart';
 import 'package:frontend_garzas/src/admin/views/home_admin_view.dart';
 import 'package:frontend_garzas/src/auth/data/auth_api.dart';
@@ -22,6 +23,7 @@ import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 class AuthController extends ChangeNotifier {
   final AuthApi authApi;
   final CashRegisterController cashRegisterController;
+  final GeneralConfigController generalConfigController;
   final AuthStorage authStorage;
   final ApiClient apiClient;
   final NavigationService navigationService;
@@ -30,6 +32,7 @@ class AuthController extends ChangeNotifier {
   AuthController({
     required this.authApi,
     required this.cashRegisterController,
+    required this.generalConfigController,
     required this.authStorage,
     required this.apiClient,
     required this.navigationService,
@@ -221,10 +224,14 @@ class AuthController extends ChangeNotifier {
 
    Future<void> _navigateToHome() async {
     final currentSession = _session;
+
     if (currentSession == null) {
       _navigateToSignIn();
       return;
     }
+
+    // Cargar configuraciones del negocio
+    await generalConfigController.loadGeneralConfig();
 
     switch (currentSession.role) {
       case AppRole.admin:

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
-import 'package:frontend_garzas/src/sales/clean/enums/enums.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/sales/controllers/order_controller.dart';
 import 'package:frontend_garzas/src/sales/views/generate_ticket_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -10,8 +10,12 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../../commons/text_back_button.dart';
+import '../../../core/app/consts.dart';
 import '../../../core/services/regex_service.dart';
 import '../../../inject_container.dart';
+import '../../admin/clean/enums/enums.dart';
+import '../../admin/clean/widgets/config_garza_container.dart';
+import '../clean/widgets/select_payment_method_sale_widget.dart';
 
 class FinishOrderView extends StatelessWidget {
 
@@ -56,13 +60,13 @@ class FinishOrderView extends StatelessWidget {
                         Text("Cliente", style: textTheme.titleMedium,),
                         IsselTextFormField(
                           hintText: "Nombre del cliente",
-                          controller: TextEditingController(text: orderController.selectedClient?.user),
+                          controller: TextEditingController(text: orderController.selectedClient?.name),
                           readOnly: true,
                         ),
                         Text("Tipo de agua", style: textTheme.titleMedium,),
                         IsselTextFormField(
                           hintText: "Tipo de agua",
-                          controller: TextEditingController(text: WaterType.fromTabSwitcher(orderController.state).display),
+                          controller: TextEditingController(text: WaterType.fromTabSwitcher(orderController.state).dp),
                           readOnly: true,
                         ),
                         Text("Litros a vender", style: textTheme.titleMedium),
@@ -91,6 +95,29 @@ class FinishOrderView extends StatelessWidget {
                           spacing: 30,
                           children: [
                             Text("Termina tu venta", style: textTheme.displaySmall?.copyWith(color: colorScheme.onPrimary),),
+
+                            Row(
+                              spacing: 10,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SelectPaymentMethodSaleWidget(
+                                  image: AppAssets.cash,
+                                  selected: orderController.paymentMethod == PaymentMethod.cash,
+                                  onTap: () => orderController.paymentMethod = PaymentMethod.cash,
+                                ),
+                                SelectPaymentMethodSaleWidget(
+                                  image: AppAssets.card,
+                                  selected: orderController.paymentMethod == PaymentMethod.card,
+                                  onTap: () => orderController.paymentMethod = PaymentMethod.card,
+                                ),
+                                SelectPaymentMethodSaleWidget(
+                                  image: AppAssets.check,
+                                  selected: orderController.paymentMethod == PaymentMethod.check,
+                                  onTap: () => orderController.paymentMethod = PaymentMethod.check,
+                                ),
+                              ],
+                            ),
+
                             Flex(
                               direction: Axis.vertical,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +181,7 @@ class FinishOrderView extends StatelessWidget {
 
   void createSell(BuildContext context) async {
     OrderController orderController = context.read();
-    CtrlResponse response = await orderController.createSell();
+    CtrlResponse<SaleEntity> response = await orderController.createSell();
 
     if (response.success){
       NavigationService navigationService = locator();
