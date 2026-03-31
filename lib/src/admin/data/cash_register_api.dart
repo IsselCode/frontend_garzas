@@ -1,8 +1,8 @@
-import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/summary_entity.dart';
+import 'package:frontend_garzas/src/sales/clean/entities/active_cut_summary_entity.dart';
 
 class CashRegisterApi {
   final ApiClient apiClient;
@@ -13,7 +13,7 @@ class CashRegisterApi {
   final String _cashRegisterByDateRangePath = "/cash-register/range";
   final String _cashRegisterOpenPath = "/cash-register/open";
   final String _activeCashRegisterPath = "/cash-register/active";
-  // final String _activeCashRegisterSummaryPath = "/cash-register/summary";
+  final String _activeCashRegisterSummaryPath = "/cash-register/summary";
   String _cashRegisterSummaryById(int id) => "/cash-register/$id/summary";
   final String _cashRegisterClosePath = "/cash-register/close";
 
@@ -76,9 +76,14 @@ class CashRegisterApi {
 
     try {
 
-      Map<String, dynamic> response = await apiClient.get(
+      Map<String, dynamic> body = {
+        "opening_amount": openingAmount,
+      };
+
+      Map<String, dynamic> response = await apiClient.post(
         _cashRegisterOpenPath,
         authRequired: true,
+        body: body
       );
 
       return CashRegisterEntity.fromMap(response);
@@ -90,15 +95,33 @@ class CashRegisterApi {
 
   }
 
-  Future<CashRegisterEntity> active() async {
+  Future<CashRegisterEntity?> active() async {
     try {
 
       Map<String, dynamic> response = await apiClient.get(
-        _cashRegisterOpenPath,
+        _activeCashRegisterPath,
         authRequired: true,
       );
 
+      if (response.isEmpty) return null;
+
       return CashRegisterEntity.fromMap(response);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+  }
+
+  Future<ActiveCutSummaryEntity> activeCutSummary() async {
+    try {
+
+      Map<String, dynamic> response = await apiClient.get(
+        _activeCashRegisterSummaryPath,
+        authRequired: true,
+      );
+
+      return ActiveCutSummaryEntity.fromMap(response);
     } on AppException {
       rethrow;
     } catch (e) {
@@ -116,7 +139,7 @@ class CashRegisterApi {
       };
 
       Map<String, dynamic> response = await apiClient.post(
-        _cashRegisterOpenPath,
+        _cashRegisterClosePath,
         authRequired: true,
         body: body
       );

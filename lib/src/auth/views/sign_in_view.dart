@@ -128,6 +128,6 @@ class SignInView extends StatelessWidget {
       return;
     }
 
-    authController.navigateToHome();
+    await authController.navigateToHome();
   }
 }

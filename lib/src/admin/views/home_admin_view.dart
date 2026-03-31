@@ -55,7 +55,7 @@ class HomeAdminView extends StatelessWidget {
 
                 IsselActionBox(
                   title: "Cortes",
-                  asset: AppAssets.users,
+                  asset: AppAssets.cashRegister,
                   onTap: () => navigationService.navigateTo(CashRegisterView()),
                   height: 230,
                   width: 200,

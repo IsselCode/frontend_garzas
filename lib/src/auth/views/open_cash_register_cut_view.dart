@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
+import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/regex_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
+import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -67,11 +69,11 @@ class OpenCashRegisterCutView extends StatelessWidget {
                             hintText: "Cantidad inicial",
                             height: 60,
                             inputFormatters: [RegexService.positiveNumberFormatter],
-                            validator: (value) => RegexService.usernameValidator(value),
+                            validator: (value) => RegexService.positiveNumberValidator(value),
                           ),
                           IsselButton(
                             text: "Abrir corte",
-                            onTap: () => signIn(context),
+                            onTap: () => openCut(context),
                           ),
                         ],
                       ),
@@ -87,32 +89,26 @@ class OpenCashRegisterCutView extends StatelessWidget {
     );
   }
 
-  void signIn(BuildContext context) async {
+  void openCut(BuildContext context) async {
     if (!formKey.currentState!.validate()) {
       return;
     }
 
-    // context.loaderOverlay.show();
-
+    context.loaderOverlay.show();
     CashRegisterController cashRegisterController = context.read();
-    // CtrlResponse response = await authController.signIn(
-    //   quantity.text
-    // );
-
+    CtrlResponse response = await cashRegisterController.openCut(double.parse(quantity.text));
     if (!context.mounted) {
       return;
     }
+    context.loaderOverlay.hide();
 
-    // context.loaderOverlay.hide();
-
-    // if (!response.success) {
-    //   ToastService toastService = locator();
-    //   toastService.error(
-    //     response.message ?? "No fue posible iniciar sesi\u00f3n",
-    //   );
-    //   return;
-    // }
-
-    // authController.navigateToHome();
+    NavigationService navigationService = locator();
+    ToastService toastService = locator();
+    if (response.success) {
+      navigationService.pushAndRemoveUntil(HomeSalesView());
+    }
+    if (!response.success) {
+      toastService.error(response.message ?? "No fue posible iniciar sesi\u00f3n",);
+    }
   }
 }

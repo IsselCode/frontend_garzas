@@ -5,6 +5,7 @@ import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
+import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
@@ -14,6 +15,7 @@ import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/auth/views/open_cash_register_cut_view.dart';
 import 'package:frontend_garzas/src/auth/views/splash_view.dart';
+import 'package:frontend_garzas/src/sales/clean/dialogs/close_cut_dialog.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -67,6 +69,9 @@ class MyApp extends StatelessWidget {
       child: Consumer<TitleBarController>(
         builder: (context, controller, child) {
           NavigationService navigationService = locator();
+          CashRegisterController cashRegisterController = locator();
+          AuthController authController = context.read();
+
           return GlobalLoaderOverlay(
             child: ToastificationWrapper(
               child: MaterialApp(
@@ -86,6 +91,7 @@ class MyApp extends StatelessWidget {
                 ],
                 navigatorKey: navigationService.navigatorKey,
                 builder: (context, child) {
+
                   return Stack(
                     children: [
                       child!,
@@ -123,6 +129,7 @@ class MyApp extends StatelessWidget {
                             ),
                           ),
                           actions: [
+                            if (authController.session != null && authController.session!.role == AppRole.seller)
                             IsselWindowCaptionAction(
                               icon: Icon(Icons.print_outlined),
                               onPressed: () {
@@ -136,6 +143,19 @@ class MyApp extends StatelessWidget {
                                 );
                               },
                             ),
+                            if (authController.session != null && authController.session!.role == AppRole.seller && cashRegisterController.openCash)
+                            IsselWindowCaptionAction(
+                                icon: Icon(Icons.money, color: Colors.blue,),
+                                onPressed: () {
+                                  authController.session!.role == AppRole.seller;
+                                  final dialogContext = navigationService.navigatorKey.currentContext;
+                                  if (dialogContext == null) return;
+                                  showDialog(
+                                    context: dialogContext,
+                                    builder: (context) => CloseCutDialog(),
+                                  );
+                                },
+                              ),
                             IsselWindowCaptionAction(
                               icon: Icon(Icons.exit_to_app, color: Colors.red,),
                               onPressed: () {
@@ -153,7 +173,7 @@ class MyApp extends StatelessWidget {
                     ],
                   );
                 },
-                home: OpenCashRegisterCutView(),
+                home: SplashView(),
               ),
             ),
           );

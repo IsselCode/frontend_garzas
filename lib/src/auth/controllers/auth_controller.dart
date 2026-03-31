@@ -6,17 +6,22 @@ import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
+import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
+import 'package:frontend_garzas/src/admin/data/cash_register_api.dart';
 import 'package:frontend_garzas/src/admin/views/home_admin_view.dart';
 import 'package:frontend_garzas/src/auth/data/auth_api.dart';
 import 'package:frontend_garzas/src/auth/data/auth_storage.dart';
 import 'package:frontend_garzas/src/auth/models/auth_session.dart';
+import 'package:frontend_garzas/src/auth/views/open_cash_register_cut_view.dart';
 import 'package:frontend_garzas/src/auth/views/sign_in_view.dart';
 import 'package:frontend_garzas/src/dispatch/views/home_dispatch_view.dart';
 import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 
 class AuthController extends ChangeNotifier {
   final AuthApi authApi;
+  final CashRegisterController cashRegisterController;
   final AuthStorage authStorage;
   final ApiClient apiClient;
   final NavigationService navigationService;
@@ -24,6 +29,7 @@ class AuthController extends ChangeNotifier {
 
   AuthController({
     required this.authApi,
+    required this.cashRegisterController,
     required this.authStorage,
     required this.apiClient,
     required this.navigationService,
@@ -64,7 +70,7 @@ class AuthController extends ChangeNotifier {
 
       await _setSession(session, persist: true);
 
-      return CtrlResponse(success: true, message: 'Inicio de sesion exitoso');
+      return CtrlResponse(success: true, message: 'Inicio de sesion exitoso', element: session);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     } catch (e) {
@@ -93,7 +99,7 @@ class AuthController extends ChangeNotifier {
 
       if (!storedSession.isExpired && !storedSession.shouldRefreshSoon) {
         await _setSession(storedSession, persist: false);
-        _navigateToHome();
+        await _navigateToHome();
         return CtrlResponse(success: true);
       }
 
@@ -119,8 +125,8 @@ class AuthController extends ChangeNotifier {
     _navigateToSignIn();
   }
 
-  void navigateToHome() {
-    _navigateToHome();
+  Future<void> navigateToHome() async {
+    await _navigateToHome();
   }
 
   Future<CtrlResponse> _performRefresh({
@@ -213,7 +219,7 @@ class AuthController extends ChangeNotifier {
     });
   }
 
-  void _navigateToHome() {
+   Future<void> _navigateToHome() async {
     final currentSession = _session;
     if (currentSession == null) {
       _navigateToSignIn();
@@ -228,7 +234,7 @@ class AuthController extends ChangeNotifier {
         navigationService.pushAndRemoveUntil(const HomeDispatchView());
         return;
       case AppRole.seller:
-        navigationService.pushAndRemoveUntil(const HomeSalesView());
+        await navigateToOpenCashRegisterCut();
         return;
     }
   }
@@ -242,4 +248,23 @@ class AuthController extends ChangeNotifier {
     _isLoading = value;
     notifyListeners();
   }
+
+  Future<void> navigateToOpenCashRegisterCut() async {
+
+    try {
+
+      bool response = await cashRegisterController.active();
+
+      if (response) {
+        navigationService.pushAndRemoveUntil(HomeSalesView());
+      } else {
+        navigationService.pushAndRemoveUntil(OpenCashRegisterCutView());
+      }
+
+    } on AppException catch(e) {
+      // TODO: IMPLEMENTAR ERROR
+    }
+
+  }
+
 }

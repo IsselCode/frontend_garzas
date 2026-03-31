@@ -44,6 +44,21 @@ class RegexService {
   static bool isValidPositiveNumber(String value) => positiveNumberPattern.hasMatch(value);
   static bool isValidSignedNumber(String value) => negativeNumberPattern.hasMatch(value);
   static bool isValidPhone(String value) => phonePattern.hasMatch(value);
+
+  // Validators
+  static String? positiveNumberValidator(String? value) {
+    final text = value?.trim() ?? '';
+
+    if (text.isEmpty) {
+      return 'El valor es obligatorio';
+    }
+
+    if (!isValidPositiveNumber(text)) {
+      return "Valor no válido";
+    }
+
+    return null;
+  }
   static String? usernameValidator(String? value) {
     final text = value?.trim() ?? '';
 
