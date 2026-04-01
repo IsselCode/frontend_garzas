@@ -159,7 +159,7 @@ class OrderController extends ChangeNotifier {
   Future<CtrlResponse<SaleEntity>> createSell() async {
 
     try {
-      Printer? printer = printerService.selectedPrinter;
+      Printer? printer = await printerService.getSelectedPrinter();
       if (printer == null){
         return CtrlResponse(success: false, message: "No hay ninguna impresora seleccionada");
       }
@@ -185,7 +185,7 @@ class OrderController extends ChangeNotifier {
 
   Future<void> printTicket() async {
     ToastService toastService = locator();
-    Printer? printer = printerService.selectedPrinter;
+    Printer? printer = await printerService.getSelectedPrinter();
     if (printer == null){
       toastService.error("No hay ninguna impresora seleccionada");
       return ;

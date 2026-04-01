@@ -14,6 +14,11 @@ class PrinterService {
 
   Printer? selectedPrinter;
 
+  Future<Printer?> getSelectedPrinter() async {
+    if (selectedPrinter != null) return selectedPrinter;
+    return getPrinter();
+  }
+
   Future<({Printer? printer, List<dynamic> printers})> loadData() async {
     final printer = await getPrinter();
     final printers = await listPrinters();

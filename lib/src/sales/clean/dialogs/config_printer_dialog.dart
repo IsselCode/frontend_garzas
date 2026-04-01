@@ -91,7 +91,10 @@ class _ConfigPrinterDialogState extends State<ConfigPrinterDialog> {
                       value: printerService.selectedPrinter ?? data.printer,
                       color: colorScheme.surfaceContainer,
                       hintText: "Selecciona una impresora",
-                      onChanged: (p0) => setState(() {printerService.setPrinter(p0 as Printer);}),
+                      onChanged: (p0) async {
+                        await printerService.setPrinter(p0 as Printer);
+                        setState(() {});
+                      },
                     );
 
                   },
