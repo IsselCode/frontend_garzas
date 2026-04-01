@@ -85,8 +85,10 @@ class FinishOrderView extends StatelessWidget {
 
               //* Right
               Expanded(
-                  child: ColoredBox(
-                    color: colorScheme.primary,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.primaryToSecondary
+                    ),
                     child: Center(
                       child: SizedBox(
                         width: 320,

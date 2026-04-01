@@ -1,39 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_garzas/src/sales/controllers/order_controller.dart';
+import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
+import 'package:frontend_garzas/src/dispatch/views/home_dispatch_view.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/app/consts.dart';
 import '../../../core/services/navigation_service.dart';
 import '../../../inject_container.dart';
-import 'home_sales_view.dart';
 
-class GenerateTicketView extends StatefulWidget {
+class GenerateTicketDispatchView extends StatefulWidget {
 
-  const GenerateTicketView._();
-
-  static Widget init(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: context.read<OrderController>(),
-      child: GenerateTicketView._(),
-    );
-  }
-
-
+  const GenerateTicketDispatchView();
 
   @override
-  State<GenerateTicketView> createState() => _GenerateTicketViewState();
+  State<GenerateTicketDispatchView> createState() => _GenerateTicketDispatchViewState();
 }
 
-class _GenerateTicketViewState extends State<GenerateTicketView> {
+class _GenerateTicketDispatchViewState extends State<GenerateTicketDispatchView> {
 
   @override
   void initState() {
     super.initState();
-    OrderController orderController = context.read();
-    orderController.printTicket().then((value) {
+    DispatchController dispatchController = context.read();
+    dispatchController.printTicket().then((value) {
       NavigationService navigationService = locator();
-      navigationService.pushAndRemoveUntil(HomeSalesView());
+      navigationService.pushAndRemoveUntil(HomeDispatchView());
     },);
   }
 

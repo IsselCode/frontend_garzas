@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 class AppLotties {
   static const _baseLotties = "assets/lotties";
 
-  static const scan = "$_baseLotties/scan.json"; // https://lottiefiles.com/es/free-animation/document-ocr-scan-xjHvcgGQ7G
-  static const glass_water = "$_baseLotties/glass_water.json"; // https://lottiefiles.com/free-animation/water-KjMVMduwqB
-  static const water_indicator = "$_baseLotties/water_indicator.json"; // https://lottiefiles.com/free-animation/water-KjMVMduwqB
+  static const scan =
+      "$_baseLotties/scan.json"; // https://lottiefiles.com/es/free-animation/document-ocr-scan-xjHvcgGQ7G
+  static const glass_water =
+      "$_baseLotties/glass_water.json"; // https://lottiefiles.com/free-animation/water-KjMVMduwqB
+  static const water_indicator =
+      "$_baseLotties/water_indicator.json"; // https://lottiefiles.com/free-animation/water-KjMVMduwqB
 }
 
 class AppAssets {
-
   static const _baseImages = "assets/images";
 
   static const logo = "$_baseImages/logo.png";
@@ -30,7 +32,6 @@ class AppAssets {
 }
 
 class AppColors {
-
   static const darkBackground = Color(0xff0F101B);
   static const darkBackSurface = Color(0xff272832);
   static const lightBackground = Color(0xffE5ECF4);
@@ -42,7 +43,15 @@ class AppColors {
   static const red = Colors.red;
 
   static const primary = Color(0xff0F52FF);
+  static const secondary = Color(0xff1A3A9F);
   static const darkPrimary = Color(0xff0046ff);
-  static const secondary = Color(0xff2860f0);
+}
 
+class AppGradients {
+  static const primaryToSecondary = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [AppColors.primary, AppColors.secondary],
+    stops: [0.10, 0.85],
+  );
 }

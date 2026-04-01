@@ -1,4 +1,3 @@
-import 'package:frontend_garzas/commons/entities/client_entity.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/config_garza_entity.dart';
@@ -11,12 +10,17 @@ class GarzasApi {
 
   final String _garzasPath = "/settings/garzas";
 
-  Future<List<ConfigGarzaEntity>> listGarzas() async {
+  Future<List<ConfigGarzaEntity>> listGarzas({WaterType? waterType}) async {
 
     try {
+
+      Map<String, dynamic>? queryParams;
+      if (waterType != null) queryParams = {"water_type": waterType.name};
+
       List response = await apiClient.get(
         _garzasPath,
         authRequired: true,
+        queryParams: queryParams
       );
 
       return response.map((e) => ConfigGarzaEntity.fromMap(e),).toList();

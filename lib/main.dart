@@ -15,6 +15,7 @@ import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/auth/views/open_cash_register_cut_view.dart';
 import 'package:frontend_garzas/src/auth/views/splash_view.dart';
+import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/close_cut_dialog.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => locator<ConfigGarzasController>(),),
         ChangeNotifierProvider(create: (context) => locator<GeneralConfigController>(),),
         ChangeNotifierProvider(create: (context) => locator<StatisticsController>(),),
+        ChangeNotifierProvider(create: (context) => locator<DispatchController>(),),
       ],
       child: Consumer<TitleBarController>(
         builder: (context, controller, child) {
@@ -128,7 +130,7 @@ class MyApp extends StatelessWidget {
                             ),
                           ),
                           actions: [
-                            if (authController.session != null && authController.session!.role == AppRole.seller)
+                            if (authController.session != null && authController.session!.role != AppRole.admin)
                             IsselWindowCaptionAction(
                               icon: Icon(Icons.print_outlined),
                               onPressed: () {

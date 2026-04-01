@@ -4,6 +4,7 @@ import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/statistics_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
+import 'package:frontend_garzas/src/dispatch/entities/dispatch_validate_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 
 class SalesApi {
@@ -15,6 +16,9 @@ class SalesApi {
   final String _salesQuotePath = "/sales/quote";
   final String _salesByDateRangePath = "/sales/range";
   final String _getMonthlyPaymentTotalsPath = "/sales/monthly-payment-totals";
+
+  String _dispatchValidatePath(String code) => "/sales/$code/dispatch/validate";
+  String _dispatchPath(String code) => "/sales/$code/dispatch";
 
   Future<List<SaleEntity>> listSales() async {
 
@@ -117,6 +121,29 @@ class SalesApi {
       _salesPath,
       authRequired: true,
       body: dto.toJson()
+    );
+
+    return SaleEntity.fromMap(response);
+
+  }
+
+  // Dispatch
+  Future<DispatchValidateEntity> validateDispatch(String barcode) async {
+
+    Map<String, dynamic> response = await apiClient.get(
+        _dispatchValidatePath(barcode),
+        authRequired: true,
+    );
+
+    return DispatchValidateEntity.fromMap(response);
+
+  }
+
+  Future<SaleEntity> dispatch(String barcode) async {
+
+    Map<String, dynamic> response = await apiClient.post(
+      _dispatchPath(barcode),
+      authRequired: true,
     );
 
     return SaleEntity.fromMap(response);

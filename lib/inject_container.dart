@@ -20,6 +20,7 @@ import 'package:frontend_garzas/src/admin/data/users_api.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/auth/data/auth_api.dart';
 import 'package:frontend_garzas/src/auth/data/auth_storage.dart';
+import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -49,6 +50,7 @@ Future<void> injectContainer() async {
   // controllers
   locator.registerLazySingleton(() => CashRegisterController(cashRegisterApi: locator()));
   locator.registerLazySingleton(() => GeneralConfigController(generalApi: locator()));
+  locator.registerLazySingleton(() => DispatchController(salesApi: locator(), garzasApi: locator(), generalConfigController: locator(), printerService: locator()));
 
   locator.registerLazySingleton(
     () => AuthController(

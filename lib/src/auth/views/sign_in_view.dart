@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/regex_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
@@ -70,8 +71,10 @@ class SignInView extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ColoredBox(
-              color: colorScheme.primary,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: AppGradients.primaryToSecondary
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 30,

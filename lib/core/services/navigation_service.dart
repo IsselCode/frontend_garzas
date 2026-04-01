@@ -4,13 +4,13 @@ class NavigationService {
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  void navigateTo(Widget route) {
-    navigatorKey.currentState?.push(
+  Future<T?> navigateTo<T>(Widget route) {
+    return navigatorKey.currentState?.push<T>(
       MaterialPageRoute(
         builder: (context) => route,
         settings: RouteSettings(name: route.runtimeType.toString()),
       )
-    );
+    ) ?? Future.value(null);
   }
 
   void pushReplacement(Widget route) {
