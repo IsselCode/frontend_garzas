@@ -77,7 +77,9 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
 
     _isNavigating = false;
     _requestScannerFocus();
-    print("VOLDIMOS");
+
+    // TODO: VERIFICAR SI SE PUEDE LIMPIAR EL CONTROLADOR DE DESPACHO
+    print("SE NAVEGÓ HASTA ESTA VISTA DESPUES DEL TICKET");
   }
 
   @override

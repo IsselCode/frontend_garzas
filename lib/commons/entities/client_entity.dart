@@ -7,18 +7,18 @@ class ClientEntity extends Equatable {
   final String name;
   final String phone;
   final double potableGalPricing;
-  final double potableLiterPricing;
+  final double potableM3Pricing;
   final double pozoGalPricing;
-  final double pozoLiterPricing;
+  final double pozoM3Pricing;
   final DateTime createdAt;
 
   ClientEntity({
     required this.name,
     required this.phone,
     required this.potableGalPricing,
-    required this.potableLiterPricing,
+    required this.potableM3Pricing,
     required this.pozoGalPricing,
-    required this.pozoLiterPricing,
+    required this.pozoM3Pricing,
     required this.createdAt
   });
 
@@ -27,9 +27,9 @@ class ClientEntity extends Equatable {
       name: map["name"],
       phone: map["phone"],
       potableGalPricing: map["potable_gal_pricing"],
-      potableLiterPricing: map["potable_liter_pricing"],
+      potableM3Pricing: map["potable_m3_pricing"],
       pozoGalPricing: map["pozo_gal_pricing"],
-      pozoLiterPricing: map["pozo_liter_pricing"],
+      pozoM3Pricing: map["pozo_m3_pricing"],
       createdAt: DateTime.parse(map["created_at"]),
     );
   }

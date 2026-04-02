@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 class Indicator extends StatelessWidget {
 
-  final double potableLiters;
+  final double potableM3;
   final double potableGallons;
-  final double pozoLiters;
+  final double pozoM3;
   final double pozoGallons;
 
   const Indicator({
     super.key,
-    required this.potableLiters,
+    required this.potableM3,
     required this.potableGallons,
-    required this.pozoLiters,
+    required this.pozoM3,
     required this.pozoGallons
   });
 
@@ -47,7 +47,7 @@ class Indicator extends StatelessWidget {
                     spacing: 5,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text("Litros: \$$potableLiters"),
+                      Text("Metros Cubicos: \$$potableM3"),
                       Text("Galones: \$$potableGallons"),
                     ],
                   ),
@@ -70,7 +70,7 @@ class Indicator extends StatelessWidget {
                     spacing: 5,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text("Litros: \$$pozoLiters"),
+                      Text("Metros Cubicos: \$$pozoM3"),
                       Text("Galones: \$$pozoGallons"),
                     ],
                   ),

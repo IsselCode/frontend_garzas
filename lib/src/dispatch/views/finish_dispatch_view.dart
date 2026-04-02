@@ -56,7 +56,7 @@ class FinishDispatchView extends StatelessWidget {
                           controller: TextEditingController(text: unit.dp),
                           readOnly: true,
                         ),
-                        Text("Cantidad en ${unit == UnitOfMeasurement.liters ? "Litros" : "Galones"}", style: textTheme.titleMedium,),
+                        Text("Cantidad en ${unit == UnitOfMeasurement.cubic_meters ? "Metros Cubicos" : "Galones"}", style: textTheme.titleMedium,),
                         IsselTextFormField(
                           hintText: "Nombre del cliente",
                           controller: TextEditingController(text: dispatchController.dispatchValidate!.quantity.toString()),

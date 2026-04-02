@@ -133,7 +133,7 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Litro: \$${client.potableLiterPricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("M3: \$${client.potableM3Pricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
                                 Text("Galón: \$${client.potableGalPricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
                               ],
                             ),
@@ -145,7 +145,7 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Litro: \$${client.pozoLiterPricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("M3: \$${client.pozoM3Pricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
                                 Text("Galón: \$${client.pozoGalPricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
                               ],
                             ),

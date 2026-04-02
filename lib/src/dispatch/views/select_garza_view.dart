@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
-import 'package:frontend_garzas/commons/issel_carousel_test.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/config_garza_entity.dart';
@@ -83,7 +82,7 @@ class _SelectGarzaViewState extends State<SelectGarzaView> {
                           PointerDeviceKind.mouse,
                         },
                       ),
-                      child: IsselCarouselTest(
+                      child: IsselCarousel(
                         onTap: (index) => selectGarza(garzas[index]),
                         height: 350,
                         itemCount: garzas.length,
@@ -102,7 +101,6 @@ class _SelectGarzaViewState extends State<SelectGarzaView> {
                                 const SizedBox(height: 20,),
                                 Text(garza.title, style: textTheme.titleLarge,),
                                 Text(garza.garzaType.dp, style: textTheme.bodyLarge,),
-                                Text(garza.unitOfMeasurement.dp, style: textTheme.bodyLarge,),
                               ],
                             ),
                           );

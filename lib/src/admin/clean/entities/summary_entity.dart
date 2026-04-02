@@ -8,14 +8,14 @@ int _getValue(PaymentMethod method, WaterType water, UnitOfMeasurement unit) {
       switch (water) {
         case WaterType.potable:
           switch (unit) {
-            case UnitOfMeasurement.liters:
+            case UnitOfMeasurement.cubic_meters:
               return 1;
             case UnitOfMeasurement.gallons:
               return 2;
           }
         case WaterType.pozo:
           switch (unit) {
-            case UnitOfMeasurement.liters:
+            case UnitOfMeasurement.cubic_meters:
               return 3;
             case UnitOfMeasurement.gallons:
               return 4;
@@ -25,14 +25,14 @@ int _getValue(PaymentMethod method, WaterType water, UnitOfMeasurement unit) {
       switch (water) {
         case WaterType.potable:
           switch (unit) {
-            case UnitOfMeasurement.liters:
+            case UnitOfMeasurement.cubic_meters:
               return 5;
             case UnitOfMeasurement.gallons:
               return 6;
           }
         case WaterType.pozo:
           switch (unit) {
-            case UnitOfMeasurement.liters:
+            case UnitOfMeasurement.cubic_meters:
               return 7;
             case UnitOfMeasurement.gallons:
               return 8;
@@ -42,14 +42,14 @@ int _getValue(PaymentMethod method, WaterType water, UnitOfMeasurement unit) {
       switch (water) {
         case WaterType.potable:
           switch (unit) {
-            case UnitOfMeasurement.liters:
+            case UnitOfMeasurement.cubic_meters:
               return 9;
             case UnitOfMeasurement.gallons:
               return 10;
           }
         case WaterType.pozo:
           switch (unit) {
-            case UnitOfMeasurement.liters:
+            case UnitOfMeasurement.cubic_meters:
               return 11;
             case UnitOfMeasurement.gallons:
               return 12;

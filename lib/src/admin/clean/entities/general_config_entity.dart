@@ -19,9 +19,9 @@ class GeneralConfigEntity extends Equatable {
   String businessAddress;
   String extraInfo1;
   String extraInfo2;
-  double potableLiterPricing;
+  double potableM3Pricing;
   double potableGalPricing;
-  double pozoLiterPricing;
+  double pozoM3Pricing;
   double pozoGalPricing;
 
   GeneralConfigEntity({
@@ -42,9 +42,9 @@ class GeneralConfigEntity extends Equatable {
     required this.businessAddress,
     required this.extraInfo1,
     required this.extraInfo2,
-    required this.potableLiterPricing,
+    required this.potableM3Pricing,
     required this.potableGalPricing,
-    required this.pozoLiterPricing,
+    required this.pozoM3Pricing,
     required this.pozoGalPricing,
   });
 
@@ -67,9 +67,9 @@ class GeneralConfigEntity extends Equatable {
       businessAddress: map['business_address'],
       extraInfo1: map['extra_info_1'],
       extraInfo2: map['extra_info_2'],
-      potableLiterPricing: map["potable_liter_pricing"],
+      potableM3Pricing: map["potable_m3_pricing"],
       potableGalPricing: map["potable_gal_pricing"],
-      pozoLiterPricing: map["pozo_liter_pricing"],
+      pozoM3Pricing: map["pozo_m3_pricing"],
       pozoGalPricing: map["pozo_gal_pricing"],
     );
   }
@@ -92,9 +92,9 @@ class GeneralConfigEntity extends Equatable {
     String? businessAddress,
     String? extraInfo1,
     String? extraInfo2,
-    double? potableLiterPricing,
+    double? potableM3Pricing,
     double? potableGalPricing,
-    double? pozoLiterPricing,
+    double? pozoM3Pricing,
     double? pozoGalPricing,
   }) {
     return GeneralConfigEntity(
@@ -115,9 +115,9 @@ class GeneralConfigEntity extends Equatable {
       businessAddress: businessAddress ?? this.businessAddress,
       extraInfo1: extraInfo1 ?? this.extraInfo1,
       extraInfo2: extraInfo2 ?? this.extraInfo2,
-      potableLiterPricing: potableLiterPricing ?? this.potableLiterPricing,
+      potableM3Pricing: potableM3Pricing ?? this.potableM3Pricing,
       potableGalPricing: potableGalPricing ?? this.potableGalPricing,
-      pozoLiterPricing: pozoLiterPricing ?? this.pozoLiterPricing,
+      pozoM3Pricing: pozoM3Pricing ?? this.pozoM3Pricing,
       pozoGalPricing: pozoGalPricing ?? this.pozoGalPricing,
     );
   }
@@ -141,9 +141,9 @@ class GeneralConfigEntity extends Equatable {
       'business_address': businessAddress,
       'extra_info_1': extraInfo1,
       'extra_info_2': extraInfo2,
-      "potable_liter_pricing": potableLiterPricing,
+      "potable_m3_pricing": potableM3Pricing,
       "potable_gal_pricing": potableGalPricing,
-      "pozo_liter_pricing": pozoLiterPricing,
+      "pozo_m3_pricing": pozoM3Pricing,
       "pozo_gal_pricing": pozoGalPricing,
     };
   }
@@ -167,9 +167,9 @@ class GeneralConfigEntity extends Equatable {
     businessAddress,
     extraInfo1,
     extraInfo2,
-    potableLiterPricing,
+    potableM3Pricing,
     potableGalPricing,
-    pozoLiterPricing,
+    pozoM3Pricing,
     pozoGalPricing,
   ];
 

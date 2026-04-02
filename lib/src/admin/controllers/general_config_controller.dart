@@ -99,15 +99,15 @@ class GeneralConfigController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> updatePrices(double potableGalPricing, double potableLiterPricing, double pozoGalPricing, double pozoLiterPricing) async {
+  Future<CtrlResponse> updatePrices(double potableGalPricing, double potableM3Pricing, double pozoGalPricing, double pozoM3Pricing) async {
 
     GeneralConfigEntity previousConfig = generalConfigEntity!;
 
     GeneralConfigEntity newConfig = generalConfigEntity!.copyWith(
       potableGalPricing: potableGalPricing,
-      potableLiterPricing: potableLiterPricing,
+      potableM3Pricing: potableM3Pricing,
       pozoGalPricing: pozoGalPricing,
-      pozoLiterPricing: pozoLiterPricing
+      pozoM3Pricing: pozoM3Pricing
     );
 
     if (newConfig == previousConfig) {

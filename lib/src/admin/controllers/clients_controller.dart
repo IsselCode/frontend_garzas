@@ -54,11 +54,11 @@ class ClientsController extends ChangeNotifier {
 
   }
 
-  Future<CtrlResponse> createClient(String name, String phone, double potableLiterPricing, double potableGallonPricing, double pozoLiterPricing, double pozoGallonPricing) async {
+  Future<CtrlResponse> createClient(String name, String phone, double potableM3Pricing, double potableGallonPricing, double pozoM3Pricing, double pozoGallonPricing) async {
 
     try {
 
-      ClientEntity tempClient = await clientsApi.createClient(name.trim(), phone, potableGallonPricing, potableLiterPricing, pozoGallonPricing, pozoLiterPricing);
+      ClientEntity tempClient = await clientsApi.createClient(name.trim(), phone, potableGallonPricing, potableM3Pricing, pozoGallonPricing, pozoM3Pricing);
       allClients.insert(0, tempClient);
       showedClients = allClients;
       notifyListeners();
@@ -69,10 +69,10 @@ class ClientsController extends ChangeNotifier {
 
   }
 
-  Future<CtrlResponse> updateClientByPhone(String clientPhone, String name, String newPhone, double potableLiterPricing, double potableGallonPricing, double pozoLiterPricing, double pozoGallonPricing) async {
+  Future<CtrlResponse> updateClientByPhone(String clientPhone, String name, String newPhone, double potableM3Pricing, double potableGallonPricing, double pozoM3Pricing, double pozoGallonPricing) async {
 
     try {
-      ClientEntity tempClient = await clientsApi.updateClientByPhone(clientPhone, name.trim(), newPhone, potableGallonPricing, potableLiterPricing, pozoGallonPricing, pozoLiterPricing);
+      ClientEntity tempClient = await clientsApi.updateClientByPhone(clientPhone, name.trim(), newPhone, potableGallonPricing, potableM3Pricing, pozoGallonPricing, pozoM3Pricing);
       int tempIndexClient = allClients.indexWhere((element) => element.phone == clientPhone,);
       allClients[tempIndexClient] = tempClient;
       showedClients = allClients;

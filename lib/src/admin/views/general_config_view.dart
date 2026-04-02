@@ -33,9 +33,9 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   TextEditingController extraInfo2Ctrl = TextEditingController();
 
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
-  double potableLiterPricing = 1;
+  double potableM3Pricing = 1;
   double potableGallonPricing = 1;
-  double pozoLiterPricing = 1;
+  double pozoM3Pricing = 1;
   double pozoGallonPricing = 1;
   PageController pageController = PageController();
 
@@ -62,9 +62,9 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     extraInfo1Ctrl.text = config.extraInfo1;
     extraInfo2Ctrl.text = config.extraInfo2;
     potableGallonPricing = config.potableGalPricing;
-    potableLiterPricing = config.potableLiterPricing;
+    potableM3Pricing = config.potableM3Pricing;
     pozoGallonPricing = config.pozoGalPricing;
-    pozoLiterPricing = config.pozoLiterPricing;
+    pozoM3Pricing = config.pozoM3Pricing;
   }
 
   @override
@@ -256,11 +256,11 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                               children: [
                                                 IsselStepperField(
                                                   height: 50,
-                                                  title: "Litro",
-                                                  onChanged: (value) => potableLiterPricing = value,
+                                                  title: "M3",
+                                                  onChanged: (value) => potableM3Pricing = value,
                                                   maxValue: 10000,
                                                   minValue: 0,
-                                                  initValue: potableLiterPricing,
+                                                  initValue: potableM3Pricing,
                                                   backColor: colorScheme.surfaceContainer,
                                                   counterColor: colorScheme.surface,
                                                 ),
@@ -281,11 +281,11 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                               children: [
                                                 IsselStepperField(
                                                   height: 50,
-                                                  title: "Litro",
-                                                  onChanged: (value) => pozoLiterPricing = value,
+                                                  title: "M3",
+                                                  onChanged: (value) => pozoM3Pricing = value,
                                                   maxValue: 10000,
                                                   minValue: 0,
-                                                  initValue: pozoLiterPricing,
+                                                  initValue: pozoM3Pricing,
                                                   backColor: colorScheme.surfaceContainer,
                                                   counterColor: colorScheme.surface,
                                                 ),
@@ -519,7 +519,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     GeneralConfigController controller = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await controller.updatePrices(potableGallonPricing, potableLiterPricing, pozoGallonPricing, pozoLiterPricing);
+    CtrlResponse response = await controller.updatePrices(potableGallonPricing, potableM3Pricing, pozoGallonPricing, pozoM3Pricing);
     if (!mounted) return;
     context.loaderOverlay.hide();
 

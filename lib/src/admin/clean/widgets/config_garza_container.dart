@@ -46,20 +46,20 @@ enum WaterType {
 
 enum UnitOfMeasurement {
   gallons(dp: "Galones", abbr: "gal"),
-  liters(dp: "Litros", abbr: "L");
+  cubic_meters(dp: "Metros Cubicos", abbr: "m3");
 
   final String dp;
   final String abbr;
   const UnitOfMeasurement({required this.dp, required this.abbr});
 
-  static UnitOfMeasurement fromTabSwitcher(TabSwitcherAlignStates state) => state == TabSwitcherAlignStates.left ? UnitOfMeasurement.liters : UnitOfMeasurement.gallons;
+  static UnitOfMeasurement fromTabSwitcher(TabSwitcherAlignStates state) => state == TabSwitcherAlignStates.left ? UnitOfMeasurement.cubic_meters : UnitOfMeasurement.gallons;
 
   static UnitOfMeasurement fromString(String type) {
     switch (type) {
       case "gallons":
         return UnitOfMeasurement.gallons;
-      case "liters":
-        return UnitOfMeasurement.liters;
+      case "cubic_meters":
+        return UnitOfMeasurement.cubic_meters;
       default:
         throw AppException(message: "Tipo de medida inexistente");
     }
@@ -178,10 +178,10 @@ class ConfigGarzaContainer extends StatelessWidget {
                     ),
                     Expanded(
                       child: IsselPill(
-                        text: "Litros",
-                        textColor: unitOfMeasurement == UnitOfMeasurement.liters ? colorScheme.onPrimary : colorScheme.onSurface,
-                        color: unitOfMeasurement == UnitOfMeasurement.liters ? colorScheme.primary : colorScheme.surfaceContainer,
-                        onTap: () => onUnitOfMeasurement(UnitOfMeasurement.liters),
+                        text: "Metros Cubicos",
+                        textColor: unitOfMeasurement == UnitOfMeasurement.cubic_meters ? colorScheme.onPrimary : colorScheme.onSurface,
+                        color: unitOfMeasurement == UnitOfMeasurement.cubic_meters ? colorScheme.primary : colorScheme.surfaceContainer,
+                        onTap: () => onUnitOfMeasurement(UnitOfMeasurement.cubic_meters),
                       ),
                     ),
                   ],

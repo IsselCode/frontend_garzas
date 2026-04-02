@@ -138,27 +138,27 @@ class _StartOrderViewState extends State<StartOrderView> {
                                 Text("Selecciona el tipo de agua", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
                                 IsselTabSwitcher(
                                   state: orderController.stateUnit,
-                                  leftText: "Litros",
+                                  leftText: "Metros Cubicos",
                                   rightText: "Galones",
                                   onChanged: (value) => orderController.stateUnit = value,
                                 ),
                               ],
                             ),
 
-                            //* Cantidad de litros
+                            //* Cantidad de Metros Cubicos
                             Column(
                               spacing: 10,
                               children: [
-                                Text("Ingresa la cantidad a vender en litros", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
+                                Text("Ingresa la cantidad a vender en ${orderController.stateUnit == TabSwitcherAlignStates.left ? "M3" : "galones"} ", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
                                 IsselTextFormField(
-                                  hintText: "1000",
+                                  hintText: "5",
                                   controller: orderController.quantityController,
                                   textAlign: TextAlign.center,
                                   style: textTheme.titleLarge?.copyWith(color: colorScheme.primary),
                                   inputFormatters: [RegexService.positiveNumberFormatter],
                                   validator: (value) {
-                                    if (value == null) return "Ingresa la cantidad de litros a vender";
-                                    if (value.isEmpty) return "Ingresa la cantidad de litros a vender";
+                                    if (value == null) return "Ingresa la cantidad de Metros Cubicos a vender";
+                                    if (value.isEmpty) return "Ingresa la cantidad de Metros Cubicos a vender";
                                     if (int.tryParse(value)! <= 0) return "Ingresa un valor positivo";
                                     return null;
                                   },

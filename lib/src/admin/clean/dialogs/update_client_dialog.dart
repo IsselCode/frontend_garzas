@@ -31,9 +31,9 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
   TextEditingController name = TextEditingController();
   TextEditingController phone = TextEditingController();
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
-  double potableLiterPricing = 1;
+  double potableM3Pricing = 1;
   double potableGallonPricing = 1;
-  double pozoLiterPricing = 1;
+  double pozoM3Pricing = 1;
   double pozoGallonPricing = 1;
   PageController pageController = PageController();
 
@@ -43,9 +43,9 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
     name.text = widget.clientEntity.name;
     phone.text = widget.clientEntity.phone;
     potableGallonPricing = widget.clientEntity.potableGalPricing;
-    potableLiterPricing = widget.clientEntity.potableLiterPricing;
+    potableM3Pricing = widget.clientEntity.potableM3Pricing;
     pozoGallonPricing = widget.clientEntity.pozoGalPricing;
-    pozoLiterPricing = widget.clientEntity.pozoLiterPricing;
+    pozoM3Pricing = widget.clientEntity.pozoM3Pricing;
   }
 
   @override
@@ -125,11 +125,11 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
                     children: [
                       IsselStepperField(
                         height: 50,
-                        title: "Litro",
-                        onChanged: (value) => potableLiterPricing = value,
+                        title: "M3",
+                        onChanged: (value) => potableM3Pricing = value,
                         maxValue: 10000,
                         minValue: 0,
-                        initValue: potableLiterPricing,
+                        initValue: potableM3Pricing,
                         backColor: colorScheme.surfaceContainer,
                         counterColor: colorScheme.surface,
                       ),
@@ -150,11 +150,11 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
                     children: [
                       IsselStepperField(
                         height: 50,
-                        title: "Litro",
-                        onChanged: (value) => pozoLiterPricing = value,
+                        title: "M3",
+                        onChanged: (value) => pozoM3Pricing = value,
                         maxValue: 10000,
                         minValue: 0,
-                        initValue: pozoLiterPricing,
+                        initValue: pozoM3Pricing,
                         backColor: colorScheme.surfaceContainer,
                         counterColor: colorScheme.surface,
                       ),
@@ -193,7 +193,7 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
     ClientsController clientsController = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await clientsController.updateClientByPhone(widget.clientEntity.phone, name.text, phone.text, potableLiterPricing, potableGallonPricing, pozoLiterPricing, pozoGallonPricing);
+    CtrlResponse response = await clientsController.updateClientByPhone(widget.clientEntity.phone, name.text, phone.text, potableM3Pricing, potableGallonPricing, pozoM3Pricing, pozoGallonPricing);
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();

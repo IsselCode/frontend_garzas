@@ -130,7 +130,7 @@ class PieChart2State extends State<PieChartSample2> {
                   controller: pageController,
                   children: [
                     Indicator(
-                      potableLiters: widget.summaries
+                      potableM3: widget.summaries
                           .where((element) => element.value == 1)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
@@ -138,7 +138,7 @@ class PieChart2State extends State<PieChartSample2> {
                           .where((element) => element.value == 2)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
-                      pozoLiters: widget.summaries
+                      pozoM3: widget.summaries
                           .where((element) => element.value == 3)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
@@ -148,7 +148,7 @@ class PieChart2State extends State<PieChartSample2> {
                           .firstWhere((element) => true, orElse: () => 0),
                     ),
                     Indicator(
-                      potableLiters: widget.summaries
+                      potableM3: widget.summaries
                           .where((element) => element.value == 5)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
@@ -156,7 +156,7 @@ class PieChart2State extends State<PieChartSample2> {
                           .where((element) => element.value == 6)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
-                      pozoLiters: widget.summaries
+                      pozoM3: widget.summaries
                           .where((element) => element.value == 7)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
@@ -166,7 +166,7 @@ class PieChart2State extends State<PieChartSample2> {
                           .firstWhere((element) => true, orElse: () => 0),
                     ),
                     Indicator(
-                      potableLiters: widget.summaries
+                      potableM3: widget.summaries
                           .where((element) => element.value == 9)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
@@ -174,7 +174,7 @@ class PieChart2State extends State<PieChartSample2> {
                           .where((element) => element.value == 10)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),
-                      pozoLiters: widget.summaries
+                      pozoM3: widget.summaries
                           .where((element) => element.value == 11)
                           .map((e) => e.totalAmount)
                           .firstWhere((element) => true, orElse: () => 0),

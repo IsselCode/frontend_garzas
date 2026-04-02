@@ -42,15 +42,15 @@ class ClientsApi {
 
   }
 
-  Future<ClientEntity> createClient(String name, String phone, double potableGalPricing, double potableLiterPricing, double pozoGalPricing, double pozoLiterPricing) async {
+  Future<ClientEntity> createClient(String name, String phone, double potableGalPricing, double potableM3Pricing, double pozoGalPricing, double pozoM3Pricing) async {
 
     Map<String, dynamic> body = {
       "name": name,
       "phone": phone,
       "potable_gal_pricing": potableGalPricing,
-      "potable_liter_pricing": potableLiterPricing,
+      "potable_m3_pricing": potableM3Pricing,
       "pozo_gal_pricing": pozoGalPricing,
-      "pozo_liter_pricing": pozoLiterPricing,
+      "pozo_m3_pricing": pozoM3Pricing,
     };
 
     Map<String, dynamic> response = await apiClient.post(
@@ -71,15 +71,15 @@ class ClientsApi {
 
   }
 
-  Future<ClientEntity> updateClientByPhone(String clientPhone, String name, String newPhone, double potableGalPricing, double potableLiterPricing, double pozoGalPricing, double pozoLiterPricing) async {
+  Future<ClientEntity> updateClientByPhone(String clientPhone, String name, String newPhone, double potableGalPricing, double potableM3Pricing, double pozoGalPricing, double pozoM3Pricing) async {
 
     Map<String, dynamic> body = {
       "name": name,
       "phone": newPhone,
       "potable_gal_pricing": potableGalPricing,
-      "potable_liter_pricing": potableLiterPricing,
+      "potable_m3_pricing": potableM3Pricing,
       "pozo_gal_pricing": pozoGalPricing,
-      "pozo_liter_pricing": pozoLiterPricing,
+      "pozo_m3_pricing": pozoM3Pricing,
     };
 
     body.removeWhere((key, value) => value == null || (value is String && value.isEmpty));

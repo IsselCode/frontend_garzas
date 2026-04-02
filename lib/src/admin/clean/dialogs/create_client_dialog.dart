@@ -24,9 +24,9 @@ class _CreateUserPageState extends State<CreateClientDialog> {
   TextEditingController name = TextEditingController();
   TextEditingController phone = TextEditingController();
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
-  double potableLiterPricing = 1;
+  double potableM3Pricing = 1;
   double potableGallonPricing = 1;
-  double pozoLiterPricing = 1;
+  double pozoM3Pricing = 1;
   double pozoGallonPricing = 1;
   PageController pageController = PageController();
 
@@ -107,11 +107,11 @@ class _CreateUserPageState extends State<CreateClientDialog> {
                     children: [
                       IsselStepperField(
                         height: 50,
-                        title: "Litro",
-                        onChanged: (value) => potableLiterPricing = value,
+                        title: "M3",
+                        onChanged: (value) => potableM3Pricing = value,
                         maxValue: 10000,
                         minValue: 0,
-                        initValue: potableLiterPricing,
+                        initValue: potableM3Pricing,
                         backColor: colorScheme.surfaceContainer,
                         counterColor: colorScheme.surface,
                       ),
@@ -132,11 +132,11 @@ class _CreateUserPageState extends State<CreateClientDialog> {
                     children: [
                       IsselStepperField(
                         height: 50,
-                        title: "Litro",
-                        onChanged: (value) => pozoLiterPricing = value,
+                        title: "M3",
+                        onChanged: (value) => pozoM3Pricing = value,
                         maxValue: 10000,
                         minValue: 0,
-                        initValue: pozoLiterPricing,
+                        initValue: pozoM3Pricing,
                         backColor: colorScheme.surfaceContainer,
                         counterColor: colorScheme.surface,
                       ),
@@ -175,7 +175,7 @@ class _CreateUserPageState extends State<CreateClientDialog> {
     ClientsController clientsController = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await clientsController.createClient(name.text, phone.text, potableLiterPricing, potableGallonPricing, pozoLiterPricing, pozoGallonPricing);
+    CtrlResponse response = await clientsController.createClient(name.text, phone.text, potableM3Pricing, potableGallonPricing, pozoM3Pricing, pozoGallonPricing);
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();
