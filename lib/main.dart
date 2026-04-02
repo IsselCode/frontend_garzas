@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => locator<DispatchController>(),),
       ],
       child: Consumer<TitleBarController>(
-        builder: (context, controller, child) {
+        builder: (context, titleBarController, child) {
           NavigationService navigationService = locator();
           CashRegisterController cashRegisterController = locator();
           AuthController authController = context.read();
@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
               child: MaterialApp(
                 title: 'Flutter Demo',
                 debugShowCheckedModeBanner: false,
-                theme: controller.currentTheme,
+                theme: titleBarController.currentTheme,
                 locale: const Locale('es', 'MX'),
                 supportedLocales: const [
                   Locale('es', 'MX'),
@@ -93,6 +93,9 @@ class MyApp extends StatelessWidget {
                 navigatorKey: navigationService.navigatorKey,
                 builder: (context, child) {
 
+                  print("ROL DIFERENTE A ADMIN: ${authController.session?.role != AppRole.admin}");
+                  print("CORTE ABIERTO: ${cashRegisterController.openCash}");
+
                   return Stack(
                     children: [
                       child!,
@@ -106,8 +109,8 @@ class MyApp extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  controller.title.isNotEmpty
-                                      ? "¡Hola, ${controller.title}!"
+                                  titleBarController.title.isNotEmpty
+                                      ? "¡Hola, ${titleBarController.title}!"
                                       : "",
                                   style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(
@@ -118,8 +121,8 @@ class MyApp extends StatelessWidget {
                                 ),
                                 IsselToggle(
                                   onChanged: (value) =>
-                                      controller.toggleTheme(),
-                                  value: controller.isDarkMode,
+                                      titleBarController.toggleTheme(),
+                                  value: titleBarController.isDarkMode,
                                   height: 35,
                                   width: 45,
                                   backColor: Theme.of(

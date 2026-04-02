@@ -14,6 +14,7 @@ class UsersController extends ChangeNotifier {
     required this.usersApi,
   });
 
+  bool usersLoaded = false;
   List<UserEntity> allUsers = [];
   List<UserEntity> showedUsers = [];
 
@@ -52,12 +53,18 @@ class UsersController extends ChangeNotifier {
 
     try {
 
-      if (allUsers.isNotEmpty){
+      if (allUsers.isNotEmpty && usersLoaded){
         return CtrlResponse(success: true);
       }
 
       List<UserEntity> tempUsers = await usersApi.listUsers(query);
-      allUsers = tempUsers;
+
+      // Si ya hay usuarios, entonces agregar al final
+      if (allUsers.isNotEmpty) {
+        allUsers.addAll(tempUsers);
+      } else {
+        allUsers = tempUsers;
+      }
       showedUsers = tempUsers;
       notifyListeners();
 

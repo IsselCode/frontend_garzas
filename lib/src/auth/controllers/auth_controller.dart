@@ -242,6 +242,7 @@ class AuthController extends ChangeNotifier {
         return;
       case AppRole.seller:
         await navigateToOpenCashRegisterCut();
+        titleBarController.notifyListeners();
         return;
     }
   }

@@ -59,7 +59,7 @@ class FinishOrderView extends StatelessWidget {
                       children: [
                         Text("Cliente", style: textTheme.titleMedium,),
                         IsselTextFormField(
-                          hintText: "Nombre del cliente",
+                          hintText: "Publico general",
                           controller: TextEditingController(text: orderController.selectedClient?.name),
                           readOnly: true,
                         ),
@@ -120,6 +120,7 @@ class FinishOrderView extends StatelessWidget {
                               ],
                             ),
 
+                            if (orderController.paymentMethod != PaymentMethod.card)
                             Flex(
                               direction: Axis.vertical,
                               crossAxisAlignment: CrossAxisAlignment.start,
