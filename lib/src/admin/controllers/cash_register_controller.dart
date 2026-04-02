@@ -90,10 +90,10 @@ class CashRegisterController extends ChangeNotifier {
 
   }
 
-  Future<CtrlResponse> closeCut(double cash, double card, double check) async {
+  Future<CtrlResponse> closeCut(double cash, double card, double credit) async {
 
     try {
-      await cashRegisterApi.closeCut(cash, card, check);
+      await cashRegisterApi.closeCut(cash, card, credit);
       openCash = true;
       notifyListeners();
       return CtrlResponse(success: true);

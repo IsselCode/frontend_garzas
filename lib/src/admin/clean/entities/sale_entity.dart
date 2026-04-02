@@ -25,6 +25,12 @@ class SaleEntity extends Equatable {
   String? dispatchedByUid;
   String? dispatchedByUsername;
   DateTime createdAt;
+  double pendingAmount;
+  bool isPaid;
+  String? paidAt;
+  String? paidByUid;
+  String? paidByUsername;
+
 
   SaleEntity({
     required this.folio,
@@ -48,6 +54,11 @@ class SaleEntity extends Equatable {
     required this.dispatchedByUid,
     required this.dispatchedByUsername,
     required this.createdAt,
+    required this.pendingAmount,
+    required this.isPaid,
+    required this.paidAt,
+    required this.paidByUid,
+    required this.paidByUsername,
   });
 
   factory SaleEntity.fromMap(Map<String, dynamic> data) {
@@ -72,7 +83,12 @@ class SaleEntity extends Equatable {
       dispatchedAt: data["dispatched_at"],
       dispatchedByUid: data["dispatched_by_uid"],
       dispatchedByUsername: data["dispatched_by_username"],
-      createdAt: DateTime.parse(data["created_at"])
+      createdAt: DateTime.parse(data["created_at"]),
+      pendingAmount: data["pending_amount"],
+      isPaid: data["is_paid"],
+      paidAt: data["paid_at"],
+      paidByUid: data["paid_by_uid"],
+      paidByUsername: data["paid_by_username"],
     );
   }
 
@@ -99,6 +115,11 @@ class SaleEntity extends Equatable {
       "dispatched_by_uid": dispatchedByUid,
       "dispatched_by_username": dispatchedByUsername,
       "created_at": createdAt,
+      "pending_amount": pendingAmount,
+      "is_paid": isPaid,
+      "paid_at": paidAt,
+      "paid_by_uid": paidByUid,
+      "paid_by_username": paidByUsername,
     };
   }
 

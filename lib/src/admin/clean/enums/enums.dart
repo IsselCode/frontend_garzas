@@ -30,7 +30,7 @@ enum PaymentMethod {
 
   cash(label: "Efectivo", image: AppAssets.cash),
   card(label: "Tarjeta", image: AppAssets.card),
-  check(label: "Cheque", image: AppAssets.check);
+  credit(label: "Credito", image: AppAssets.credit);
 
   final String label;
   final String image;
@@ -42,8 +42,8 @@ enum PaymentMethod {
         return PaymentMethod.cash;
       case "card":
         return PaymentMethod.card;
-      case "check":
-        return PaymentMethod.check;
+      case "credit":
+        return PaymentMethod.credit;
       default:
         throw AppException(message: "Método no identificado");
     }

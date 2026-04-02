@@ -113,14 +113,14 @@ class FinishOrderView extends StatelessWidget {
                                   onTap: () => orderController.paymentMethod = PaymentMethod.card,
                                 ),
                                 SelectPaymentMethodSaleWidget(
-                                  image: AppAssets.check,
-                                  selected: orderController.paymentMethod == PaymentMethod.check,
-                                  onTap: () => orderController.paymentMethod = PaymentMethod.check,
+                                  image: AppAssets.credit,
+                                  selected: orderController.paymentMethod == PaymentMethod.credit,
+                                  onTap: () => orderController.paymentMethod = PaymentMethod.credit,
                                 ),
                               ],
                             ),
 
-                            if (orderController.paymentMethod != PaymentMethod.card)
+                            if (orderController.paymentMethod == PaymentMethod.cash)
                             Flex(
                               direction: Axis.vertical,
                               crossAxisAlignment: CrossAxisAlignment.start,

@@ -6,14 +6,14 @@ class StatisticsEntity extends Equatable {
   DateTime monthEnd;
   double cashTotal;
   double cardTotal;
-  double checkTotal;
+  double creditTotal;
 
   StatisticsEntity({
     required this.monthStart,
     required this.monthEnd,
     required this.cashTotal,
     required this.cardTotal,
-    required this.checkTotal
+    required this.creditTotal
   });
 
   factory StatisticsEntity.fromMap(Map<String, dynamic> data) {
@@ -22,11 +22,11 @@ class StatisticsEntity extends Equatable {
       monthEnd: DateTime.parse(data["month_end"]),
       cashTotal: data["cash_total"],
       cardTotal: data["card_total"],
-      checkTotal: data["check_total"]
+      creditTotal: data["credit_total"]
     );
   }
 
   @override
-  List<Object?> get props => [monthStart, monthEnd, cashTotal, cardTotal, checkTotal];
+  List<Object?> get props => [monthStart, monthEnd, cashTotal, cardTotal, creditTotal];
 
 }

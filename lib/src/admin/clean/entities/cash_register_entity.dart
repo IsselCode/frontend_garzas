@@ -16,10 +16,10 @@ class CashRegisterEntity extends Equatable {
   CashRegisterStatus status;
   double cashTotal;
   double cardTotal;
-  double checkTotal;
+  double creditTotal;
   double? declaredCashTotal;
   double? declaredCardTotal;
-  double? declaredCheckTotal;
+  double? declaredCreditTotal;
 
   CashRegisterEntity({
     required this.id,
@@ -33,10 +33,10 @@ class CashRegisterEntity extends Equatable {
     required this.status,
     required this.cashTotal,
     required this.cardTotal,
-    required this.checkTotal,
+    required this.creditTotal,
     required this.declaredCashTotal,
     required this.declaredCardTotal,
-    required this.declaredCheckTotal,
+    required this.declaredCreditTotal,
   });
 
   factory CashRegisterEntity.fromMap(Map<String, dynamic> data) {
@@ -52,14 +52,14 @@ class CashRegisterEntity extends Equatable {
       status: CashRegisterStatus.fromString(data["status"]),
       cashTotal: data["cash_total"],
       cardTotal: data["card_total"],
-      checkTotal: data["check_total"],
+      creditTotal: data["credit_total"],
       declaredCashTotal: data["declared_cash_total"],
       declaredCardTotal: data["declared_card_total"],
-      declaredCheckTotal: data["declared_check_total"],
+      declaredCreditTotal: data["declared_credit_total"],
     );
   }
 
   @override
-  List<Object?> get props => [id, openedByUid, closedByUid, cashTotal, cardTotal, checkTotal];
+  List<Object?> get props => [id, openedByUid, closedByUid, cashTotal, cardTotal, creditTotal];
 
 }

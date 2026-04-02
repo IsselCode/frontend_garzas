@@ -38,7 +38,7 @@ int _getValue(PaymentMethod method, WaterType water, UnitOfMeasurement unit) {
               return 8;
           }
       }
-    case PaymentMethod.check:
+    case PaymentMethod.credit:
       switch (water) {
         case WaterType.potable:
           switch (unit) {

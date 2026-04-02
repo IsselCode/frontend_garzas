@@ -148,6 +148,8 @@ class OrderController extends ChangeNotifier {
       String? customerPhone = selectedClient?.phone;
 
       double response = await salesApi.quotSale(waterType, unitOfMeasurement, quantity, customerPhone);
+
+      print(response);
       total = response;
       return CtrlResponse(success: true, element: response);
     } on AppException catch (e) {

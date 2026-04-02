@@ -499,9 +499,9 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                           ),
                           Expanded(
                             child: StatisticGarzaContainer(
-                              asset: AppAssets.check,
+                              asset: AppAssets.credit,
                               title: "Cheque",
-                              total: statistics.statistics!.checkTotal,
+                              total: statistics.statistics!.creditTotal,
                             ),
                           ),
                         ],

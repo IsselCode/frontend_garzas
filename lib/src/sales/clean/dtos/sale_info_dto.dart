@@ -50,7 +50,7 @@ class SaleInfoDto extends Equatable {
       throw AppException(message: "El tipo de pago es obligatorio");
     }
 
-    if (paymentMethod == PaymentMethod.card) {
+    if (paymentMethod != PaymentMethod.cash) {
       amountPaid = 0;
     }
 

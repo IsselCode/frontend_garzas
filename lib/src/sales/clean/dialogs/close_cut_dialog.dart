@@ -31,7 +31,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController cashCtrl = TextEditingController();
   final TextEditingController cardCtrl = TextEditingController();
-  final TextEditingController checkCtrl = TextEditingController();
+  final TextEditingController creditCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -186,7 +186,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                       spacing: 10,
                                       children: [
                                         Image.asset(AppAssets.cash, width: 24, height: 24,),
-                                        Text(cut.checkTotal.toStringAsFixed(2))
+                                        Text(cut.creditTotal.toStringAsFixed(2))
                                       ],
                                     ),
                                     color: colorScheme.surfaceContainer,
@@ -239,7 +239,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                   Expanded(
                                     child: IsselTextFormField(
                                       fillColor: colorScheme.surfaceContainer,
-                                      controller: checkCtrl,
+                                      controller: creditCtrl,
                                       hintText: "Cheques",
                                       height: 50,
                                       inputFormatters: [RegexService.positiveNumberFormatter],
@@ -277,7 +277,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                   CtrlResponse response = await cashRegisterController.closeCut(
                     double.parse(cashCtrl.text),
                     double.parse(cardCtrl.text),
-                    double.parse(checkCtrl.text)
+                    double.parse(creditCtrl.text)
                   );
 
                   context.loaderOverlay.hide();

@@ -33,10 +33,10 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   TextEditingController extraInfo2Ctrl = TextEditingController();
 
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
-  double potableM3Pricing = 1;
-  double potableGallonPricing = 1;
-  double pozoM3Pricing = 1;
-  double pozoGallonPricing = 1;
+  double potableM3Pricing = 0;
+  double potableGallonPricing = 0;
+  double pozoM3Pricing = 0;
+  double pozoGallonPricing = 0;
   PageController pageController = PageController();
 
   late Future<CtrlResponse> _loadGeneralConfig;

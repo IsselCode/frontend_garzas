@@ -109,10 +109,10 @@ class PieChart2State extends State<PieChartSample2> {
                   SelectPaymentMethodWidget(
                     color: colorScheme.onSurface.withAlpha(60),
                     splashColor: Colors.white,
-                    image: AppAssets.check,
-                    selected: paymentMethod == PaymentMethod.check,
+                    image: AppAssets.credit,
+                    selected: paymentMethod == PaymentMethod.credit,
                     onTap: () {
-                      paymentMethod = PaymentMethod.check;
+                      paymentMethod = PaymentMethod.credit;
                       pageController.animateToPage(
                         2,
                         duration: Duration(milliseconds: 250),
@@ -242,8 +242,8 @@ class PieChart2State extends State<PieChartSample2> {
         ),
         2 => PieChartSectionData(
           color: Colors.white,
-          value: widget.cut.checkTotal,
-          title: "\$${widget.cut.checkTotal.toStringAsFixed(2)}",
+          value: widget.cut.creditTotal,
+          title: "\$${widget.cut.creditTotal.toStringAsFixed(2)}",
           radius: radius,
           badgePositionPercentageOffset: 1.1,
           titlePositionPercentageOffset: 0.4,
