@@ -226,7 +226,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                     color: colorScheme.surfaceContainer,
                                                     padding: EdgeInsets.zero,
                                                     widget: Tooltip(
-                                                      message: sell.clientName != null ? "${sell.clientName}: ${sell.clientPhone}" : null,
+                                                      message: sell.clientName != null ? "${sell.clientName}: ${sell.clientPhone}" : "",
                                                       child: Container(
                                                         alignment: Alignment.centerLeft,
                                                         margin: EdgeInsets.symmetric(horizontal: 20,),

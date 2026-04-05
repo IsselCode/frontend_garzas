@@ -10,6 +10,7 @@ import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/credits_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => locator<GeneralConfigController>(),),
         ChangeNotifierProvider(create: (context) => locator<StatisticsController>(),),
         ChangeNotifierProvider(create: (context) => locator<DispatchController>(),),
+        ChangeNotifierProvider(create: (context) => locator<CreditsController>(),),
       ],
       child: Consumer<TitleBarController>(
         builder: (context, titleBarController, child) {

@@ -5,7 +5,6 @@ import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/config_garza_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/admin/data/garzas_api.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 
 import '../../../inject_container.dart';
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/src/admin/clean/dialogs/cuts_credits_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/users_dialog.dart';
 import 'package:frontend_garzas/src/admin/views/cash_register_view.dart';
-import 'package:frontend_garzas/src/admin/views/client_management_view.dart';
 import 'package:frontend_garzas/src/admin/views/clients_view.dart';
 import 'package:frontend_garzas/src/admin/views/config_garzas_view.dart';
+import 'package:frontend_garzas/src/admin/views/credits_view.dart';
 import 'package:frontend_garzas/src/admin/views/general_config_view.dart';
 import 'package:frontend_garzas/src/admin/views/reports_and_logs_view.dart';
 import 'package:frontend_garzas/src/admin/views/user_management_view.dart';
@@ -54,9 +55,9 @@ class HomeAdminView extends StatelessWidget {
                 ),
 
                 IsselActionBox(
-                  title: "Cortes",
+                  title: "Cortes y Creditos",
                   asset: AppAssets.cashRegister,
-                  onTap: () => navigationService.navigateTo(CashRegisterView()),
+                  onTap: () => openCutsCreditsDialog(context),
                   height: 230,
                   width: 200,
                 ),
@@ -100,6 +101,24 @@ class HomeAdminView extends StatelessWidget {
       navigationService.navigateTo(UserManagementView());
     } else {
       navigationService.navigateTo(ClientsView());
+    }
+
+  }
+
+  void openCutsCreditsDialog(BuildContext context) async {
+
+    CutsCreditsType? type = await showDialog<CutsCreditsType>(
+      context: context,
+      builder: (context) => CutsCreditsDialog(),
+    );
+
+    if (type == null) return;
+
+    NavigationService navigationService = locator();
+    if (type == CutsCreditsType.cuts) {
+      navigationService.navigateTo(CashRegisterView());
+    } else {
+      navigationService.navigateTo(CreditsView());
     }
 
   }

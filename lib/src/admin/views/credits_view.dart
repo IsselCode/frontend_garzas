@@ -3,6 +3,8 @@ import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/pie_widget.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/credits_controller.dart';
+import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -14,23 +16,23 @@ import '../../../core/services/toast_service.dart';
 import '../../../inject_container.dart';
 import '../clean/dialogs/date_range_dialog.dart';
 
-class CashRegisterView extends StatefulWidget {
-  const CashRegisterView({super.key});
+class CreditsView extends StatefulWidget {
+  const CreditsView({super.key});
 
   @override
-  State<CashRegisterView> createState() => _CashRegisterViewState();
+  State<CreditsView> createState() => _CashRegisterViewState();
 }
 
-class _CashRegisterViewState extends State<CashRegisterView> {
+class _CashRegisterViewState extends State<CreditsView> {
 
-  late Future<CtrlResponse> _getCuts;
+  late Future<CtrlResponse> _getCredits;
   DateTimeRange? _salesDateRange;
 
   @override
   void initState() {
     super.initState();
-    CashRegisterController cashRegisterController = context.read();
-    _getCuts = cashRegisterController.getCashRegisterCuts();
+    CreditsController creditsController = context.read();
+    _getCredits = creditsController.getCredits();
   }
 
   @override
@@ -41,7 +43,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     TextTheme textTheme = theme.textTheme;
 
     // Controllers
-    CashRegisterController cashRegisterController = context.watch();
+    CreditsController creditsController = context.watch();
 
     return Scaffold(
       body: Padding(
@@ -74,7 +76,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                 children: [
                   // Left - Cuts
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
@@ -88,7 +90,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               // Titulo
-                              Text("Cortes", style: textTheme.titleLarge,),
+                              Text("Creditos", style: textTheme.titleLarge,),
                               // Rango de fecha
                               IsselPill(
                                 text: _formatSalesDateRange(),
@@ -99,7 +101,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                           ),
                           Expanded(
                             child: FutureBuilder(
-                              future: _getCuts,
+                              future: _getCredits,
                               builder: (context, snapshot) {
                             
                                 if (snapshot.connectionState == ConnectionState.waiting){
@@ -116,34 +118,42 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                                   return Center(child: Text(snapshot.data!.message!),);
                                 }
                             
-                                if (cashRegisterController.showedCashRegisterCuts.isEmpty) {
-                                  return Center(child: Text("No hay cortes disponibles"),);
+                                if (creditsController.showedCredits.isEmpty) {
+                                  return Center(child: Text("No hay creditos disponibles"),);
                                 }
                             
-                                List<CashRegisterEntity> cuts = cashRegisterController.showedCashRegisterCuts;
+                                List<CreditEntity> credits = creditsController.showedCredits;
                             
                                 return IsselTableWidget(
                                     color: colorScheme.surfaceContainer,
-                                    onTapRow: (index) => loadCutSummary(cuts[index]),
+                                    onTapRow: (index) => loadCreditPayments(credits[index]),
                                     header: IsselHeaderTable(
-                                      titleHeaders: ["Fecha", "Usuario", "Total"],
+                                      titleHeaders: ["Cliente", "Total", "Pagado", "Pendiente", "Fecha"],
                                       colorPills: colorScheme.surfaceContainer,
                                     ),
-                                    rows: cuts.map((cut) {
+                                    rows: credits.map((credit) {
                                       return IsselRowTable(
                                         cells: [
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: DateFormat("dd-MM-yy").format(cut.openedAt)
+                                            text: credit.clientPhone
                                           ),
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: cut.openedByUsername
+                                            text: credit.total.toStringAsFixed(2)
                                           ),
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: "\$${cut.creditTotal + cut.cardTotal + cut.cashTotal}"
-                                          )
+                                            text: credit.amountPaid.toStringAsFixed(2)
+                                          ),
+                                          IsselPill(
+                                            color: colorScheme.surface,
+                                            text: credit.salePendingAmount.toStringAsFixed(2)
+                                          ),
+                                          IsselPill(
+                                            color: colorScheme.surface,
+                                            text: DateFormat("dd-MM-yy").format(credit.createdAt)
+                                          ),
                                         ]
                                       );
                                     },).toList()
@@ -158,74 +168,45 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                   ),
                   // Right Summary
                   Expanded(
-                    flex: 3,
-                    child: cashRegisterController.selectedCut == null
+                    flex: 2,
+                    child: creditsController.creditPayments.isEmpty || creditsController.selectedCredit == null
                       ? Container(
-                        child: Center(child: Text("Selecciona un corte para ver información"),),
+                        child: Center(
+                          child: Text(creditsController.selectedCredit != null ? "No hay ningun pago" : "Selecciona un credito para ver información"),
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           color: colorScheme.surface
                         ),
                       )
-                      : Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: colorScheme.surface
+                      : IsselTableWidget(
+                      color: colorScheme.surfaceContainer,
+                      header: IsselHeaderTable(
+                        titleHeaders: ["Recibido por", "Método", "Cantidad", "Fecha"],
+                        colorPills: colorScheme.surfaceContainer,
                       ),
-                      padding: EdgeInsets.all(20),
-                      child: Column(
-                        spacing: 20,
-                        children: [
-                          // Summary
-                          PieChartSample2(
-                            cut: cashRegisterController.selectedCut!,
-                            summaries: cashRegisterController.summaries,
-                          ),
-                          // Información
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Text("Información de apertura y cierre", style: textTheme.titleMedium,),
-                                  Row(
-                                    children: [
-                                      Expanded(child: IsselInfoField(title: "Abierto por", value: cashRegisterController.selectedCut!.openedByUsername)),
-                                      Expanded(child: IsselInfoField(title: "Fecha de apertura", value: DateFormat("dd-MM-yy hh:mm a").format(cashRegisterController.selectedCut!.openedAt)),),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(child: IsselInfoField(title: "Cerrado por", value: cashRegisterController.selectedCut!.closedByUsername ?? "N/A")),
-                                      Expanded(child: IsselInfoField(title: "Fecha de cierre", value: cashRegisterController.selectedCut!.closedAt != null ? DateFormat("dd-MM-yy hh:mm a").format(cashRegisterController.selectedCut!.closedAt!) : "N/A",)),
-                                    ],
-                                  ),
-                                  Text("Cantidades", style: textTheme.titleMedium,),
-                                  IsselInfoField(title: "Cantidad inicial", value: cashRegisterController.selectedCut!.openingAmount.toStringAsFixed(2)),
-                                  Row(
-                                    children: [
-                                      Expanded(child: IsselInfoField(title: "Efectivo", value: cashRegisterController.selectedCut!.cashTotal.toStringAsFixed(2))),
-                                      Expanded(child: IsselInfoField(title: "Declarado", value: cashRegisterController.selectedCut!.declaredCashTotal != null ? cashRegisterController.selectedCut!.declaredCashTotal!.toStringAsFixed(2) : "")),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(child: IsselInfoField(title: "Tarjeta", value: cashRegisterController.selectedCut!.cardTotal.toStringAsFixed(2))),
-                                      Expanded(child: IsselInfoField(title: "Declarado", value: cashRegisterController.selectedCut!.declaredCardTotal != null ? cashRegisterController.selectedCut!.declaredCardTotal!.toStringAsFixed(2) : "")),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(child: IsselInfoField(title: "Cheque", value: cashRegisterController.selectedCut!.creditTotal.toStringAsFixed(2))),
-                                      Expanded(child: IsselInfoField(title: "Declarado", value: cashRegisterController.selectedCut!.declaredCreditTotal != null ? cashRegisterController.selectedCut!.declaredCreditTotal!.toStringAsFixed(2) : "")),
-                                    ],
-                                  ),
-                                ],
+                      rows: creditsController.creditPayments.map((payment) {
+                        return IsselRowTable(
+                            cells: [
+                              IsselPill(
+                                color: colorScheme.surface,
+                                text: payment.receivedByUsername
                               ),
-                            ),
-                          )
-                        ],
-                      ),
+                              IsselPill(
+                                color: colorScheme.surface,
+                                text: payment.paymentMethod.label
+                              ),
+                              IsselPill(
+                                color: colorScheme.surface,
+                                text: payment.amount.toStringAsFixed(2)
+                              ),
+                              IsselPill(
+                                color: colorScheme.surface,
+                                text: DateFormat("dd-MM-yy").format(payment.createdAt)
+                              ),
+                            ]
+                        );
+                      },).toList()
                     ),
                   )
                 ],
@@ -247,7 +228,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
   }
 
   Future<void> _openSalesDateRangeDialog() async {
-    final CashRegisterController cashRegisterController = context.read();
+    final CreditsController creditsController = context.read();
     final ToastService toastService = locator();
     final DateRangeDialogResult? result =
     await showDialog<DateRangeDialogResult>(
@@ -262,7 +243,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     if (result == null) return;
 
     if (result.cleared) {
-      cashRegisterController.clearSalesDateRange();
+      creditsController.clearSalesDateRange();
       setState(() {
         _salesDateRange = null;
       });
@@ -271,13 +252,13 @@ class _CashRegisterViewState extends State<CashRegisterView> {
 
     if (result.range == null) return;
 
-    final CtrlResponse response = await cashRegisterController.getCutsByDateRange(
+    final CtrlResponse response = await creditsController.getCutsByDateRange(
       startDate: result.range!.start,
       endDate: result.range!.end,
     );
 
     if (response.success) {
-      toastService.success("Ventas filtradas correctamente");
+      toastService.success("Creditos filtrados correctamente");
     } else {
       toastService.error(
         response.message ?? "No se pudieron filtrar las ventas",
@@ -290,12 +271,12 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     });
   }
 
-  Future<void> loadCutSummary(CashRegisterEntity cut) async {
+  Future<void> loadCreditPayments(CreditEntity credit) async {
 
-    CashRegisterController cashRegisterController = context.read();
+    CreditsController creditsController = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await cashRegisterController.loadCutSummary(cut);
+    CtrlResponse response = await creditsController.loadCreditPayments(credit);
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();

@@ -1,5 +1,6 @@
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/credit_payment_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/statistics_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
@@ -23,6 +24,8 @@ class SalesApi {
 
   String _listPendingCreditSalesByClientPath(String phoneNumber) => "/sales/credit/by-client/$phoneNumber";
   String _createCreditPaymentPath(String folio) => "/sales/$folio/credit-payments";
+  String _listCreditPaymentsPath(String folio) => "/sales/$folio/credit-payments";
+  final String _getPendingCreditsPath = "/sales/credit/pending";
 
   Future<List<SaleEntity>> listSales() async {
 
@@ -155,6 +158,54 @@ class SalesApi {
   }
 
   // Credits
+  Future<List<CreditEntity>> getPendingCredits({DateTime? startDate, DateTime? endDate}) async {
+
+    try {
+
+      late dynamic start;
+      late dynamic end;
+      Map<String, dynamic>? queryParams;
+
+      if (startDate != null && endDate != null) {
+        start = startDate.toIso8601String().split("T").first;
+        end = endDate.toIso8601String().split("T").first;
+        queryParams = {"start_date": start, "end_date": end};
+      }
+
+
+      List response = await apiClient.get(
+        _getPendingCreditsPath,
+        authRequired: true,
+        queryParams: queryParams
+      );
+
+      return response.map((e) => CreditEntity.fromMap(e),).toList();
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+
+  }
+
+  Future<List<CreditPaymentEntity>> getCreditPayments(String folio) async {
+
+    try {
+
+      List response = await apiClient.get(
+        _listCreditPaymentsPath(folio),
+        authRequired: true,
+      );
+
+      return response.map((e) => CreditPaymentEntity.fromMap(e),).toList();
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+
+  }
+
   Future<List<CreditEntity>> listPendingCreditSalesByClient(String phoneNumber) async {
 
     try {
