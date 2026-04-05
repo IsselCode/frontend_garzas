@@ -122,37 +122,42 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                             widget: Text(client.name, maxLines: 1, overflow: TextOverflow.ellipsis,),
                             color: colorScheme.surfaceContainer,
                             alignment: Alignment.centerLeft,
+                            height: 60,
                           ),
                           IsselPill(
                             widget: Text(client.phone, maxLines: 1, overflow: TextOverflow.ellipsis,),
                             color: colorScheme.surfaceContainer,
+                            height: 60,
                             alignment: Alignment.centerLeft,
                           ),
                           IsselPill(
-                            widget: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            height: 60,
+                            widget: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("M3: ${client.potableM3Pricing != 0 ? "\$${client.potableM3Pricing}" : "n/a"}", maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                Text("Galón: ${client.potableGalPricing != 0 ? "\$${client.potableGalPricing}" : "n/a"}", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("Gal: ${client.potableGalPricing != 0 ? "\$${client.potableGalPricing}" : "n/a"}", maxLines: 1, overflow: TextOverflow.ellipsis,),
                               ],
                             ),
                             color: colorScheme.surfaceContainer,
                             alignment: Alignment.centerLeft,
                           ),
                           IsselPill(
-                            widget: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            height: 60,
+                            widget: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("M3: ${client.pozoM3Pricing != 0 ? "\$${client.pozoM3Pricing}" : "n/a" }", maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                Text("Galón: ${client.pozoGalPricing != 0 ? "\$${client.pozoGalPricing}" : "n/a" }", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("Gal: ${client.pozoGalPricing != 0 ? "\$${client.pozoGalPricing}" : "n/a" }", maxLines: 1, overflow: TextOverflow.ellipsis,),
                               ],
                             ),
                             color: colorScheme.surfaceContainer,
                             alignment: Alignment.centerLeft,
                           ),
                           IsselPill(
+                            height: 60,
                             widget: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               spacing: 5,
