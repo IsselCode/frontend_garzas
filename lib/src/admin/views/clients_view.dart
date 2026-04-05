@@ -133,8 +133,8 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("M3: \$${client.potableM3Pricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                Text("Galón: \$${client.potableGalPricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("M3: ${client.potableM3Pricing != 0 ? "\$${client.potableM3Pricing}" : "n/a"}", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("Galón: ${client.potableGalPricing != 0 ? "\$${client.potableGalPricing}" : "n/a"}", maxLines: 1, overflow: TextOverflow.ellipsis,),
                               ],
                             ),
                             color: colorScheme.surfaceContainer,
@@ -145,8 +145,8 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("M3: \$${client.pozoM3Pricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                Text("Galón: \$${client.pozoGalPricing}", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("M3: ${client.pozoM3Pricing != 0 ? "\$${client.pozoM3Pricing}" : "n/a" }", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text("Galón: ${client.pozoGalPricing != 0 ? "\$${client.pozoGalPricing}" : "n/a" }", maxLines: 1, overflow: TextOverflow.ellipsis,),
                               ],
                             ),
                             color: colorScheme.surfaceContainer,

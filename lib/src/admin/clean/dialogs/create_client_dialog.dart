@@ -4,6 +4,7 @@ import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/regex_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -24,11 +25,16 @@ class _CreateUserPageState extends State<CreateClientDialog> {
   TextEditingController name = TextEditingController();
   TextEditingController phone = TextEditingController();
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
-  double potableM3Pricing = 1;
-  double potableGallonPricing = 1;
-  double pozoM3Pricing = 1;
-  double pozoGallonPricing = 1;
+  double potableM3Pricing = 0;
+  double potableGallonPricing = 0;
+  double pozoM3Pricing = 0;
+  double pozoGallonPricing = 0;
   PageController pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
