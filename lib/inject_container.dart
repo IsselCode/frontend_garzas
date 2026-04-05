@@ -52,7 +52,6 @@ Future<void> injectContainer() async {
   locator.registerLazySingleton(() => CashRegisterController(cashRegisterApi: locator()));
   locator.registerLazySingleton(() => CreditsController(salesApi: locator()));
   locator.registerLazySingleton(() => GeneralConfigController(generalApi: locator()));
-  locator.registerLazySingleton(() => DispatchController(salesApi: locator(), garzasApi: locator(), generalConfigController: locator(), printerService: locator()));
 
   locator.registerLazySingleton(
     () => AuthController(
@@ -65,6 +64,14 @@ Future<void> injectContainer() async {
       titleBarController: locator(),
     ),
   );
+
+  locator.registerLazySingleton(() => DispatchController(
+    salesApi: locator(),
+    garzasApi: locator(),
+    generalConfigController: locator(),
+    printerService: locator(),
+    authController: locator()
+  ));
 
   locator.registerLazySingleton(() => UsersController(usersApi: locator()),);
   locator.registerLazySingleton(() => ClientsController(clientsApi: locator()),);

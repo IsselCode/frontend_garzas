@@ -7,6 +7,7 @@ import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/data/garzas_api.dart';
 import 'package:frontend_garzas/src/admin/data/sales_api.dart';
+import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/dispatch/entities/dispatch_validate_entity.dart';
 import 'package:printing/printing.dart';
 
@@ -20,12 +21,14 @@ class DispatchController extends ChangeNotifier {
   GarzasApi garzasApi;
   GeneralConfigController generalConfigController;
   PrinterService printerService;
+  AuthController authController;
 
   DispatchController({
     required this.salesApi,
     required this.garzasApi,
     required this.generalConfigController,
     required this.printerService,
+    required this.authController,
   });
 
   DispatchValidateEntity? dispatchValidate;
@@ -110,6 +113,7 @@ class DispatchController extends ChangeNotifier {
       changeAmount: _saleEntity!.changeAmount,
       dispatchCode: _saleEntity!.dispatchCode,
       createdAt: _saleEntity!.createdAt,
+      sellerName: authController.session!.displayName
     );
 
     // Para probar o guardar ticket en PC

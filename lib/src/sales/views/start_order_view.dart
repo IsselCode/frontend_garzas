@@ -20,7 +20,7 @@ class StartOrderView extends StatefulWidget {
 
   static Widget init(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => OrderController(salesApi: locator(), clientsApi: locator(), printerService: locator(), generalConfigController: context.read()),
+      create: (context) => OrderController(salesApi: locator(), clientsApi: locator(), printerService: locator(), generalConfigController: context.read(), authController: context.read()),
       builder: (context, child) => StartOrderView._(),
     );
   }

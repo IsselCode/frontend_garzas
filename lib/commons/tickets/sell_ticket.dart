@@ -18,6 +18,7 @@ class SellTicketEntity {
   double amountPaid;
   double changeAmount;
   String dispatchCode;
+  String sellerName;
   DateTime createdAt;
 
   SellTicketEntity({
@@ -32,6 +33,7 @@ class SellTicketEntity {
     required this.changeAmount,
     required this.dispatchCode,
     required this.createdAt,
+    required this.sellerName,
   });
 }
 
@@ -154,6 +156,17 @@ Future<Uint8List> sellTicketPdf(
                 font: fontText,
                 fontSize: 8,
               ),
+            ),
+            pw.Divider(),
+            pw.Text(
+              "Atendido por",
+              style: pw.TextStyle(font: fontText, fontSize: 8),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.Text(
+              sellTicketEntity.sellerName.split(" ").first,
+              style: pw.TextStyle(font: fontText, fontSize: 8),
+              textAlign: pw.TextAlign.center,
             ),
             pw.Divider(),
             if (extraInfo1.isNotEmpty) ...[

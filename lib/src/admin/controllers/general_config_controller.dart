@@ -19,6 +19,9 @@ class GeneralConfigController extends ChangeNotifier {
 
     try {
       if (generalConfigEntity != null) {
+        WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
+          notifyListeners();
+        },);
         return CtrlResponse(success: true);
       }
 

@@ -10,6 +10,7 @@ import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.d
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 import 'package:frontend_garzas/src/admin/data/sales_api.dart';
+import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -26,12 +27,14 @@ class OrderController extends ChangeNotifier {
   SalesApi salesApi;
   PrinterService printerService;
   GeneralConfigController generalConfigController;
+  AuthController authController;
 
   OrderController({
     required this.clientsApi,
     required this.salesApi,
     required this.printerService,
     required this.generalConfigController,
+    required this.authController,
   });
 
   TabSwitcherAlignStates _state = TabSwitcherAlignStates.left;
@@ -150,7 +153,6 @@ class OrderController extends ChangeNotifier {
 
       double response = await salesApi.quotSale(waterType, unitOfMeasurement, quantity, customerPhone);
 
-      print(response);
       total = response;
       return CtrlResponse(success: true, element: response);
     } on AppException catch (e) {
@@ -216,6 +218,7 @@ class OrderController extends ChangeNotifier {
       changeAmount: _saleEntity!.changeAmount,
       dispatchCode: _saleEntity!.dispatchCode,
       createdAt: _saleEntity!.createdAt,
+      sellerName: authController.session!.displayName
     );
 
     // Para probar o guardar ticket en PC

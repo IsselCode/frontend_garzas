@@ -45,6 +45,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   void initState() {
     super.initState();
     controller = context.read<GeneralConfigController>();
+
+    // Asignar actualizaciones
     controller.addListener(_syncControllers);
     businessNameCtrl.addListener(_refreshPreview);
     bussinessAddressCtrl.addListener(_refreshPreview);
@@ -346,7 +348,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                 ),
                                 Text("Información adicional", style: textTheme.titleSmall),
                                 IsselTextFormField(
-                                  hintText: "Garcias por su compra.",
+                                  hintText: "Gracias por su compra.",
                                   prefixIcon: Icons.info_outline,
                                   fillColor: colorScheme.surfaceContainer,
                                   controller: extraInfo1Ctrl,
@@ -432,7 +434,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                         waterType: WaterType.potable,
                                         unitOfMeasurement: UnitOfMeasurement.gallons,
                                         quantity: 125,
-                                        createdAt: DateTime.now()
+                                        createdAt: DateTime.now(),
+                                        sellerName: "Prueba"
                                       );
 
                                       return sellTicketPdf(config, ticket);
