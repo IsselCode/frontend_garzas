@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
@@ -136,23 +137,43 @@ class _CashRegisterViewState extends State<CreditsView> {
                                         cells: [
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: credit.clientPhone
+                                            widget: AutoSizeText(
+                                              credit.clientPhone,
+                                              style: textTheme.bodyMedium,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: credit.total.toStringAsFixed(2)
+                                            widget: AutoSizeText(
+                                              credit.total.toStringAsFixed(2),
+                                              style: textTheme.bodyMedium,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: credit.amountPaid.toStringAsFixed(2)
+                                            widget: AutoSizeText(
+                                              credit.amountPaid.toStringAsFixed(2),
+                                              style: textTheme.bodyMedium,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: credit.salePendingAmount.toStringAsFixed(2)
+                                            widget: AutoSizeText(
+                                              credit.salePendingAmount.toStringAsFixed(2),
+                                              style: textTheme.bodyMedium,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: DateFormat("dd-MM-yy").format(credit.createdAt)
+                                            widget: AutoSizeText(
+                                              DateFormat("dd-MM-yy").format(credit.createdAt),
+                                              style: textTheme.bodyMedium,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                         ]
                                       );
@@ -182,7 +203,7 @@ class _CashRegisterViewState extends State<CreditsView> {
                       : IsselTableWidget(
                       color: colorScheme.surfaceContainer,
                       header: IsselHeaderTable(
-                        titleHeaders: ["Recibido por", "Método", "Cantidad", "Fecha"],
+                        titleHeaders: ["Cobrador", "Método", "Cantidad", "Fecha"],
                         colorPills: colorScheme.surfaceContainer,
                       ),
                       rows: creditsController.creditPayments.map((payment) {
@@ -190,19 +211,35 @@ class _CashRegisterViewState extends State<CreditsView> {
                             cells: [
                               IsselPill(
                                 color: colorScheme.surface,
-                                text: payment.receivedByUsername
+                                widget: AutoSizeText(
+                                  payment.receivedByUsername,
+                                  style: textTheme.bodyMedium,
+                                  maxLines: 1,
+                                ),
                               ),
                               IsselPill(
                                 color: colorScheme.surface,
-                                text: payment.paymentMethod.label
+                                widget: AutoSizeText(
+                                  payment.paymentMethod.label,
+                                  style: textTheme.bodyMedium,
+                                  maxLines: 1,
+                                ),
                               ),
                               IsselPill(
                                 color: colorScheme.surface,
-                                text: payment.amount.toStringAsFixed(2)
+                                widget: AutoSizeText(
+                                  payment.amount.toStringAsFixed(2),
+                                  style: textTheme.bodyMedium,
+                                  maxLines: 1,
+                                ),
                               ),
                               IsselPill(
                                 color: colorScheme.surface,
-                                text: DateFormat("dd-MM-yy").format(payment.createdAt)
+                                widget: AutoSizeText(
+                                  DateFormat("dd-MM-yy").format(payment.createdAt),
+                                  style: textTheme.bodyMedium,
+                                  maxLines: 1,
+                                ),
                               ),
                             ]
                         );

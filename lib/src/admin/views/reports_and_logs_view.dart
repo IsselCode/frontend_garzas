@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
@@ -226,12 +227,12 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                     color: colorScheme.surfaceContainer,
                                                     padding: EdgeInsets.zero,
                                                     widget: Tooltip(
-                                                      message: sell.clientName != null ? "${sell.clientName}: ${sell.clientPhone}" : "",
+                                                      message: sell.clientName != null ? "${sell.clientName}: ${sell.clientPhone}" : "Público General",
                                                       child: Container(
                                                         alignment: Alignment.centerLeft,
                                                         margin: EdgeInsets.symmetric(horizontal: 20,),
                                                         child: Text(
-                                                          sell.clientName ?? "",
+                                                          sell.clientName ?? "Público General",
                                                           style: textTheme.labelMedium,
                                                           maxLines: 1,
                                                           overflow: TextOverflow.ellipsis,
@@ -243,7 +244,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                   // Cantidades
                                                   IsselPill(
                                                     color: colorScheme.surfaceContainer,
-                                                    widget: Text(
+                                                    widget: AutoSizeText(
                                                       "${sell.quantity} ${sell.unitOfMeasurement.abbr}",
                                                       style: textTheme.labelMedium,
                                                       maxLines: 1,
@@ -255,7 +256,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                   // Total
                                                   IsselPill(
                                                     color: colorScheme.surfaceContainer,
-                                                    widget: Text(
+                                                    widget: AutoSizeText(
                                                       "\$${sell.total.toStringAsFixed(2)}",
                                                       style: textTheme.labelMedium,
                                                       maxLines: 1,
@@ -291,9 +292,9 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                     widget: Tooltip(
                                                       message: DateFormat("dd/MM/yy hh:mm:ss a",).format(sell.createdAt),
                                                       child: Container(
-                                                        alignment: Alignment.centerLeft,
+                                                        alignment: Alignment.center,
                                                         margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: Text(
+                                                        child: AutoSizeText(
                                                           DateFormat("dd/MM/yy hh:mm:ss a",).format(sell.createdAt),
                                                           style: textTheme.labelMedium,
                                                           maxLines: 1,
@@ -412,7 +413,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                       child: Container(
                                                         alignment: Alignment.centerLeft,
                                                         margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: Text(
+                                                        child: AutoSizeText(
                                                           log.info,
                                                           style: textTheme.labelMedium,
                                                           maxLines: 1,

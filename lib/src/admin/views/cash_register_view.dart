@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
@@ -142,7 +145,11 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                                           ),
                                           IsselPill(
                                             color: colorScheme.surface,
-                                            text: "\$${cut.creditTotal + cut.cardTotal + cut.cashTotal}"
+                                            widget: AutoSizeText(
+                                              "\$${cut.creditTotal + cut.cardTotal + cut.cashTotal}",
+                                              style: textTheme.bodyMedium,
+                                              maxLines: 1,
+                                            ),
                                           )
                                         ]
                                       );
