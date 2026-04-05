@@ -106,21 +106,6 @@ class PieChart2State extends State<PieChartSample2> {
                       setState(() {});
                     },
                   ),
-                  SelectPaymentMethodWidget(
-                    color: colorScheme.onSurface.withAlpha(60),
-                    splashColor: Colors.white,
-                    image: AppAssets.credit,
-                    selected: paymentMethod == PaymentMethod.credit,
-                    onTap: () {
-                      paymentMethod = PaymentMethod.credit;
-                      pageController.animateToPage(
-                        2,
-                        duration: Duration(milliseconds: 250),
-                        curve: Curves.bounceInOut,
-                      );
-                      setState(() {});
-                    },
-                  ),
                 ],
               ),
               SizedBox(
@@ -130,58 +115,16 @@ class PieChart2State extends State<PieChartSample2> {
                   controller: pageController,
                   children: [
                     Indicator(
-                      potableM3: widget.summaries
-                          .where((element) => element.value == 1)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      potableGallons: widget.summaries
-                          .where((element) => element.value == 2)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      pozoM3: widget.summaries
-                          .where((element) => element.value == 3)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      pozoGallons: widget.summaries
-                          .where((element) => element.value == 4)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
+                      potableM3: widget.summaries.where((element) => element.value == 1).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      potableGallons: widget.summaries.where((element) => element.value == 2).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      pozoM3: widget.summaries.where((element) => element.value == 3).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      pozoGallons: widget.summaries.where((element) => element.value == 4).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
                     ),
                     Indicator(
-                      potableM3: widget.summaries
-                          .where((element) => element.value == 5)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      potableGallons: widget.summaries
-                          .where((element) => element.value == 6)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      pozoM3: widget.summaries
-                          .where((element) => element.value == 7)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      pozoGallons: widget.summaries
-                          .where((element) => element.value == 8)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                    ),
-                    Indicator(
-                      potableM3: widget.summaries
-                          .where((element) => element.value == 9)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      potableGallons: widget.summaries
-                          .where((element) => element.value == 10)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      pozoM3: widget.summaries
-                          .where((element) => element.value == 11)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
-                      pozoGallons: widget.summaries
-                          .where((element) => element.value == 12)
-                          .map((e) => e.totalAmount)
-                          .firstWhere((element) => true, orElse: () => 0),
+                      potableM3: widget.summaries.where((element) => element.value == 5).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      potableGallons: widget.summaries.where((element) => element.value == 6).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      pozoM3: widget.summaries.where((element) => element.value == 7).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      pozoGallons: widget.summaries.where((element) => element.value == 8).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
                     ),
                   ],
                 ),
@@ -206,7 +149,7 @@ class PieChart2State extends State<PieChartSample2> {
     final baseFontSize = chartSize * 0.057;
     final touchedFontSize = chartSize * 0.089;
 
-    return List.generate(3, (i) {
+    return List.generate(2, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? touchedFontSize : baseFontSize;
       final radius = isTouched ? touchedRadius : baseRadius;
@@ -230,20 +173,6 @@ class PieChart2State extends State<PieChartSample2> {
           color: Colors.blue,
           value: widget.cut.cardTotal,
           title: "\$${widget.cut.cardTotal.toStringAsFixed(2)}",
-          radius: radius,
-          badgePositionPercentageOffset: 1.1,
-          titlePositionPercentageOffset: 0.4,
-          titleStyle: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-            shadows: shadows,
-          ),
-        ),
-        2 => PieChartSectionData(
-          color: Colors.white,
-          value: widget.cut.creditTotal,
-          title: "\$${widget.cut.creditTotal.toStringAsFixed(2)}",
           radius: radius,
           badgePositionPercentageOffset: 1.1,
           titlePositionPercentageOffset: 0.4,

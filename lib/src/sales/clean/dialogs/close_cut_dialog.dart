@@ -173,20 +173,8 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                     widget: Row(
                                       spacing: 10,
                                       children: [
-                                        Image.asset(AppAssets.cash, width: 24, height: 24,),
+                                        Image.asset(AppAssets.card, width: 24, height: 24,),
                                         Text(cut.cardTotal.toStringAsFixed(2))
-                                      ],
-                                    ),
-                                    color: colorScheme.surfaceContainer,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: IsselPill(
-                                    widget: Row(
-                                      spacing: 10,
-                                      children: [
-                                        Image.asset(AppAssets.cash, width: 24, height: 24,),
-                                        Text(cut.creditTotal.toStringAsFixed(2))
                                       ],
                                     ),
                                     color: colorScheme.surfaceContainer,
@@ -231,16 +219,6 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                       fillColor: colorScheme.surfaceContainer,
                                       controller: cardCtrl,
                                       hintText: "Tarjeta",
-                                      height: 50,
-                                      inputFormatters: [RegexService.positiveNumberFormatter],
-                                      validator: (value) => RegexService.positiveNumberValidator(value),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: IsselTextFormField(
-                                      fillColor: colorScheme.surfaceContainer,
-                                      controller: creditCtrl,
-                                      hintText: "Credito",
                                       height: 50,
                                       inputFormatters: [RegexService.positiveNumberFormatter],
                                       validator: (value) => RegexService.positiveNumberValidator(value),

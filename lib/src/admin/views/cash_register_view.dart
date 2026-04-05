@@ -146,7 +146,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                                           IsselPill(
                                             color: colorScheme.surface,
                                             widget: AutoSizeText(
-                                              "\$${cut.creditTotal + cut.cardTotal + cut.cashTotal}",
+                                              "\$${cut.cardTotal + cut.cashTotal}",
                                               style: textTheme.bodyMedium,
                                               maxLines: 1,
                                             ),
@@ -219,12 +219,6 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                                     children: [
                                       Expanded(child: IsselInfoField(title: "Tarjeta", value: cashRegisterController.selectedCut!.cardTotal.toStringAsFixed(2))),
                                       Expanded(child: IsselInfoField(title: "Declarado", value: cashRegisterController.selectedCut!.declaredCardTotal != null ? cashRegisterController.selectedCut!.declaredCardTotal!.toStringAsFixed(2) : "")),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(child: IsselInfoField(title: "Cheque", value: cashRegisterController.selectedCut!.creditTotal.toStringAsFixed(2))),
-                                      Expanded(child: IsselInfoField(title: "Declarado", value: cashRegisterController.selectedCut!.declaredCreditTotal != null ? cashRegisterController.selectedCut!.declaredCreditTotal!.toStringAsFixed(2) : "")),
                                     ],
                                   ),
                                 ],
