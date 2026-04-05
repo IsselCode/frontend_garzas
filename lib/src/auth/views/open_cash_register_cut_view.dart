@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/regex_service.dart';
@@ -96,16 +97,20 @@ class OpenCashRegisterCutView extends StatelessWidget {
 
     context.loaderOverlay.show();
     CashRegisterController cashRegisterController = context.read();
+
     CtrlResponse response = await cashRegisterController.openCut(double.parse(quantity.text));
     if (!context.mounted) {
       return;
     }
+
     context.loaderOverlay.hide();
 
     NavigationService navigationService = locator();
     ToastService toastService = locator();
+    TitleBarController titleBarController = context.read();
     if (response.success) {
       navigationService.pushAndRemoveUntil(HomeSalesView());
+      titleBarController.notifyListeners();
     }
     if (!response.success) {
       toastService.error(response.message ?? "No fue posible iniciar sesi\u00f3n",);
