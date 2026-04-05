@@ -6,6 +6,7 @@ import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/dispatch/entities/dispatch_validate_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
+import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 
 class SalesApi {
   final ApiClient apiClient;
@@ -19,6 +20,9 @@ class SalesApi {
 
   String _dispatchValidatePath(String code) => "/sales/$code/dispatch/validate";
   String _dispatchPath(String code) => "/sales/$code/dispatch";
+
+  String _listPendingCreditSalesByClientPath(String phoneNumber) => "/sales/credit/by-client/$phoneNumber";
+  String _createCreditPaymentPath(String folio) => "/sales/$folio/credit-payments";
 
   Future<List<SaleEntity>> listSales() async {
 
@@ -150,5 +154,47 @@ class SalesApi {
 
   }
 
+  // Credits
+  Future<List<CreditEntity>> listPendingCreditSalesByClient(String phoneNumber) async {
+
+    try {
+
+      List response = await apiClient.get(
+        _listPendingCreditSalesByClientPath(phoneNumber),
+        authRequired: true,
+      );
+
+      return response.map((e) => CreditEntity.fromMap(e),).toList();
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+
+  }
+
+  Future<void> createCreditPayment(String folio, PaymentMethod method, double total) async {
+
+    try {
+
+      Map<String, dynamic> body = {
+        "payment_method": method.name,
+        "amount": total,
+      };
+
+      Map<String, dynamic> response = await apiClient.post(
+        _createCreditPaymentPath(folio),
+        authRequired: true,
+        body: body
+      );
+
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      print(e.toString());
+      throw AppException(message: e.toString());
+    }
+
+  }
 
 }

@@ -240,7 +240,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                     child: IsselTextFormField(
                                       fillColor: colorScheme.surfaceContainer,
                                       controller: creditCtrl,
-                                      hintText: "Cheques",
+                                      hintText: "Credito",
                                       height: 50,
                                       inputFormatters: [RegexService.positiveNumberFormatter],
                                       validator: (value) => RegexService.positiveNumberValidator(value),

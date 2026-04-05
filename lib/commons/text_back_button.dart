@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class TextBackButton extends StatelessWidget {
-  const TextBackButton({super.key});
+
+  VoidCallback? onTap;
+
+  TextBackButton({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,7 @@ class TextBackButton extends StatelessWidget {
           ],
         ),
       ),
-      onTap: () => Navigator.pop(context),
+      onTap: onTap ?? () => Navigator.pop(context),
     );
   }
 }

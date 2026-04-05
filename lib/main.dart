@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend_garzas/commons/dialogs/exit_to_app_dialog.dart';
 import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
@@ -18,6 +19,7 @@ import 'package:frontend_garzas/src/auth/views/splash_view.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/close_cut_dialog.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/config_printer_dialog.dart';
+import 'package:frontend_garzas/src/sales/clean/dialogs/credit_payment_dialog/credit_payment_dialog.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
@@ -93,9 +95,6 @@ class MyApp extends StatelessWidget {
                 navigatorKey: navigationService.navigatorKey,
                 builder: (context, child) {
 
-                  print("ROL DIFERENTE A ADMIN: ${authController.session?.role != AppRole.admin}");
-                  print("CORTE ABIERTO: ${cashRegisterController.openCash}");
-
                   return Stack(
                     children: [
                       child!,
@@ -134,7 +133,7 @@ class MyApp extends StatelessWidget {
                           ),
                           actions: [
                             if (authController.session != null && authController.session!.role != AppRole.admin)
-                            IsselWindowCaptionAction(
+                              IsselWindowCaptionAction(
                               icon: Icon(Icons.print_outlined),
                               onPressed: () {
                                 final dialogContext = navigationService
@@ -147,9 +146,22 @@ class MyApp extends StatelessWidget {
                                 );
                               },
                             ),
+                            if (authController.session != null && authController.session!.role == AppRole.seller)
+                              IsselWindowCaptionAction(
+                              icon: Icon(Icons.payment, color: Colors.blue,),
+                              onPressed: () {
+                                authController.session!.role == AppRole.seller;
+                                final dialogContext = navigationService.navigatorKey.currentContext;
+                                if (dialogContext == null) return;
+                                showDialog(
+                                  context: dialogContext,
+                                  builder: (context) => CreditPaymentDialog.init(context),
+                                );
+                              },
+                          ),
                             if (authController.session != null && authController.session!.role == AppRole.seller && cashRegisterController.openCash)
-                            IsselWindowCaptionAction(
-                                icon: Icon(Icons.money, color: Colors.blue,),
+                              IsselWindowCaptionAction(
+                                icon: FaIcon(FontAwesomeIcons.cashRegister, color: Colors.blue, size: 16,),
                                 onPressed: () {
                                   authController.session!.role == AppRole.seller;
                                   final dialogContext = navigationService.navigatorKey.currentContext;

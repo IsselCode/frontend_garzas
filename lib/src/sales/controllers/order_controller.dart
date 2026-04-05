@@ -11,6 +11,7 @@ import 'package:frontend_garzas/src/admin/controllers/general_config_controller.
 import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 import 'package:frontend_garzas/src/admin/data/sales_api.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
+import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:printing/printing.dart';
 
@@ -229,6 +230,21 @@ class OrderController extends ChangeNotifier {
       onLayout: (format) => sellTicketPdf(config!, ticket),
     );
 
+
+  }
+
+  // Credits
+
+  Future<CtrlResponse<List<CreditEntity>>> findCreditClientByPhoneNumber(String phoneNumber) async {
+
+    try {
+
+      List<CreditEntity> tempCredits = await salesApi.listPendingCreditSalesByClient(phoneNumber);
+      return CtrlResponse(success: true, element: tempCredits);
+
+    } on AppException catch(e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
 
   }
 

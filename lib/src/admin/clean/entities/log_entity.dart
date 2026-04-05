@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
-import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 
 class LogEntity extends Equatable {
 
