@@ -103,7 +103,7 @@ class MyApp extends StatelessWidget {
                       SizedBox(
                         height: Size.fromHeight(kWindowCaptionHeight).height,
                         child: IsselSnapLayoutsCaption(
-                          icon: Image.asset(AppAssets.logo),
+                          icon: null,
                           title: Material(
                             color: Colors.transparent,
                             child: Row(
@@ -174,6 +174,7 @@ class MyApp extends StatelessWidget {
                                   );
                                 },
                               ),
+                            if (authController.session != null)
                             IsselWindowCaptionAction(
                               icon: Icon(Icons.exit_to_app, color: Colors.red,),
                               onPressed: () {

@@ -84,7 +84,7 @@ class _IsselSnapLayoutsCaptionState extends State<IsselSnapLayoutsCaption>
             child: SizedBox(
               width: 18,
               height: 18,
-              child: widget.icon ?? const FlutterLogo(),
+              child: widget.icon,
             ),
           ),
           Expanded(

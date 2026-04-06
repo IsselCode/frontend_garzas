@@ -21,8 +21,7 @@ class _GenerateTicketDispatchViewState extends State<GenerateTicketDispatchView>
   @override
   void initState() {
     super.initState();
-    DispatchController dispatchController = context.read();
-    dispatchController.printTicket().then((value) {
+    Future.delayed(Duration(seconds: 2)).then((value) {
       NavigationService navigationService = locator();
       navigationService.pushAndRemoveUntil(HomeDispatchView());
     },);
@@ -45,10 +44,10 @@ class _GenerateTicketDispatchViewState extends State<GenerateTicketDispatchView>
             children: [
               Transform.translate(
                 offset: Offset(0, 100),
-                child: Text("Generando Ticket", style: textTheme.displayMedium?.copyWith(color: colorScheme.onPrimary),)
+                child: Text("Llenando", style: textTheme.displayMedium?.copyWith(color: colorScheme.onPrimary),)
               ),
               Lottie.asset(
-                AppLotties.scan,
+                AppLotties.water_indicator,
                 width: 500,
                 height: 500,
                 fit: BoxFit.fill,

@@ -88,12 +88,20 @@ class _SplashScreenViewState extends State<SplashView>
                 child: FadeTransition(
                   opacity: _textOpacity,
                   child: Image.asset(
-                    AppAssets.logoText,
-                    width: 300,
-                    height: 300,
+                    AppAssets.logo,
+                    width: 400,
+                    height: 400,
                   ),
                 ),
               ),
+              Positioned(
+                right: 20,
+                bottom: -50,
+                child: Image.asset(
+                  AppAssets.logo2,
+                  width: 250,
+                )
+              )
             ],
           );
         },
