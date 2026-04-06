@@ -501,7 +501,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                           Expanded(
                             child: StatisticGarzaContainer(
                               asset: AppAssets.credit,
-                              title: "Cheque",
+                              title: "Credito",
                               total: statistics.statistics!.creditTotal,
                             ),
                           ),

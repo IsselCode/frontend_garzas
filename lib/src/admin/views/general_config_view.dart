@@ -203,7 +203,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                           onChanged: (value) => updateLogs(GeneralConfigLogField.clientDeleted, value),
                                         ),
                                         IsselToggleField(
-                                          title: "Abertura de corte",
+                                          title: "Apertura de corte",
                                           value: generalConfigController.generalConfigEntity!.cashRegisterOpening,
                                           backColor: colorScheme.surfaceContainer,
                                           onChanged: (value) => updateLogs(GeneralConfigLogField.cashRegisterOpening, value),

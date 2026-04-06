@@ -31,7 +31,6 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController cashCtrl = TextEditingController();
   final TextEditingController cardCtrl = TextEditingController();
-  final TextEditingController creditCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -254,8 +253,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
 
                   CtrlResponse response = await cashRegisterController.closeCut(
                     double.parse(cashCtrl.text),
-                    double.parse(cardCtrl.text),
-                    double.parse(creditCtrl.text)
+                    double.parse(cardCtrl.text)
                   );
 
                   context.loaderOverlay.hide();
