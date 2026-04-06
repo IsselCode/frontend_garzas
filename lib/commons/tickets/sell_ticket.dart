@@ -7,6 +7,15 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+const PdfPageFormat sellTicketPageFormat = PdfPageFormat(
+  72 * PdfPageFormat.mm,
+  double.infinity,
+  marginLeft: 4 * PdfPageFormat.mm,
+  marginRight: 4 * PdfPageFormat.mm,
+  marginTop: 6 * PdfPageFormat.mm,
+  marginBottom: 6 * PdfPageFormat.mm,
+);
+
 class SellTicketEntity {
   String folio;
   String? clientName;
@@ -39,8 +48,9 @@ class SellTicketEntity {
 
 Future<Uint8List> sellTicketPdf(
   GeneralConfigEntity generalConfigEntity,
-  SellTicketEntity sellTicketEntity,
-) async {
+  SellTicketEntity sellTicketEntity, {
+  PdfPageFormat pageFormat = sellTicketPageFormat,
+}) async {
   final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
   final fontTitle = await PdfGoogleFonts.montserratAlternatesBlackItalic();
   final fontText = await PdfGoogleFonts.montserratMedium();
@@ -53,7 +63,8 @@ Future<Uint8List> sellTicketPdf(
   final barcodeData = sellTicketEntity.dispatchCode;
   final clientName = (sellTicketEntity.clientName ?? '').trim();
   final clientPhone = (sellTicketEntity.clientPhone ?? '').trim();
-  final quantityText = '${sellTicketEntity.quantity.toStringAsFixed(2)} ${sellTicketEntity.unitOfMeasurement.abbr}';
+  final quantityText =
+      '${sellTicketEntity.quantity.toStringAsFixed(2)} ${sellTicketEntity.unitOfMeasurement.abbr}';
 
   String twoDigits(int value) => value.toString().padLeft(2, '0');
   String formatDate(DateTime date) =>
@@ -69,7 +80,7 @@ Future<Uint8List> sellTicketPdf(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Expanded(
-            flex: 3,
+            flex: 2,
             child: pw.Text(
               label,
               style: pw.TextStyle(font: fontText, fontSize: 8),
@@ -77,7 +88,7 @@ Future<Uint8List> sellTicketPdf(
           ),
           pw.SizedBox(width: 6),
           pw.Expanded(
-            flex: 5,
+            flex: 4,
             child: pw.Text(
               value,
               style: pw.TextStyle(font: fontText, fontSize: 8),
@@ -91,8 +102,7 @@ Future<Uint8List> sellTicketPdf(
 
   pdf.addPage(
     pw.Page(
-      pageFormat: PdfPageFormat.roll80,
-      margin: const pw.EdgeInsets.all(12),
+      pageFormat: pageFormat,
       build: (pw.Context context) {
         return pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.stretch,
@@ -134,7 +144,10 @@ Future<Uint8List> sellTicketPdf(
               textAlign: pw.TextAlign.center,
             ),
             pw.SizedBox(height: 6),
-            dataRow('Cliente', clientName.isEmpty ? 'Publico general' : clientName),
+            dataRow(
+              'Cliente',
+              clientName.isEmpty ? 'Publico general' : clientName,
+            ),
             dataRow('Telefono', clientPhone.isEmpty ? 'N/D' : clientPhone),
             dataRow('Tipo de agua', sellTicketEntity.waterType.dp),
             dataRow('Cantidad', quantityText),
@@ -152,10 +165,7 @@ Future<Uint8List> sellTicketPdf(
               height: 42,
               drawText: true,
               textPadding: 4,
-              textStyle: pw.TextStyle(
-                font: fontText,
-                fontSize: 8,
-              ),
+              textStyle: pw.TextStyle(font: fontText, fontSize: 8),
             ),
             pw.Divider(),
             pw.Text(

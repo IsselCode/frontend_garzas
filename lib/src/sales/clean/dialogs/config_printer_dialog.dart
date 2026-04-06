@@ -3,13 +3,10 @@ import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:printing/printing.dart';
 
-import '../../../../core/app/consts.dart';
 import '../../../../inject_container.dart';
 
 class ConfigPrinterDialog extends StatefulWidget {
-
-
-  ConfigPrinterDialog({super.key});
+  const ConfigPrinterDialog({super.key});
 
   @override
   State<ConfigPrinterDialog> createState() => _ConfigPrinterDialogState();
@@ -18,7 +15,6 @@ class ConfigPrinterDialog extends StatefulWidget {
 class _ConfigPrinterDialogState extends State<ConfigPrinterDialog> {
   final TextEditingController nameCtrl = TextEditingController();
   final GlobalKey<FormState> form = GlobalKey<FormState>();
-
 
   late Future<({Printer? printer, List<dynamic> printers})> _loadPrinterData;
 
@@ -36,12 +32,17 @@ class _ConfigPrinterDialogState extends State<ConfigPrinterDialog> {
     ColorScheme colorScheme = theme.colorScheme;
 
     PrinterService printerService = locator();
+    final dialogWidth = MediaQuery.of(context).size.width.clamp(320.0, 420.0);
 
     return Dialog(
       child: Container(
-        width: 350,
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(24)),
+        width: dialogWidth,
+        constraints: const BoxConstraints(maxWidth: 420),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
+        ),
         child: SingleChildScrollView(
           child: Form(
             key: form,
@@ -68,7 +69,6 @@ class _ConfigPrinterDialogState extends State<ConfigPrinterDialog> {
                 FutureBuilder(
                   future: _loadPrinterData,
                   builder: (context, snapshot) {
-
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return IsselShimmer(width: double.infinity, height: 50);
                     }
@@ -78,16 +78,28 @@ class _ConfigPrinterDialogState extends State<ConfigPrinterDialog> {
                     }
 
                     if (!snapshot.hasData) {
-                      return IsselPill(text: "No hay impresoras disponibles", height: 50,);
+                      return IsselPill(
+                        text: "No hay impresoras disponibles",
+                        height: 50,
+                      );
                     }
 
                     final data = snapshot.data!;
 
                     return IsselDropdown(
-                      items: data.printers.map((printer) => DropdownMenuItem(
-                        value: printer,
-                        child: Text(printer.name),
-                      )).toList(),
+                      items: data.printers.map((printer) {
+                        return DropdownMenuItem(
+                          value: printer,
+                          child: SizedBox(
+                            width: dialogWidth - 120,
+                            child: Text(
+                              printer.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                       value: printerService.selectedPrinter ?? data.printer,
                       color: colorScheme.surfaceContainer,
                       hintText: "Selecciona una impresora",
@@ -96,19 +108,17 @@ class _ConfigPrinterDialogState extends State<ConfigPrinterDialog> {
                         setState(() {});
                       },
                     );
-
                   },
                 ),
 
                 // Divisor
-                Divider(color: colorScheme.outline,),
+                Divider(color: colorScheme.outline),
                 //* Action Boxes
                 IsselButton(
                   text: "Volver",
                   onTap: () {
-
                     if (!form.currentState!.validate()) {
-                      return ;
+                      return;
                     }
 
                     Navigator.pop(context, nameCtrl.text);

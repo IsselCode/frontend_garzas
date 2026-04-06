@@ -69,7 +69,7 @@ class FinishOrderView extends StatelessWidget {
                           controller: TextEditingController(text: WaterType.fromTabSwitcher(orderController.state).dp),
                           readOnly: true,
                         ),
-                        Text("Metros Cubicos a vender", style: textTheme.titleMedium),
+                        Text("${orderController.stateUnit == TabSwitcherAlignStates.left ? "Metros Cubicos" : "Galones"} a vender", style: textTheme.titleMedium),
                         IsselTextFormField(
                           hintText: "Tipo de agua",
                           controller: orderController.quantityController,

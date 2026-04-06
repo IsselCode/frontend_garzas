@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/tickets/sell_ticket.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
@@ -22,7 +20,6 @@ import '../../../inject_container.dart';
 import '../../admin/clean/enums/enums.dart';
 
 class OrderController extends ChangeNotifier {
-
   ClientsApi clientsApi;
   SalesApi salesApi;
   PrinterService printerService;
@@ -75,13 +72,13 @@ class OrderController extends ChangeNotifier {
     }
     notifyListeners();
   }
+
   List<ClientEntity> clients = [];
   List<ClientEntity> showedClients = [];
 
   //! Logic Methods
   CtrlResponse calculateTotalRemaining() {
     try {
-
       final double? clientMoney = double.tryParse(clientMoneyCtrl.text.trim());
 
       if (clientMoney == null) {
@@ -89,7 +86,9 @@ class OrderController extends ChangeNotifier {
       }
 
       if (clientMoney < total) {
-        throw AppException(message: "La cantidad entregada no cubre el total de la venta");
+        throw AppException(
+          message: "La cantidad entregada no cubre el total de la venta",
+        );
       }
 
       totalRemaining = clientMoney - total;
@@ -106,67 +105,66 @@ class OrderController extends ChangeNotifier {
   // Model Methods
 
   Future<void> getClients() async {
-
     try {
-
       List<ClientEntity> tempClients = await clientsApi.listClients(limit: 10);
       clients = tempClients;
       showedClients = tempClients;
 
       notifyListeners();
-
-    } on AppException catch(e) {
-     rethrow;
+    } on AppException {
+      rethrow;
     }
-
   }
 
   Future<CtrlResponse> getSearchClients(String phone) async {
-
     if (phone.isEmpty) {
       showedClients = clients;
       notifyListeners();
       return CtrlResponse(success: true);
-    };
+    }
 
     try {
-
       ClientEntity tempClient = await clientsApi.getClientByPhone(phone);
       showedClients = [tempClient];
 
       notifyListeners();
       return CtrlResponse(success: true);
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
   Future<CtrlResponse<double>> calculateTotal() async {
-
     try {
-
       WaterType waterType = WaterType.fromTabSwitcher(state);
-      UnitOfMeasurement unitOfMeasurement = UnitOfMeasurement.fromTabSwitcher(stateUnit);
+      UnitOfMeasurement unitOfMeasurement = UnitOfMeasurement.fromTabSwitcher(
+        stateUnit,
+      );
       double quantity = double.parse(quantityController.text);
       String? customerPhone = selectedClient?.phone;
 
-      double response = await salesApi.quotSale(waterType, unitOfMeasurement, quantity, customerPhone);
+      double response = await salesApi.quotSale(
+        waterType,
+        unitOfMeasurement,
+        quantity,
+        customerPhone,
+      );
 
       total = response;
       return CtrlResponse(success: true, element: response);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
   Future<CtrlResponse<SaleEntity>> createSell() async {
-
     try {
       Printer? printer = await printerService.getSelectedPrinter();
-      if (printer == null){
-        return CtrlResponse(success: false, message: "No hay ninguna impresora seleccionada");
+      if (printer == null) {
+        return CtrlResponse(
+          success: false,
+          message: "No hay ninguna impresora seleccionada",
+        );
       }
 
       SaleInfoDto dto = SaleInfoDto(
@@ -182,21 +180,20 @@ class OrderController extends ChangeNotifier {
       _saleEntity = await salesApi.createSale(dto);
 
       return CtrlResponse(success: true);
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
   Future<void> printTicket() async {
     ToastService toastService = locator();
     Printer? printer = await printerService.getSelectedPrinter();
-    if (printer == null){
+    if (printer == null) {
       toastService.error("No hay ninguna impresora seleccionada");
-      return ;
+      return;
     }
 
-    if (generalConfigController.generalConfigEntity == null){
+    if (generalConfigController.generalConfigEntity == null) {
       await generalConfigController.loadGeneralConfig();
     }
 
@@ -218,7 +215,7 @@ class OrderController extends ChangeNotifier {
       changeAmount: _saleEntity!.changeAmount,
       dispatchCode: _saleEntity!.dispatchCode,
       createdAt: _saleEntity!.createdAt,
-      sellerName: authController.session!.displayName
+      sellerName: authController.session!.displayName,
     );
 
     // Para probar o guardar ticket en PC
@@ -230,25 +227,25 @@ class OrderController extends ChangeNotifier {
 
     await Printing.directPrintPdf(
       printer: printer,
-      onLayout: (format) => sellTicketPdf(config!, ticket),
+      format: sellTicketPageFormat,
+      dynamicLayout: false,
+      usePrinterSettings: true,
+      onLayout: (format) => sellTicketPdf(config!, ticket, pageFormat: format),
     );
-
-
   }
 
   // Credits
 
-  Future<CtrlResponse<List<CreditEntity>>> findCreditClientByPhoneNumber(String phoneNumber) async {
-
+  Future<CtrlResponse<List<CreditEntity>>> findCreditClientByPhoneNumber(
+    String phoneNumber,
+  ) async {
     try {
-
-      List<CreditEntity> tempCredits = await salesApi.listPendingCreditSalesByClient(phoneNumber);
+      List<CreditEntity> tempCredits = await salesApi
+          .listPendingCreditSalesByClient(phoneNumber);
       return CtrlResponse(success: true, element: tempCredits);
-
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
   @override
@@ -257,6 +254,4 @@ class OrderController extends ChangeNotifier {
     clientMoneyCtrl.dispose();
     super.dispose();
   }
-  
-
 }
