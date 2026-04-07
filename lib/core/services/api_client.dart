@@ -261,7 +261,7 @@ class ApiClient {
   }
 
   String _buildBaseUrl(String host, int port) {
-    return 'https://$host:$port/api/v1';
+    return 'http://$host:$port/api/v1';
   }
 
   Future<bool> _checkHealth(String baseUrl) async {
