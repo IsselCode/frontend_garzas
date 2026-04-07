@@ -1,6 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/error_ip_connection_view.dart';
+import 'package:frontend_garzas/core/services/api_client.dart';
+import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -40,9 +44,19 @@ class _SplashScreenViewState extends State<SplashView>
       await Future.delayed(Duration(milliseconds: (circleDuration.inMilliseconds * 0.4).toInt()),);
       await _textCtrl.forward();
       await Future.delayed(const Duration(seconds: 1));
-
       if (!mounted) return;
 
+      // Obtener dirección ip con servicio mdns
+      ApiClient apiClient = locator();
+      NavigationService navigationService = locator();
+      bool response = await apiClient.discoverWithNsd();
+
+      if (!response) {
+        navigationService.pushAndRemoveUntil(ErrorIpConnectionView());
+        return;
+      }
+
+      // Reestablecer sesión
       await context.read<AuthController>().restoreSession();
     });
   }

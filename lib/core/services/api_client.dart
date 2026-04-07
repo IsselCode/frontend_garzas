@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:frontend_garzas/commons/entities/device_entity.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
+import 'package:frontend_garzas/core/services/mdns_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 typedef AccessTokenProvider = Future<String?> Function();
 typedef UnauthorizedHandler = Future<bool> Function();
@@ -14,19 +17,48 @@ class ApiError {
 }
 
 class ApiClient {
-  final HttpClient _httpClient;
-  final String baseUrl;
+  static const String _cachedIpKey = 'cached_backend_ip';
+  static const String _cachedPortKey = 'cached_backend_port';
+
+  final HttpClient _httpClient = HttpClient();
+  late String baseUrl;
+
+  Future<bool> discoverWithNsd() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? cachedIp = prefs.getString(_cachedIpKey);
+    final int? cachedPort = prefs.getInt(_cachedPortKey);
+
+    if (cachedIp != null && cachedPort != null) {
+      final String cachedBaseUrl = _buildBaseUrl(cachedIp, cachedPort);
+      final bool isCachedAvailable = await _checkHealth(cachedBaseUrl);
+
+      if (isCachedAvailable) {
+        baseUrl = cachedBaseUrl;
+        return true;
+      }
+    }
+
+
+    final DeviceEntity? server = await MdnsService().discoverWithNsd();
+    if (server == null || server.host.isEmpty) {
+      return false;
+    }
+
+    final String discoveredBaseUrl = _buildBaseUrl(server.host, server.port);
+    final bool isDiscoveredAvailable = await _checkHealth(discoveredBaseUrl);
+
+    if (!isDiscoveredAvailable) {
+      return false;
+    }
+
+    await prefs.setString(_cachedIpKey, server.host);
+    await prefs.setInt(_cachedPortKey, server.port);
+    baseUrl = discoveredBaseUrl;
+    return true;
+  }
 
   AccessTokenProvider? _accessTokenProvider;
   UnauthorizedHandler? _unauthorizedHandler;
-
-  ApiClient({
-    HttpClient? httpClient,
-    this.baseUrl = const String.fromEnvironment(
-      'API_BASE_URL',
-      defaultValue: 'http://127.0.0.1:8000/api/v1',
-    ),
-  }) : _httpClient = httpClient ?? HttpClient();
 
   void configureAuth({
     AccessTokenProvider? accessTokenProvider,
@@ -226,5 +258,19 @@ class ApiClient {
     }
 
     return null;
+  }
+
+  String _buildBaseUrl(String host, int port) {
+    return 'https://$host:$port/api/v1';
+  }
+
+  Future<bool> _checkHealth(String baseUrl) async {
+    try {
+      final request = await _httpClient.getUrl(Uri.parse('$baseUrl/health'));
+      final response = await request.close();
+      return response.statusCode >= 200 && response.statusCode < 300;
+    } catch (_) {
+      return false;
+    }
   }
 }
