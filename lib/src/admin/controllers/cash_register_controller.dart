@@ -23,10 +23,6 @@ class CashRegisterController extends ChangeNotifier {
 
     try {
 
-      if (cashRegisterCuts.isNotEmpty) {
-        return CtrlResponse(success: true);
-      }
-
       List<CashRegisterEntity> tempCuts = await cashRegisterApi.listCashRegisterCuts();
       cashRegisterCuts = tempCuts;
       showedCashRegisterCuts = tempCuts;

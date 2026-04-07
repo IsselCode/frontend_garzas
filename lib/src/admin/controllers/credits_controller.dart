@@ -29,10 +29,6 @@ class CreditsController extends ChangeNotifier {
 
     try {
 
-      if (allCredits.isNotEmpty) {
-        return CtrlResponse(success: true);
-      }
-
       List<CreditEntity> tempCredits = await salesApi.getPendingCredits();
       allCredits = tempCredits;
       showedCredits = tempCredits;

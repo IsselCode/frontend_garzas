@@ -148,7 +148,7 @@ Future<Uint8List> sellTicketPdf(
               'Cliente',
               clientName.isEmpty ? 'Publico general' : clientName,
             ),
-            dataRow('Telefono', clientPhone.isEmpty ? 'N/D' : clientPhone),
+            dataRow('Telefono', clientPhone.isEmpty ? 'N/A' : clientPhone),
             dataRow('Tipo de agua', sellTicketEntity.waterType.dp),
             dataRow('Cantidad', quantityText),
             pw.SizedBox(height: 4),

@@ -21,10 +21,6 @@ class ConfigGarzasController extends ChangeNotifier {
   Future<CtrlResponse> loadConfigGarzas() async {
     try {
 
-      if (configGarzas.isNotEmpty) {
-        return CtrlResponse(success: true);
-      }
-
       List<ConfigGarzaEntity> tempConfigGarzas = await garzasApi.listGarzas();
       configGarzas = tempConfigGarzas;
       notifyListeners();

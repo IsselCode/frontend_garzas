@@ -29,10 +29,6 @@ class StatisticsController extends ChangeNotifier {
   Future<CtrlResponse> getGarzasStatistics() async {
     try {
 
-      if (statistics != null) {
-        return CtrlResponse(success: true);
-      }
-
       StatisticsEntity tempStatistics = await salesApi.getMonthlyPaymentTotals();
       statistics = tempStatistics;
       notifyListeners();
@@ -44,10 +40,6 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> getSales() async {
     try {
-
-      if (sales.isNotEmpty) {
-        return CtrlResponse(success: true);
-      }
 
       List<SaleEntity> tempSells = await salesApi.listSales();
 
@@ -81,10 +73,6 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> getLogs() async {
     try {
-
-      if (logs.isNotEmpty){
-        return CtrlResponse(success: true);
-      }
 
       List<LogEntity> tempLogs = await logsApi.listLogs();
       logs = tempLogs;

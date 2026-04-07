@@ -19,10 +19,6 @@ class ClientsController extends ChangeNotifier {
 
     try {
 
-      if (allClients.isNotEmpty) {
-        return CtrlResponse(success: true);
-      }
-
       List<ClientEntity> tempClients = await clientsApi.listClients();
       allClients = tempClients;
       showedClients = tempClients;
