@@ -6,12 +6,14 @@ class StatisticGarzaContainer extends StatelessWidget {
   final String asset;
   final String title;
   final double total;
+  final double liters;
 
   const StatisticGarzaContainer({
     super.key,
     required this.asset,
     required this.title,
     required this.total,
+    required this.liters,
   });
 
   @override
@@ -30,11 +32,14 @@ class StatisticGarzaContainer extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
-        spacing: 10,
+        spacing: 0,
         children: [
-          Image.asset(asset, height: 96, width: 96),
+          Image.asset(asset, height: 80, width: 80),
+          const SizedBox(height: 10,),
           Text(title, style: textTheme.titleSmall),
           Text("\$${total.toStringAsFixed(2)}"),
+          const SizedBox(height: 10,),
+          Text("Litros: ${liters.toStringAsFixed(2)}"),
         ],
       ),
     );

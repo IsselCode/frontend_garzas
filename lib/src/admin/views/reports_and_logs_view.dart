@@ -489,6 +489,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                               asset: AppAssets.cash,
                               title: "Efectivo",
                               total: statistics.statistics!.cashTotal,
+                              liters: statistics.statistics!.cashLiters,
                             ),
                           ),
                           Expanded(
@@ -496,6 +497,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                               asset: AppAssets.card,
                               title: "Tarjeta",
                               total: statistics.statistics!.cardTotal,
+                              liters: statistics.statistics!.cardLiters,
                             ),
                           ),
                           Expanded(
@@ -503,6 +505,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                               asset: AppAssets.credit,
                               title: "Credito",
                               total: statistics.statistics!.creditTotal,
+                              liters: statistics.statistics!.creditLiters,
                             ),
                           ),
                         ],
