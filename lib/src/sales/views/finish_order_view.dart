@@ -138,7 +138,7 @@ class FinishOrderView extends StatelessWidget {
                                 ),
                                 Text("Cantidad a devolver", style: textTheme.titleSmall?.copyWith(color: colorScheme.onPrimary),),
                                 IsselPill(
-                                  text: "\$${orderController.totalRemaining}",
+                                  text: "\$${orderController.totalRemaining ?? 0.0}",
                                   textColor: colorScheme.primary,
                                   height: 60,
                                 ),

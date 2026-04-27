@@ -58,8 +58,10 @@ class SaleInfoDto extends Equatable {
       throw AppException(message: "El dinero del cliente es obligatorio");
     }
 
-    if (changeAmount == null) {
+    if (paymentMethod == PaymentMethod.cash && changeAmount == null) {
       throw AppException(message: "El cambio restante es obligatorio");
+    } else {
+      changeAmount = 0;
     }
 
     return SaleInfoDto._(

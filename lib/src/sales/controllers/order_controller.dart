@@ -52,7 +52,7 @@ class OrderController extends ChangeNotifier {
 
   TextEditingController clientMoneyCtrl = TextEditingController();
   double total = 0;
-  double totalRemaining = 0;
+  double? totalRemaining;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
   PaymentMethod get paymentMethod => _paymentMethod;
   set paymentMethod(PaymentMethod value) {
