@@ -9,6 +9,8 @@ import 'package:frontend_garzas/src/dispatch/entities/dispatch_validate_entity.d
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 
+import '../clean/entities/monthly_garza_total_entity.dart';
+
 class SalesApi {
   final ApiClient apiClient;
 
@@ -18,6 +20,7 @@ class SalesApi {
   final String _salesQuotePath = "/sales/quote";
   final String _salesByDateRangePath = "/sales/range";
   final String _getMonthlyPaymentTotalsPath = "/sales/monthly-payment-totals";
+  final String _getMonthlyGarzaTotals = "/sales/monthly-garza-totals";
 
   String _dispatchValidatePath(String code) => "/sales/$code/dispatch/validate";
   String _dispatchPath(String code) => "/sales/$code/dispatch";
@@ -55,6 +58,24 @@ class SalesApi {
       );
 
       return StatisticsEntity.fromMap(response);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+
+  }
+
+  Future<MonthlyGarzaTotalEntity> getMonthlyGarzaTotals() async {
+
+    try {
+
+      Map<String, dynamic> response = await apiClient.get(
+        _getMonthlyGarzaTotals,
+        authRequired: true,
+      );
+
+      return MonthlyGarzaTotalEntity.fromMap(response);
     } on AppException {
       rethrow;
     } catch (e) {
@@ -146,11 +167,12 @@ class SalesApi {
 
   }
 
-  Future<SaleEntity> dispatch(String barcode) async {
+  Future<SaleEntity> dispatch(String barcode, int garzaNumber) async {
 
     Map<String, dynamic> response = await apiClient.post(
       _dispatchPath(barcode),
       authRequired: true,
+      body: {"garza_number": garzaNumber}
     );
 
     return SaleEntity.fromMap(response);

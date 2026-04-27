@@ -74,7 +74,7 @@ class DispatchController extends ChangeNotifier {
         return CtrlResponse(success: false, message: "No hay ninguna impresora seleccionada");
       }
 
-      _saleEntity = await salesApi.dispatch(dispatchValidate!.dispatchCode);
+      _saleEntity = await salesApi.dispatch(dispatchValidate!.dispatchCode, selectedGarza!.number);
 
       return CtrlResponse(success: true);
     } on AppException catch(e) {

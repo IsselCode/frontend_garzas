@@ -4,7 +4,9 @@ import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/date_range_dialog.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/monthly_garza_total_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/statistic_garza_container.dart';
+import 'package:frontend_garzas/src/admin/clean/widgets/statistic_garza_container_2.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -23,19 +25,40 @@ class ReportsAndLogsView extends StatefulWidget {
 
 class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
   PageController pageController = PageController(initialPage: 0);
+  PageController pageTotalsController = PageController(initialPage: 0);
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
+  TabSwitcherAlignStates state2 = TabSwitcherAlignStates.left;
   late Future<CtrlResponse> _loadStatistics;
+  late Future<CtrlResponse> _loadMonthlyGarzaTotals;
   late Future<CtrlResponse> _loadSells;
   late Future<CtrlResponse> _loadLogs;
   DateTimeRange? _salesDateRange;
   DateTimeRange? _logsDateRange;
   FocusNode findByFolioNode = FocusNode();
 
+  GarzaTotalEntity? _findGarzaTotal(
+    StatisticsController statistics,
+    int garzaNumber,
+  ) {
+    final totals =
+        statistics.monthlyGarzaTotalEntity?.totals ??
+        const <GarzaTotalEntity>[];
+
+    for (final total in totals) {
+      if (total.garzaNumber == garzaNumber) {
+        return total;
+      }
+    }
+
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
     StatisticsController statisticsController = context.read();
-    _loadStatistics = statisticsController.getGarzasStatistics();
+    _loadStatistics = statisticsController.getMonthlyPaymentTotals();
+    _loadMonthlyGarzaTotals = statisticsController.getMonthlyGarzaTotals();
     _loadSells = statisticsController.getSales();
     _loadLogs = statisticsController.getLogs();
   }
@@ -101,9 +124,28 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                 SizedBox(
                   width: 300,
                   child: Center(
-                    child: Text(
-                      "Ventas Mensuales",
-                      style: textTheme.titleMedium,
+                    child: IsselTabSwitcher(
+                      width: 200,
+                      state: state2,
+                      leftText: "Método",
+                      rightText: "Garzas",
+                      onChanged: (value) {
+                        state2 = value;
+                        if (state2 == TabSwitcherAlignStates.left) {
+                          pageTotalsController.animateToPage(
+                            0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.ease,
+                          );
+                        } else {
+                          pageTotalsController.animateToPage(
+                            1,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.ease,
+                          );
+                        }
+                        setState(() {});
+                      },
                     ),
                   ),
                 ),
@@ -456,62 +498,127 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                     ),
                   ),
 
-                  //* Estadisticas de garzas
-                  FutureBuilder(
-                    future: _loadStatistics,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Column(
-                          spacing: 10,
-                          children: [
-                            Expanded(
-                              child: IsselShimmer(width: 300, height: 150),
-                            ),
-                            Expanded(
-                              child: IsselShimmer(width: 300, height: 150),
-                            ),
-                            Expanded(
-                              child: IsselShimmer(width: 300, height: 150),
-                            ),
-                          ],
-                        );
-                      }
 
-                      if (!snapshot.data!.success) {
-                        return Center(child: Text(snapshot.data!.message!));
-                      }
+                  SizedBox(
+                    width: 300,
+                    child: PageView(
+                      controller: pageTotalsController,
+                      children: [
+                        //* Estadisticas por método
+                        FutureBuilder(
+                          future: _loadStatistics,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Column(
+                                spacing: 10,
+                                children: [
+                                  Expanded(
+                                    child: IsselShimmer(width: 300, height: 150),
+                                  ),
+                                  Expanded(
+                                    child: IsselShimmer(width: 300, height: 150),
+                                  ),
+                                  Expanded(
+                                    child: IsselShimmer(width: 300, height: 150),
+                                  ),
+                                ],
+                              );
+                            }
 
-                      return Column(
-                        spacing: 10,
-                        children: [
-                          Expanded(
-                            child: StatisticGarzaContainer(
-                              asset: AppAssets.cash,
-                              title: "Efectivo",
-                              total: statistics.statistics!.cashTotal,
-                              liters: statistics.statistics!.cashLiters,
-                            ),
-                          ),
-                          Expanded(
-                            child: StatisticGarzaContainer(
-                              asset: AppAssets.card,
-                              title: "Tarjeta",
-                              total: statistics.statistics!.cardTotal,
-                              liters: statistics.statistics!.cardLiters,
-                            ),
-                          ),
-                          Expanded(
-                            child: StatisticGarzaContainer(
-                              asset: AppAssets.credit,
-                              title: "Credito",
-                              total: statistics.statistics!.creditTotal,
-                              liters: statistics.statistics!.creditLiters,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                            if (!snapshot.data!.success) {
+                              return Center(child: Text(snapshot.data!.message!));
+                            }
+
+                            return Column(
+                              spacing: 10,
+                              children: [
+                                Expanded(
+                                  child: StatisticGarzaContainer(
+                                    asset: AppAssets.cash,
+                                    title: "Efectivo",
+                                    total: statistics.statistics!.cashTotal,
+                                    liters: statistics.statistics!.cashLiters,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: StatisticGarzaContainer(
+                                    asset: AppAssets.card,
+                                    title: "Tarjeta",
+                                    total: statistics.statistics!.cardTotal,
+                                    liters: statistics.statistics!.cardLiters,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: StatisticGarzaContainer(
+                                    asset: AppAssets.credit,
+                                    title: "Credito",
+                                    total: statistics.statistics!.creditTotal,
+                                    liters: statistics.statistics!.creditLiters,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        //* Estadisticas por garza
+                        FutureBuilder(
+                          future: _loadMonthlyGarzaTotals,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Column(
+                                spacing: 10,
+                                children: [
+                                  Expanded(
+                                    child: IsselShimmer(width: 300, height: 150),
+                                  ),
+                                  Expanded(
+                                    child: IsselShimmer(width: 300, height: 150),
+                                  ),
+                                  Expanded(
+                                    child: IsselShimmer(width: 300, height: 150),
+                                  ),
+                                  Expanded(
+                                    child: IsselShimmer(width: 300, height: 150),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            if (!snapshot.data!.success) {
+                              return Center(child: Text(snapshot.data!.message!));
+                            }
+
+                            return Column(
+                              spacing: 10,
+                              children: [
+                                Text(
+                                  "Solo apareceran las estadisticas de las garzas que despacharon agua.",
+                                  style: textTheme.bodySmall,
+                                  textAlign: TextAlign.center,
+                                ),
+                                ...List.generate(4, (index) {
+                                  final garzaNumber = index + 1;
+                                  final garza = _findGarzaTotal(
+                                    statistics,
+                                    garzaNumber,
+                                  );
+
+                                  return Expanded(
+                                    child: StatisticGarzaContainer_2(
+                                      asset: AppAssets.waterTank,
+                                      title: garza?.garzaTitle ?? "Garza $garzaNumber",
+                                      total: garza?.totalAmount ?? 0,
+                                      liters: garza?.totalLiters ?? 0,
+                                    ),
+                                  );
+                                }),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),

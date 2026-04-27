@@ -24,6 +24,7 @@ class SaleEntity extends Equatable {
   String? dispatchedAt;
   String? dispatchedByUid;
   String? dispatchedByUsername;
+  int? dispatchedGarzaNumber;
   DateTime createdAt;
   double pendingAmount;
   bool isPaid;
@@ -53,6 +54,7 @@ class SaleEntity extends Equatable {
     required this.dispatchedAt,
     required this.dispatchedByUid,
     required this.dispatchedByUsername,
+    required this.dispatchedGarzaNumber,
     required this.createdAt,
     required this.pendingAmount,
     required this.isPaid,
@@ -83,6 +85,7 @@ class SaleEntity extends Equatable {
       dispatchedAt: data["dispatched_at"],
       dispatchedByUid: data["dispatched_by_uid"],
       dispatchedByUsername: data["dispatched_by_username"],
+      dispatchedGarzaNumber: data["dispatched_garza_number"],
       createdAt: DateTime.parse(data["created_at"]),
       pendingAmount: data["pending_amount"],
       isPaid: data["is_paid"],
@@ -114,6 +117,7 @@ class SaleEntity extends Equatable {
       "dispatched_at": dispatchedAt,
       "dispatched_by_uid": dispatchedByUid,
       "dispatched_by_username": dispatchedByUsername,
+      "dispatched_garza_number": dispatchedGarzaNumber,
       "created_at": createdAt,
       "pending_amount": pendingAmount,
       "is_paid": isPaid,

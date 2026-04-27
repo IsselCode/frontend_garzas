@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/log_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/monthly_garza_total_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/statistics_entity.dart';
 import 'package:frontend_garzas/src/admin/data/logs_api.dart';
@@ -19,6 +20,7 @@ class StatisticsController extends ChangeNotifier {
   });
 
   StatisticsEntity? statistics;
+  MonthlyGarzaTotalEntity? monthlyGarzaTotalEntity;
 
   List<SaleEntity> sales = [];
   List<SaleEntity> showedSales = [];
@@ -26,11 +28,23 @@ class StatisticsController extends ChangeNotifier {
   List<LogEntity> logs = [];
   List<LogEntity> showedLogs = [];
 
-  Future<CtrlResponse> getGarzasStatistics() async {
+  Future<CtrlResponse> getMonthlyPaymentTotals() async {
     try {
 
       StatisticsEntity tempStatistics = await salesApi.getMonthlyPaymentTotals();
       statistics = tempStatistics;
+      notifyListeners();
+      return CtrlResponse(success: true);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+  Future<CtrlResponse> getMonthlyGarzaTotals() async {
+    try {
+
+      MonthlyGarzaTotalEntity tempMonthlyGarzaTotal = await salesApi.getMonthlyGarzaTotals();
+      monthlyGarzaTotalEntity = tempMonthlyGarzaTotal;
       notifyListeners();
       return CtrlResponse(success: true);
     } on AppException catch (e) {
