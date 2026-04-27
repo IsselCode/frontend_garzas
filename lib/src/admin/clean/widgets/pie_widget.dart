@@ -106,6 +106,20 @@ class PieChart2State extends State<PieChartSample2> {
                       setState(() {});
                     },
                   ),
+                  SelectPaymentMethodWidget(
+                    image: AppAssets.credit,
+                    color: Colors.yellow.withAlpha(60),
+                    selected: paymentMethod == PaymentMethod.credit,
+                    onTap: () {
+                      paymentMethod = PaymentMethod.credit;
+                      pageController.animateToPage(
+                        2,
+                        duration: Duration(milliseconds: 250),
+                        curve: Curves.bounceInOut,
+                      );
+                      setState(() {});
+                    },
+                  ),
                 ],
               ),
               SizedBox(
@@ -115,16 +129,22 @@ class PieChart2State extends State<PieChartSample2> {
                   controller: pageController,
                   children: [
                     Indicator(
-                      potableM3: widget.summaries.where((element) => element.value == 1).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      potableGallons: widget.summaries.where((element) => element.value == 2).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      pozoM3: widget.summaries.where((element) => element.value == 3).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      pozoGallons: widget.summaries.where((element) => element.value == 4).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      potableTotal: widget.summaries.where((element) => element.value == 1).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      potableLiters: widget.summaries.where((element) => element.value == 1).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
+                      pozoTotal: widget.summaries.where((element) => element.value == 2).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      pozoLiters: widget.summaries.where((element) => element.value == 2).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
                     ),
                     Indicator(
-                      potableM3: widget.summaries.where((element) => element.value == 5).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      potableGallons: widget.summaries.where((element) => element.value == 6).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      pozoM3: widget.summaries.where((element) => element.value == 7).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      pozoGallons: widget.summaries.where((element) => element.value == 8).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      potableTotal: widget.summaries.where((element) => element.value == 3).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      potableLiters: widget.summaries.where((element) => element.value == 3).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
+                      pozoTotal: widget.summaries.where((element) => element.value == 4).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      pozoLiters: widget.summaries.where((element) => element.value == 4).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
+                    ),
+                    Indicator(
+                      potableTotal: widget.summaries.where((element) => element.value == 5).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      potableLiters: widget.summaries.where((element) => element.value == 5).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
+                      pozoTotal: widget.summaries.where((element) => element.value == 6).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
+                      pozoLiters: widget.summaries.where((element) => element.value == 6).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
                     ),
                   ],
                 ),

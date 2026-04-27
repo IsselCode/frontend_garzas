@@ -129,7 +129,7 @@ class CashRegisterApi {
     }
   }
 
-  Future<CashRegisterEntity> closeCut(double cash, double card) async {
+  Future<void> closeCut(double cash, double card) async {
     try {
 
       Map<String, dynamic> body = {
@@ -137,13 +137,12 @@ class CashRegisterApi {
         "declared_card_total": card,
       };
 
-      Map<String, dynamic> response = await apiClient.post(
+      await apiClient.post(
         _cashRegisterClosePath,
         authRequired: true,
         body: body
       );
 
-      return CashRegisterEntity.fromMap(response["cut"]);
     } on AppException {
       rethrow;
     } catch (e) {
