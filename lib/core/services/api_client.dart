@@ -19,6 +19,7 @@ class ApiError {
 class ApiClient {
   static const String _cachedIpKey = 'cached_backend_ip';
   static const String _cachedPortKey = 'cached_backend_port';
+  static const Duration _healthTimeout = Duration(seconds: 3);
 
   final HttpClient _httpClient = HttpClient();
   late String baseUrl;
@@ -36,8 +37,10 @@ class ApiClient {
         baseUrl = cachedBaseUrl;
         return true;
       }
-    }
 
+      await prefs.remove(_cachedIpKey);
+      await prefs.remove(_cachedPortKey);
+    }
 
     final DeviceEntity? server = await MdnsService().discoverWithNsd();
     if (server == null || server.host.isEmpty) {
@@ -54,6 +57,22 @@ class ApiClient {
     await prefs.setString(_cachedIpKey, server.host);
     await prefs.setInt(_cachedPortKey, server.port);
     baseUrl = discoveredBaseUrl;
+    return true;
+  }
+
+  Future<bool> configureManualBackend({
+    required String host,
+    required int port,
+  }) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String manualBaseUrl = _buildBaseUrl(host, port);
+    final bool isAvailable = await _checkHealth(manualBaseUrl);
+
+    if (!isAvailable) return false;
+
+    await prefs.setString(_cachedIpKey, host);
+    await prefs.setInt(_cachedPortKey, port);
+    baseUrl = manualBaseUrl;
     return true;
   }
 
@@ -188,7 +207,9 @@ class ApiClient {
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw AppException(
-        message: _extractMessage(decoded)?.detail ?? 'La solicitud a la API fallo (${response.statusCode})',
+        message:
+            _extractMessage(decoded)?.detail ??
+            'La solicitud a la API fallo (${response.statusCode})',
       );
     }
 
@@ -266,8 +287,10 @@ class ApiClient {
 
   Future<bool> _checkHealth(String baseUrl) async {
     try {
-      final request = await _httpClient.getUrl(Uri.parse('$baseUrl/health'));
-      final response = await request.close();
+      final request = await _httpClient
+          .getUrl(Uri.parse('$baseUrl/health'))
+          .timeout(_healthTimeout);
+      final response = await request.close().timeout(_healthTimeout);
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (_) {
       return false;
