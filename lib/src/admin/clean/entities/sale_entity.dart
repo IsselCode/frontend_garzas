@@ -20,17 +20,15 @@ class SaleEntity extends Equatable {
   double amountPaid;
   double changeAmount;
   bool isDispatched;
-  DispatchStatus dispatchStatus;
-  String? dispatchedAt;
-  String? dispatchedByUid;
-  String? dispatchedByUsername;
-  int? dispatchedGarzaNumber;
   DateTime createdAt;
   double pendingAmount;
   bool isPaid;
   String? paidAt;
   String? paidByUid;
   String? paidByUsername;
+  double totalLiters;
+  double dispatchedLiters;
+  double remainingLiters;
 
 
   SaleEntity({
@@ -50,17 +48,15 @@ class SaleEntity extends Equatable {
     required this.amountPaid,
     required this.changeAmount,
     required this.isDispatched,
-    required this.dispatchStatus,
-    required this.dispatchedAt,
-    required this.dispatchedByUid,
-    required this.dispatchedByUsername,
-    required this.dispatchedGarzaNumber,
     required this.createdAt,
     required this.pendingAmount,
     required this.isPaid,
     required this.paidAt,
     required this.paidByUid,
     required this.paidByUsername,
+    required this.totalLiters,
+    required this.dispatchedLiters,
+    required this.remainingLiters
   });
 
   factory SaleEntity.fromMap(Map<String, dynamic> data) {
@@ -81,17 +77,15 @@ class SaleEntity extends Equatable {
       amountPaid: data["amount_paid"],
       changeAmount: data["change_amount"],
       isDispatched: data["is_dispatched"],
-      dispatchStatus: DispatchStatus.fromString(data["dispatch_status"]),
-      dispatchedAt: data["dispatched_at"],
-      dispatchedByUid: data["dispatched_by_uid"],
-      dispatchedByUsername: data["dispatched_by_username"],
-      dispatchedGarzaNumber: data["dispatched_garza_number"],
       createdAt: DateTime.parse(data["created_at"]),
       pendingAmount: data["pending_amount"],
       isPaid: data["is_paid"],
       paidAt: data["paid_at"],
       paidByUid: data["paid_by_uid"],
       paidByUsername: data["paid_by_username"],
+      totalLiters: data["total_liters"],
+      dispatchedLiters: data["dispatched_liters"],
+      remainingLiters: data["remaining_liters"]
     );
   }
 
@@ -113,21 +107,19 @@ class SaleEntity extends Equatable {
       "amount_paid": amountPaid,
       "change_amount": changeAmount,
       "is_dispatched": isDispatched,
-      "dispatch_status": dispatchStatus,
-      "dispatched_at": dispatchedAt,
-      "dispatched_by_uid": dispatchedByUid,
-      "dispatched_by_username": dispatchedByUsername,
-      "dispatched_garza_number": dispatchedGarzaNumber,
       "created_at": createdAt,
       "pending_amount": pendingAmount,
       "is_paid": isPaid,
       "paid_at": paidAt,
       "paid_by_uid": paidByUid,
       "paid_by_username": paidByUsername,
+      "total_liters": totalLiters,
+      "dispatched_liters": dispatchedLiters,
+      "remaining_liters": remainingLiters,
     };
   }
 
   @override
-  List<Object?> get props => [folio, dispatchCode, sellerUid, dispatchedByUid, isDispatched, dispatchStatus];
+  List<Object?> get props => [folio, dispatchCode, sellerUid, isDispatched, totalLiters, dispatchedLiters, remainingLiters];
 
 }

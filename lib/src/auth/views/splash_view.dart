@@ -1,14 +1,18 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/error_ip_connection_view.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/app/consts.dart';
+
+bool forceManualIpForTesting = false;
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -47,16 +51,45 @@ class _SplashScreenViewState extends State<SplashView>
       if (!mounted) return;
 
       // Obtener dirección ip con servicio mdns
-      ApiClient apiClient = locator();
       NavigationService navigationService = locator();
-      bool response = await apiClient.discoverWithNsd();
+      ToastService toastService = locator();
+      if (forceManualIpForTesting) {
+        // Prueba temporal: omite deteccion automatica/mDNS y solicita IP manual.
+        navigationService.pushAndRemoveUntil(ErrorIpConnectionView());
+        return;
+      }
+
+      ApiClient apiClient = locator();
+      bool response = false;
+
+      try {
+        response = await apiClient
+            .discoverWithNsd()
+            .timeout(const Duration(seconds: 10));
+      } on TimeoutException catch (e) {
+        toastService.error(
+          "Timeout en deteccion automatica: ${e.message ?? e.toString()}",
+        );
+        navigationService.pushAndRemoveUntil(ErrorIpConnectionView());
+        return;
+      } catch (e) {
+        toastService.error(
+          "Error en deteccion automatica (${e.runtimeType}): $e",
+        );
+        navigationService.pushAndRemoveUntil(ErrorIpConnectionView());
+        return;
+      }
 
       if (!response) {
+        toastService.error(
+          "No se encontro el servidor automaticamente. Ingresa la IP manualmente.",
+        );
         navigationService.pushAndRemoveUntil(ErrorIpConnectionView());
         return;
       }
 
       // Reestablecer sesión
+      if (!mounted) return;
       await context.read<AuthController>().restoreSession();
     });
   }

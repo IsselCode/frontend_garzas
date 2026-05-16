@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
-import 'package:frontend_garzas/src/dispatch/views/generate_ticket_dispatch_view.dart';
+import 'package:frontend_garzas/src/dispatch/views/dispatch_session_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -12,11 +12,10 @@ import '../../../commons/text_back_button.dart';
 import '../../../core/services/navigation_service.dart';
 import '../../../core/services/toast_service.dart';
 import '../../../inject_container.dart';
-import '../../admin/clean/entities/sale_entity.dart';
+import '../entities/dispatch_session_entity.dart';
 
 class FinishDispatchView extends StatelessWidget {
-
-  FinishDispatchView();
+  FinishDispatchView({super.key});
 
   final FocusNode buttonFocus = FocusNode();
   final FocusNode clientMoneyFocus = FocusNode();
@@ -33,7 +32,14 @@ class FinishDispatchView extends StatelessWidget {
     DispatchController dispatchController = context.read();
 
     // Data
-    UnitOfMeasurement unit = dispatchController.dispatchValidate!.unitOfMeasurement;
+    WaterType wt = dispatchController.dispatchValidate!.waterType;
+    UnitOfMeasurement unit =
+        dispatchController.dispatchValidate!.unitOfMeasurement;
+    final dispatchedQuantity = _litersToUnit(
+      dispatchController.dispatchValidate!.dispatchedLiters,
+      unit,
+    );
+    final purchasedQuantity = dispatchController.dispatchValidate!.quantity;
 
     return Scaffold(
       body: Stack(
@@ -50,22 +56,30 @@ class FinishDispatchView extends StatelessWidget {
                       spacing: 20,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Tipo de Agua", style: textTheme.titleMedium,),
+                        Text("Tipo de Agua", style: textTheme.titleMedium),
                         IsselTextFormField(
                           hintText: "Nombre del cliente",
-                          controller: TextEditingController(text: unit.dp),
+                          controller: TextEditingController(text: wt.dp),
                           readOnly: true,
                         ),
-                        Text("Cantidad en ${unit == UnitOfMeasurement.cubic_meters ? "Metros Cubicos" : "Galones"}", style: textTheme.titleMedium,),
+                        Text(
+                          "Cantidad en ${unit == UnitOfMeasurement.cubic_meters ? "Metros Cubicos" : "Galones"}",
+                          style: textTheme.titleMedium,
+                        ),
                         IsselTextFormField(
                           hintText: "Nombre del cliente",
-                          controller: TextEditingController(text: dispatchController.dispatchValidate!.quantity.toString()),
+                          controller: TextEditingController(
+                            text:
+                                "${_formatQuantity(dispatchedQuantity)}/${_formatQuantity(purchasedQuantity)}",
+                          ),
                           readOnly: true,
                         ),
-                        Text("Garza", style: textTheme.titleMedium,),
+                        Text("Garza", style: textTheme.titleMedium),
                         IsselTextFormField(
                           hintText: "Garza",
-                          controller: TextEditingController(text: dispatchController.selectedGarza!.title),
+                          controller: TextEditingController(
+                            text: dispatchController.selectedGarza!.title,
+                          ),
                           readOnly: true,
                         ),
                       ],
@@ -76,38 +90,43 @@ class FinishDispatchView extends StatelessWidget {
 
               //* Right
               Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.primaryToSecondary
-                    ),
-                    child: Center(
-                      child: SizedBox(
-                        width: 320,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 30,
-                          children: [
-                            Text("Realizar llenado", style: textTheme.displaySmall?.copyWith(color: colorScheme.onPrimary),),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.primaryToSecondary,
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: 360,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 30,
+                        children: [
+                          Text(
+                            "Continuar despacho",
+                            textAlign: TextAlign.center,
+                            style: textTheme.displaySmall?.copyWith(
+                              color: colorScheme.onPrimary,
+                            ),
+                          ),
 
-                            IsselButton(
-                              text: "Llenar",
-                              focusNode: buttonFocus,
-                              onTap: () => dispatchWater(context),
-                            )
-                          ],
-                        ),
+                          IsselButton(
+                            text: "Continuar",
+                            focusNode: buttonFocus,
+                            onTap: () => dispatchWater(context),
+                          ),
+                        ],
                       ),
                     ),
-                  )
-              )
-
+                  ),
+                ),
+              ),
             ],
           ),
           // AppBar
           Positioned(
             top: kWindowCaptionHeight + 10,
             left: 10,
-            child: TextBackButton()
+            child: TextBackButton(),
           ),
         ],
       ),
@@ -116,16 +135,29 @@ class FinishDispatchView extends StatelessWidget {
 
   void dispatchWater(BuildContext context) async {
     DispatchController dispatchController = context.read();
-    CtrlResponse<SaleEntity> response = await dispatchController.dispatch();
+    CtrlResponse<DispatchSessionEntity> response = await dispatchController
+        .createDispatchSession();
 
-    if (response.success){
+    if (response.success) {
       NavigationService navigationService = locator();
-      navigationService.pushAndRemoveUntil(GenerateTicketDispatchView());
+      navigationService.navigateTo(DispatchSessionView());
     } else {
       ToastService toastService = locator();
       toastService.error(response.message!);
     }
-
   }
 
+  double _litersToUnit(double liters, UnitOfMeasurement unit) {
+    switch (unit) {
+      case UnitOfMeasurement.cubic_meters:
+        return liters / 1000;
+      case UnitOfMeasurement.gallons:
+        return liters / 3.785411784;
+    }
+  }
+
+  String _formatQuantity(double value) {
+    final fixed = value.toStringAsFixed(2);
+    return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
+  }
 }

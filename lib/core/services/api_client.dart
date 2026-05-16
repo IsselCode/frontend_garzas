@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:frontend_garzas/commons/entities/device_entity.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/mdns_service.dart';
+import 'package:frontend_garzas/core/services/server_status_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef AccessTokenProvider = Future<String?> Function();
@@ -20,9 +22,15 @@ class ApiClient {
   static const String _cachedIpKey = 'cached_backend_ip';
   static const String _cachedPortKey = 'cached_backend_port';
   static const Duration _healthTimeout = Duration(seconds: 3);
+  static const Duration _requestTimeout = Duration(seconds: 10);
 
   final HttpClient _httpClient = HttpClient();
+  final ServerStatusController serverStatusController;
   late String baseUrl;
+
+  ApiClient({required this.serverStatusController}) {
+    _httpClient.connectionTimeout = _requestTimeout;
+  }
 
   Future<bool> discoverWithNsd() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -102,6 +110,49 @@ class ApiClient {
     );
   }
 
+  Future<Stream<String>> getTextStream(
+    String path, {
+    bool authRequired = true,
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParams,
+  }) async {
+    return _handleConnectionFailure(() async {
+      final url = _buildUri(path, queryParams: queryParams);
+      final request = await _openRequest('GET', url).timeout(_requestTimeout);
+
+      if (headers != null) {
+        headers.forEach(request.headers.set);
+      }
+
+      if (authRequired) {
+        final accessToken = await _accessTokenProvider?.call();
+        if (accessToken == null || accessToken.isEmpty) {
+          throw AppException(
+            message: 'No existe un token de acceso disponible',
+          );
+        }
+        request.headers.set(
+          HttpHeaders.authorizationHeader,
+          'Bearer $accessToken',
+        );
+      }
+
+      final response = await request.close().timeout(_requestTimeout);
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        final responseBody = await utf8.decodeStream(response);
+        final decoded = responseBody.isEmpty ? null : jsonDecode(responseBody);
+        throw AppException(
+          message:
+              _extractMessage(decoded)?.detail ??
+              'La solicitud a la API fallo (${response.statusCode})',
+        );
+      }
+
+      return response.transform(utf8.decoder);
+    });
+  }
+
   Future<dynamic> post(
     String path, {
     bool authRequired = true,
@@ -162,62 +213,81 @@ class ApiClient {
     Map<String, dynamic>? queryParams,
     bool retrying = false,
   }) async {
-    final url = _buildUri(path, queryParams: queryParams);
-    final request = await _openRequest(method, url);
+    return _handleConnectionFailure(() async {
+      final url = _buildUri(path, queryParams: queryParams);
+      final request = await _openRequest(method, url).timeout(_requestTimeout);
 
-    request.headers.contentType = ContentType.json;
+      request.headers.contentType = ContentType.json;
 
-    if (headers != null) {
-      headers.forEach(request.headers.set);
-    }
-
-    if (authRequired) {
-      final accessToken = await _accessTokenProvider?.call();
-      if (accessToken == null || accessToken.isEmpty) {
-        throw AppException(message: 'No existe un token de acceso disponible');
+      if (headers != null) {
+        headers.forEach(request.headers.set);
       }
-      request.headers.set(
-        HttpHeaders.authorizationHeader,
-        'Bearer $accessToken',
-      );
-    }
 
-    if (body != null) {
-      request.add(utf8.encode(jsonEncode(body)));
-    }
-
-    final response = await request.close();
-    final responseBody = await utf8.decodeStream(response);
-    final decoded = responseBody.isEmpty ? null : jsonDecode(responseBody);
-
-    if (response.statusCode == 401 && authRequired && !retrying) {
-      final refreshed = await _unauthorizedHandler?.call() ?? false;
-      if (refreshed) {
-        return _send(
-          method: method,
-          path: path,
-          authRequired: authRequired,
-          body: body,
-          headers: headers,
-          queryParams: queryParams,
-          retrying: true,
+      if (authRequired) {
+        final accessToken = await _accessTokenProvider?.call();
+        if (accessToken == null || accessToken.isEmpty) {
+          throw AppException(
+            message: 'No existe un token de acceso disponible',
+          );
+        }
+        request.headers.set(
+          HttpHeaders.authorizationHeader,
+          'Bearer $accessToken',
         );
       }
-    }
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw AppException(
-        message:
-            _extractMessage(decoded)?.detail ??
-            'La solicitud a la API fallo (${response.statusCode})',
-      );
-    }
+      if (body != null) {
+        request.add(utf8.encode(jsonEncode(body)));
+      }
 
-    if (decoded == null) {
-      return <String, dynamic>{};
-    }
+      final response = await request.close().timeout(_requestTimeout);
+      final responseBody = await utf8.decodeStream(response);
+      final decoded = responseBody.isEmpty ? null : jsonDecode(responseBody);
 
-    return decoded;
+      if (response.statusCode == 401 && authRequired && !retrying) {
+        final refreshed = await _unauthorizedHandler?.call() ?? false;
+        if (refreshed) {
+          return _send(
+            method: method,
+            path: path,
+            authRequired: authRequired,
+            body: body,
+            headers: headers,
+            queryParams: queryParams,
+            retrying: true,
+          );
+        }
+      }
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw AppException(
+          message:
+              _extractMessage(decoded)?.detail ??
+              'La solicitud a la API fallo (${response.statusCode})',
+        );
+      }
+
+      if (decoded == null) {
+        return <String, dynamic>{};
+      }
+
+      return decoded;
+    });
+  }
+
+  Future<T> _handleConnectionFailure<T>(Future<T> Function() request) async {
+    try {
+      return await request();
+    } on SocketException {
+      serverStatusController.markUnavailable();
+      throw AppException(message: 'No fue posible conectar con el servidor');
+    } on TimeoutException {
+      serverStatusController.markUnavailable();
+      throw AppException(message: 'El servidor no respondio a tiempo');
+    } on HttpException {
+      serverStatusController.markUnavailable();
+      throw AppException(message: 'Se perdio la conexion con el servidor');
+    }
   }
 
   Future<HttpClientRequest> _openRequest(String method, Uri url) {

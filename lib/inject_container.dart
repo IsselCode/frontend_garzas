@@ -2,8 +2,8 @@ import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
+import 'package:frontend_garzas/core/services/server_status_controller.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
@@ -22,6 +22,7 @@ import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/auth/data/auth_api.dart';
 import 'package:frontend_garzas/src/auth/data/auth_storage.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
+import 'package:frontend_garzas/src/dispatch/data/dispatch_sessions_api.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,23 +36,37 @@ Future<void> injectContainer() async {
   locator.registerLazySingleton(() => NavigationService());
   locator.registerLazySingleton(() => ToastService());
   locator.registerLazySingleton(() => TitleBarController());
-  locator.registerLazySingleton(() => PrinterService(sharedPreferences: locator()),);
+  locator.registerLazySingleton(() => ServerStatusController());
+  locator.registerLazySingleton(
+    () => PrinterService(sharedPreferences: locator()),
+  );
 
-  locator.registerLazySingleton(() => AuthStorage(sharedPreferences: locator()),);
-  locator.registerLazySingleton(() => ApiClient());
+  locator.registerLazySingleton(
+    () => AuthStorage(sharedPreferences: locator()),
+  );
+  locator.registerLazySingleton(
+    () => ApiClient(serverStatusController: locator()),
+  );
   locator.registerLazySingleton(() => AuthApi(apiClient: locator()));
-  locator.registerLazySingleton(() => UsersApi(apiClient: locator()),);
-  locator.registerLazySingleton(() => ClientsApi(apiClient: locator()),);
-  locator.registerLazySingleton(() => GarzasApi(apiClient: locator()),);
-  locator.registerLazySingleton(() => GeneralApi(apiClient: locator()),);
-  locator.registerLazySingleton(() => LogsApi(apiClient: locator()),);
-  locator.registerLazySingleton(() => SalesApi(apiClient: locator()),);
-  locator.registerLazySingleton(() => CashRegisterApi(apiClient: locator()),);
+  locator.registerLazySingleton(() => UsersApi(apiClient: locator()));
+  locator.registerLazySingleton(() => ClientsApi(apiClient: locator()));
+  locator.registerLazySingleton(() => GarzasApi(apiClient: locator()));
+  locator.registerLazySingleton(() => GeneralApi(apiClient: locator()));
+  locator.registerLazySingleton(() => LogsApi(apiClient: locator()));
+  locator.registerLazySingleton(() => SalesApi(apiClient: locator()));
+  locator.registerLazySingleton(() => CashRegisterApi(apiClient: locator()));
+  locator.registerLazySingleton(
+    () => DispatchSessionsApi(apiClient: locator()),
+  );
 
   // controllers
-  locator.registerLazySingleton(() => CashRegisterController(cashRegisterApi: locator()));
+  locator.registerLazySingleton(
+    () => CashRegisterController(cashRegisterApi: locator()),
+  );
   locator.registerLazySingleton(() => CreditsController(salesApi: locator()));
-  locator.registerLazySingleton(() => GeneralConfigController(generalApi: locator()));
+  locator.registerLazySingleton(
+    () => GeneralConfigController(generalApi: locator()),
+  );
 
   locator.registerLazySingleton(
     () => AuthController(
@@ -65,16 +80,23 @@ Future<void> injectContainer() async {
     ),
   );
 
-  locator.registerLazySingleton(() => DispatchController(
-    salesApi: locator(),
-    garzasApi: locator(),
-    generalConfigController: locator(),
-    printerService: locator(),
-    authController: locator()
-  ));
+  locator.registerLazySingleton(
+    () => DispatchController(
+      salesApi: locator(),
+      garzasApi: locator(),
+      dispatchSessionsApi: locator(),
+      generalConfigController: locator(),
+      printerService: locator(),
+      authController: locator(),
+    ),
+  );
 
-  locator.registerLazySingleton(() => UsersController(usersApi: locator()),);
-  locator.registerLazySingleton(() => ClientsController(clientsApi: locator()),);
-  locator.registerLazySingleton(() => ConfigGarzasController(garzasApi: locator()));
-  locator.registerLazySingleton(() => StatisticsController(logsApi: locator(), salesApi: locator()));
+  locator.registerLazySingleton(() => UsersController(usersApi: locator()));
+  locator.registerLazySingleton(() => ClientsController(clientsApi: locator()));
+  locator.registerLazySingleton(
+    () => ConfigGarzasController(garzasApi: locator()),
+  );
+  locator.registerLazySingleton(
+    () => StatisticsController(logsApi: locator(), salesApi: locator()),
+  );
 }

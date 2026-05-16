@@ -4,8 +4,9 @@ import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
+import 'package:frontend_garzas/src/dispatch/entities/garza_runtime_entity.dart';
+import 'package:frontend_garzas/src/dispatch/views/dispatch_session_view.dart';
 import 'package:frontend_garzas/src/dispatch/views/select_garza_view.dart';
-import 'package:frontend_garzas/src/sales/views/start_order_view.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,7 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _scannerController = TextEditingController();
   bool _isNavigating = false;
+  bool _showRuntimePanel = false;
 
   @override
   void initState() {
@@ -47,7 +49,6 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
   }
 
   void _handleScannerSubmit(String value) async {
-
     final scannedCode = value.trim();
 
     if (scannedCode.isEmpty || _isNavigating) {
@@ -56,11 +57,14 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
       return;
     }
 
-
-    context.loaderOverlay.show();
+    final loaderOverlay = context.loaderOverlay;
+    loaderOverlay.show();
     DispatchController controller = context.read();
-    CtrlResponse response = await controller.validateBarcode(_scannerController.text.trim());
-    context.loaderOverlay.hide();
+    CtrlResponse response = await controller.validateBarcode(scannedCode);
+
+    if (!mounted) return;
+
+    loaderOverlay.hide();
 
     if (response.success) {
       _isNavigating = true;
@@ -77,9 +81,6 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
 
     _isNavigating = false;
     _requestScannerFocus();
-
-    // TODO: VERIFICAR SI SE PUEDE LIMPIAR EL CONTROLADOR DE DESPACHO
-    print("SE NAVEGÓ HASTA ESTA VISTA DESPUES DEL TICKET");
   }
 
   @override
@@ -95,6 +96,7 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final dispatchController = context.watch<DispatchController>();
 
     return Scaffold(
       body: GestureDetector(
@@ -154,6 +156,254 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
                 ),
               ),
             ),
+            if (_showRuntimePanel)
+              Positioned(
+                right: 20,
+                bottom: 92,
+                child: _GarzasRuntimePanel(
+                  busyGarzas: dispatchController.busyGarzas,
+                  alarmGarzas: dispatchController.alarmGarzas,
+                  onTap: _openRuntimeGarza,
+                ),
+              ),
+            Positioned(
+              right: 20,
+              bottom: 20,
+              child: Badge(
+                isLabelVisible: dispatchController.runtimePanelGarzasCount > 0,
+                label: Text('${dispatchController.runtimePanelGarzasCount}'),
+                backgroundColor: colorScheme.error,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    setState(() {
+                      _showRuntimePanel = !_showRuntimePanel;
+                    });
+                    _requestScannerFocus();
+                  },
+                  child: Icon(
+                    _showRuntimePanel
+                        ? Icons.close
+                        : Icons.local_drink_outlined,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openRuntimeGarza(GarzaRuntimeEntity garza) {
+    final dispatchController = context.read<DispatchController>();
+    final navigationService = locator<NavigationService>();
+
+    dispatchController.selectRuntimeGarza(garza);
+    setState(() {
+      _showRuntimePanel = false;
+      _isNavigating = true;
+    });
+    navigationService.navigateTo(DispatchSessionView()).whenComplete(() {
+      if (!mounted) return;
+      _isNavigating = false;
+      _requestScannerFocus();
+    });
+  }
+}
+
+class _GarzasRuntimePanel extends StatelessWidget {
+  final List<GarzaRuntimeEntity> busyGarzas;
+  final List<GarzaRuntimeEntity> alarmGarzas;
+  final void Function(GarzaRuntimeEntity garza) onTap;
+
+  const _GarzasRuntimePanel({
+    required this.busyGarzas,
+    required this.alarmGarzas,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: 360,
+        constraints: const BoxConstraints(maxHeight: 420),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              child: Text('Garzas en atención', style: textTheme.titleMedium),
+            ),
+            if (busyGarzas.isEmpty && alarmGarzas.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'No hay garzas ocupadas ni con alarmas',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.outline,
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    if (busyGarzas.isNotEmpty)
+                      _RuntimeSectionTitle(text: 'Ocupadas'),
+                    ...busyGarzas.map(
+                      (garza) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _GarzaRuntimeTile(
+                          garza: garza,
+                          statusText: 'Ocupada',
+                          onTap: () => onTap(garza),
+                        ),
+                      ),
+                    ),
+                    if (alarmGarzas.isNotEmpty)
+                      _RuntimeSectionTitle(text: 'Con alarma'),
+                    ...alarmGarzas.map(
+                      (garza) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _GarzaRuntimeTile(
+                          garza: garza,
+                          statusText: 'Liberada con alarma',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RuntimeSectionTitle extends StatelessWidget {
+  final String text;
+
+  const _RuntimeSectionTitle({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, top: 8, bottom: 6),
+      child: Text(
+        text,
+        style: textTheme.labelLarge?.copyWith(color: colorScheme.outline),
+      ),
+    );
+  }
+}
+
+class _GarzaRuntimeTile extends StatelessWidget {
+  final GarzaRuntimeEntity garza;
+  final String statusText;
+  final VoidCallback? onTap;
+
+  const _GarzaRuntimeTile({
+    required this.garza,
+    required this.statusText,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final state = garza.currentState?.label ?? 'Sin estado';
+    final alarms = garza.activeAlarmDisplayNames.join(', ');
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Ink(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: garza.hasActiveAlarms
+                ? colorScheme.error
+                : colorScheme.outlineVariant,
+          ),
+        ),
+        child: Row(
+          children: [
+            Badge(
+              isLabelVisible: garza.hasActiveAlarms,
+              backgroundColor: colorScheme.error,
+              child: Image.asset(AppAssets.waterTank, width: 42, height: 42),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Garza ${garza.garzaNumber}',
+                    style: textTheme.titleSmall,
+                  ),
+                  Text(
+                    statusText,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: garza.hasActiveAlarms
+                          ? colorScheme.error
+                          : colorScheme.outline,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '$state  ${garza.dispensedVolumeLiters.toStringAsFixed(1)} / ${garza.authorizedVolumeLiters.toStringAsFixed(1)} L',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.outline,
+                    ),
+                  ),
+                  if (alarms.isNotEmpty)
+                    Text(
+                      alarms,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.error,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  if (garza.saleFolio != null)
+                    Text(
+                      garza.saleFolio!,
+                      style: textTheme.bodySmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              Icon(Icons.chevron_right, color: colorScheme.outline),
           ],
         ),
       ),

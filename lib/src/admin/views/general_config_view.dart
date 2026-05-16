@@ -34,7 +34,6 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   TextEditingController bussinessAddressCtrl = TextEditingController();
   TextEditingController extraInfo1Ctrl = TextEditingController();
   TextEditingController extraInfo2Ctrl = TextEditingController();
-  TextEditingController plcEndpoint = TextEditingController();
 
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
   double potableM3Pricing = 0;
@@ -67,7 +66,6 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     bussinessAddressCtrl.text = config.businessAddress;
     extraInfo1Ctrl.text = config.extraInfo1;
     extraInfo2Ctrl.text = config.extraInfo2;
-    plcEndpoint.text = config.plcEndpoint;
     potableGallonPricing = config.potableGalPricing;
     potableM3Pricing = config.potableM3Pricing;
     pozoGallonPricing = config.pozoGalPricing;
@@ -326,90 +324,54 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                       ),
                       // Información del ticket
                       Expanded(
-                        child: Column(
-                          spacing: 15,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(25),
-                              decoration: BoxDecoration(
-                                  color: colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(10)
-                              ),
-                              child: Form(
-                                key: formServerKey,
-                                child: Column(
-                                  spacing: 10,
-                                  children: [
-                                    IsselTextFormField(
-                                      controller: plcEndpoint,
-                                      hintText: "IP y puerto",
-                                      prefixIcon: Icons.dns_outlined,
-                                      fillColor: colorScheme.surfaceContainer,
-                                      validator: _serverValidator,
-                                    ),
-                                    IsselButton(
-                                      height: 50,
-                                      text: "Actualizar",
-                                      onTap: updateIpPlc,
-                                    )
-                                  ],
+                        child: Container(
+                          padding: EdgeInsets.all(25),
+                          decoration: BoxDecoration(
+                              color: colorScheme.surface,
+                              borderRadius: BorderRadius.circular(10)
+                          ),
+                          child: Form(
+                            key: formKey,
+                            child: Column(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text("Información del ticket", style: textTheme.titleMedium, textAlign: TextAlign.center,),
+                                Text("Nombre de la empresa", style: textTheme.titleSmall,),
+                                IsselTextFormField(
+                                  hintText: "PABN PURIFICADORA",
+                                  prefixIcon: Icons.title_outlined,
+                                  fillColor: colorScheme.surfaceContainer,
+                                  controller: businessNameCtrl,
                                 ),
-                              ),
+                                Text("Dirección de la empresa", style: textTheme.titleSmall),
+                                IsselTextFormField(
+                                  hintText: "Monzón 81000",
+                                  prefixIcon: Icons.directions_outlined,
+                                  fillColor: colorScheme.surfaceContainer,
+                                  controller: bussinessAddressCtrl,
+                                ),
+                                Text("Información adicional", style: textTheme.titleSmall),
+                                IsselTextFormField(
+                                  hintText: "Gracias por su compra.",
+                                  prefixIcon: Icons.info_outline,
+                                  fillColor: colorScheme.surfaceContainer,
+                                  controller: extraInfo1Ctrl,
+                                ),
+                                IsselTextFormField(
+                                  hintText: "¡Vuelva Pronto!",
+                                  prefixIcon: Icons.info_outline,
+                                  fillColor: colorScheme.surfaceContainer,
+                                  controller: extraInfo2Ctrl,
+                                ),
+                                IsselButton(
+                                  height: 50,
+                                  text: "Actualizar",
+                                  onTap: () => updateTicket(),
+                                )
+                              ],
                             ),
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.all(25),
-                                decoration: BoxDecoration(
-                                    color: colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(10)
-                                ),
-                                child: SingleChildScrollView(
-                                  child: Form(
-                                    key: formKey,
-                                    child: Column(
-                                      spacing: 10,
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        Text("Información del ticket", style: textTheme.titleMedium, textAlign: TextAlign.center,),
-                                        Text("Nombre de la empresa", style: textTheme.titleSmall,),
-                                        IsselTextFormField(
-                                          hintText: "PABN PURIFICADORA",
-                                          prefixIcon: Icons.title_outlined,
-                                          fillColor: colorScheme.surfaceContainer,
-                                          controller: businessNameCtrl,
-                                        ),
-                                        Text("Dirección de la empresa", style: textTheme.titleSmall),
-                                        IsselTextFormField(
-                                          hintText: "Monzón 81000",
-                                          prefixIcon: Icons.directions_outlined,
-                                          fillColor: colorScheme.surfaceContainer,
-                                          controller: bussinessAddressCtrl,
-                                        ),
-                                        Text("Información adicional", style: textTheme.titleSmall),
-                                        IsselTextFormField(
-                                          hintText: "Gracias por su compra.",
-                                          prefixIcon: Icons.info_outline,
-                                          fillColor: colorScheme.surfaceContainer,
-                                          controller: extraInfo1Ctrl,
-                                        ),
-                                        IsselTextFormField(
-                                          hintText: "¡Vuelva Pronto!",
-                                          prefixIcon: Icons.info_outline,
-                                          fillColor: colorScheme.surfaceContainer,
-                                          controller: extraInfo2Ctrl,
-                                        ),
-                                        IsselButton(
-                                          height: 50,
-                                          text: "Actualizar",
-                                          onTap: () => updateTicket(),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                       // Previsualización del Ticket
@@ -567,31 +529,6 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
 
     context.loaderOverlay.show();
     CtrlResponse response = await controller.updatePrices(potableGallonPricing, potableM3Pricing, pozoGallonPricing, pozoM3Pricing);
-    if (!mounted) return;
-    context.loaderOverlay.hide();
-
-    ToastService toastService = locator();
-    if (response.success) {
-      if (response.message != null) toastService.success(response.message!);
-    } else {
-      toastService.error(response.message!);
-    }
-
-  }
-
-  void updateIpPlc() async {
-
-
-    if (!formServerKey.currentState!.validate()) return;
-
-    final endpoint = _parseEndpoint(plcEndpoint.text);
-
-    if (endpoint == null) return;
-
-    GeneralConfigController controller = context.read();
-
-    context.loaderOverlay.show();
-    CtrlResponse response = await controller.updateIpPlc(endpoint);
     if (!mounted) return;
     context.loaderOverlay.hide();
 

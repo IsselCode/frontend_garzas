@@ -3,8 +3,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:frontend_garzas/commons/dialogs/exit_to_app_dialog.dart';
 import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
+import 'package:frontend_garzas/commons/server_unavailable_view.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/core/services/server_status_controller.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
@@ -15,7 +17,6 @@ import 'package:frontend_garzas/src/admin/controllers/general_config_controller.
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
-import 'package:frontend_garzas/src/auth/views/open_cash_register_cut_view.dart';
 import 'package:frontend_garzas/src/auth/views/splash_view.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/close_cut_dialog.dart';
@@ -24,11 +25,8 @@ import 'package:frontend_garzas/src/sales/clean/dialogs/credit_payment_dialog/cr
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
-
-import 'core/app/consts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,6 +66,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => locator<TitleBarController>(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => locator<ServerStatusController>(),
+        ),
         ChangeNotifierProvider(create: (context) => locator<AuthController>()),
         ChangeNotifierProvider(create: (context) => locator<UsersController>()),
         ChangeNotifierProvider(
@@ -92,153 +93,195 @@ class MyApp extends StatelessWidget {
           create: (context) => locator<CreditsController>(),
         ),
       ],
-      child: Consumer<TitleBarController>(
-        builder: (context, titleBarController, child) {
-          NavigationService navigationService = locator();
-          CashRegisterController cashRegisterController = locator();
-          AuthController authController = context.read();
+      child:
+          Consumer4<
+            TitleBarController,
+            AuthController,
+            DispatchController,
+            ServerStatusController
+          >(
+            builder:
+                (
+                  context,
+                  titleBarController,
+                  authController,
+                  dispatchController,
+                  serverStatusController,
+                  child,
+                ) {
+                  NavigationService navigationService = locator();
+                  CashRegisterController cashRegisterController = locator();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    dispatchController.syncRuntimeStream(
+                      shouldRun:
+                          authController.session?.role == AppRole.dispatch,
+                    );
+                  });
 
-          return GlobalLoaderOverlay(
-            child: ToastificationWrapper(
-              child: MaterialApp(
-                title: 'Flutter Demo',
-                debugShowCheckedModeBanner: false,
-                theme: titleBarController.currentTheme,
-                locale: const Locale('es', 'MX'),
-                supportedLocales: const [
-                  Locale('es', 'MX'),
-                  Locale('es'),
-                  Locale('en'),
-                ],
-                localizationsDelegates: const [
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-                navigatorKey: navigationService.navigatorKey,
-                builder: (context, child) {
-                  return Stack(
-                    children: [
-                      child!,
-                      SizedBox(
-                        height: Size.fromHeight(kWindowCaptionHeight).height,
-                        child: IsselSnapLayoutsCaption(
-                          icon: null,
-                          title: Material(
-                            color: Colors.transparent,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  titleBarController.title.isNotEmpty
-                                      ? "¡Hola, ${titleBarController.title}!"
-                                      : "",
-                                  style: Theme.of(context).textTheme.titleSmall
-                                      ?.copyWith(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
+                  return GlobalLoaderOverlay(
+                    child: ToastificationWrapper(
+                      child: MaterialApp(
+                        title: 'Flutter Demo',
+                        debugShowCheckedModeBanner: false,
+                        theme: titleBarController.currentTheme,
+                        locale: const Locale('es', 'MX'),
+                        supportedLocales: const [
+                          Locale('es', 'MX'),
+                          Locale('es'),
+                          Locale('en'),
+                        ],
+                        localizationsDelegates: const [
+                          GlobalMaterialLocalizations.delegate,
+                          GlobalWidgetsLocalizations.delegate,
+                          GlobalCupertinoLocalizations.delegate,
+                        ],
+                        navigatorKey: navigationService.navigatorKey,
+                        builder: (context, child) {
+                          return Stack(
+                            children: [
+                              child!,
+                              if (serverStatusController.serverUnavailable)
+                                const Positioned.fill(
+                                  child: ServerUnavailableView(),
+                                ),
+                              SizedBox(
+                                height: Size.fromHeight(
+                                  kWindowCaptionHeight,
+                                ).height,
+                                child: IsselSnapLayoutsCaption(
+                                  icon: null,
+                                  title: Material(
+                                    color: Colors.transparent,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          titleBarController.title.isNotEmpty
+                                              ? "¡Hola, ${titleBarController.title}!"
+                                              : "",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall
+                                              ?.copyWith(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                              ),
+                                        ),
+                                        IsselToggle(
+                                          onChanged: (value) =>
+                                              titleBarController.toggleTheme(),
+                                          value: titleBarController.isDarkMode,
+                                          height: 35,
+                                          width: 45,
+                                          backColor: Theme.of(
+                                            context,
+                                          ).colorScheme.surface,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: [
+                                    if (authController.session != null &&
+                                        authController.session!.role !=
+                                            AppRole.admin)
+                                      IsselWindowCaptionAction(
+                                        icon: Icon(Icons.print_outlined),
+                                        onPressed: () {
+                                          final dialogContext =
+                                              navigationService
+                                                  .navigatorKey
+                                                  .currentContext;
+                                          if (dialogContext == null) return;
+                                          showDialog(
+                                            context: dialogContext,
+                                            builder: (context) =>
+                                                ConfigPrinterDialog(),
+                                          );
+                                        },
                                       ),
+                                    if (authController.session != null &&
+                                        authController.session!.role ==
+                                            AppRole.seller)
+                                      IsselWindowCaptionAction(
+                                        icon: Icon(
+                                          Icons.payment,
+                                          color: Colors.blue,
+                                        ),
+                                        onPressed: () {
+                                          authController.session!.role ==
+                                              AppRole.seller;
+                                          final dialogContext =
+                                              navigationService
+                                                  .navigatorKey
+                                                  .currentContext;
+                                          if (dialogContext == null) return;
+                                          showDialog(
+                                            context: dialogContext,
+                                            builder: (context) =>
+                                                CreditPaymentDialog.init(
+                                                  context,
+                                                ),
+                                          );
+                                        },
+                                      ),
+                                    if (authController.session != null &&
+                                        authController.session!.role ==
+                                            AppRole.seller &&
+                                        cashRegisterController.openCash)
+                                      IsselWindowCaptionAction(
+                                        icon: FaIcon(
+                                          FontAwesomeIcons.cashRegister,
+                                          color: Colors.blue,
+                                          size: 16,
+                                        ),
+                                        onPressed: () {
+                                          authController.session!.role ==
+                                              AppRole.seller;
+                                          final dialogContext =
+                                              navigationService
+                                                  .navigatorKey
+                                                  .currentContext;
+                                          if (dialogContext == null) return;
+                                          showDialog(
+                                            context: dialogContext,
+                                            builder: (context) =>
+                                                CloseCutDialog(),
+                                          );
+                                        },
+                                      ),
+                                    if (authController.session != null)
+                                      IsselWindowCaptionAction(
+                                        icon: Icon(
+                                          Icons.exit_to_app,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          final dialogContext =
+                                              navigationService
+                                                  .navigatorKey
+                                                  .currentContext;
+                                          if (dialogContext == null) return;
+                                          showDialog(
+                                            context: dialogContext,
+                                            builder: (context) =>
+                                                ExitToAppDialog(),
+                                          );
+                                        },
+                                      ),
+                                  ],
                                 ),
-                                IsselToggle(
-                                  onChanged: (value) =>
-                                      titleBarController.toggleTheme(),
-                                  value: titleBarController.isDarkMode,
-                                  height: 35,
-                                  width: 45,
-                                  backColor: Theme.of(
-                                    context,
-                                  ).colorScheme.surface,
-                                ),
-                              ],
-                            ),
-                          ),
-                          actions: [
-                            if (authController.session != null &&
-                                authController.session!.role != AppRole.admin)
-                              IsselWindowCaptionAction(
-                                icon: Icon(Icons.print_outlined),
-                                onPressed: () {
-                                  final dialogContext = navigationService
-                                      .navigatorKey
-                                      .currentContext;
-                                  if (dialogContext == null) return;
-                                  showDialog(
-                                    context: dialogContext,
-                                    builder: (context) => ConfigPrinterDialog(),
-                                  );
-                                },
                               ),
-                            if (authController.session != null &&
-                                authController.session!.role == AppRole.seller)
-                              IsselWindowCaptionAction(
-                                icon: Icon(Icons.payment, color: Colors.blue),
-                                onPressed: () {
-                                  authController.session!.role ==
-                                      AppRole.seller;
-                                  final dialogContext = navigationService
-                                      .navigatorKey
-                                      .currentContext;
-                                  if (dialogContext == null) return;
-                                  showDialog(
-                                    context: dialogContext,
-                                    builder: (context) =>
-                                        CreditPaymentDialog.init(context),
-                                  );
-                                },
-                              ),
-                            if (authController.session != null &&
-                                authController.session!.role ==
-                                    AppRole.seller &&
-                                cashRegisterController.openCash)
-                              IsselWindowCaptionAction(
-                                icon: FaIcon(
-                                  FontAwesomeIcons.cashRegister,
-                                  color: Colors.blue,
-                                  size: 16,
-                                ),
-                                onPressed: () {
-                                  authController.session!.role ==
-                                      AppRole.seller;
-                                  final dialogContext = navigationService
-                                      .navigatorKey
-                                      .currentContext;
-                                  if (dialogContext == null) return;
-                                  showDialog(
-                                    context: dialogContext,
-                                    builder: (context) => CloseCutDialog(),
-                                  );
-                                },
-                              ),
-                            if (authController.session != null)
-                              IsselWindowCaptionAction(
-                                icon: Icon(
-                                  Icons.exit_to_app,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () {
-                                  final dialogContext = navigationService
-                                      .navigatorKey
-                                      .currentContext;
-                                  if (dialogContext == null) return;
-                                  showDialog(
-                                    context: dialogContext,
-                                    builder: (context) => ExitToAppDialog(),
-                                  );
-                                },
-                              ),
-                          ],
-                        ),
+                            ],
+                          );
+                        },
+                        home: SplashView(),
                       ),
-                    ],
+                    ),
                   );
                 },
-                home: SplashView(),
-              ),
-            ),
-          );
-        },
-      ),
+          ),
     );
   }
 }

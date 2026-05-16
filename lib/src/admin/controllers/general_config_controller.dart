@@ -130,32 +130,6 @@ class GeneralConfigController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> updateIpPlc(String ip) async {
-
-    GeneralConfigEntity previousConfig = generalConfigEntity!;
-
-
-    GeneralConfigEntity newConfig = generalConfigEntity!.copyWith(
-      plcEndpoint: ip,
-    );
-
-    if (newConfig == previousConfig) {
-      return CtrlResponse(success: true);
-    }
-
-    generalConfigEntity = newConfig;
-    notifyListeners();
-
-    try {
-      await generalApi.updateConfig(newConfig);
-      return CtrlResponse(success: true);
-    } on AppException catch(e) {
-      generalConfigEntity = previousConfig;
-      notifyListeners();
-      return CtrlResponse(success: false, message: e.message);
-    }
-  }
-
 
 
 }

@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/dispatch/views/home_dispatch_view.dart';
 import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
 
 import '../../../core/app/consts.dart';
 import '../../../core/services/navigation_service.dart';
 import '../../../inject_container.dart';
 
 class GenerateTicketDispatchView extends StatefulWidget {
-
-  const GenerateTicketDispatchView();
+  const GenerateTicketDispatchView({super.key});
 
   @override
-  State<GenerateTicketDispatchView> createState() => _GenerateTicketDispatchViewState();
+  State<GenerateTicketDispatchView> createState() =>
+      _GenerateTicketDispatchViewState();
 }
 
-class _GenerateTicketDispatchViewState extends State<GenerateTicketDispatchView> {
-
+class _GenerateTicketDispatchViewState
+    extends State<GenerateTicketDispatchView> {
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration(seconds: 2)).then((value) {
       NavigationService navigationService = locator();
       navigationService.pushAndRemoveUntil(HomeDispatchView());
-    },);
+    });
   }
 
   @override
@@ -35,16 +33,19 @@ class _GenerateTicketDispatchViewState extends State<GenerateTicketDispatchView>
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppGradients.primaryToSecondary
-        ),
+        decoration: BoxDecoration(gradient: AppGradients.primaryToSecondary),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Transform.translate(
                 offset: Offset(0, 100),
-                child: Text("Llenando", style: textTheme.displayMedium?.copyWith(color: colorScheme.onPrimary),)
+                child: Text(
+                  "Llenando",
+                  style: textTheme.displayMedium?.copyWith(
+                    color: colorScheme.onPrimary,
+                  ),
+                ),
               ),
               Lottie.asset(
                 AppLotties.water_indicator,

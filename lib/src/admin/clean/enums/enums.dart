@@ -51,30 +51,6 @@ enum PaymentMethod {
 
 }
 
-enum DispatchStatus {
-
-  pending(label: "Pendiente"),
-  success(label: "Éxito"),
-  failed(label: "Error");
-
-  final String label;
-  const DispatchStatus({required this.label});
-
-  static fromString(String role) {
-    switch (role) {
-      case "pending":
-        return DispatchStatus.pending;
-      case "success":
-        return DispatchStatus.success;
-      case "failed":
-        return DispatchStatus.failed;
-      default:
-        throw AppException(message: "Estado no identificado");
-    }
-  }
-
-}
-
 enum CashRegisterStatus {
 
   open(label: "Abierto"),

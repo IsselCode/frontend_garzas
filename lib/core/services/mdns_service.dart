@@ -43,8 +43,7 @@ class MdnsService {
       await stopDiscovery(discovery);
       return out.isNotEmpty ? out.first : null;
     } catch (e) {
-      print(e);
-      throw UnimplementedError();
+      throw Exception('Error al detectar servidor por mDNS: $e');
     }
   }
 }
