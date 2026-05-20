@@ -211,6 +211,7 @@ class OrderController extends ChangeNotifier {
       unitOfMeasurement: _saleEntity!.unitOfMeasurement,
       quantity: _saleEntity!.quantity,
       total: total,
+      paymentMethod: _saleEntity!.paymentMethod,
       amountPaid: _saleEntity!.amountPaid,
       changeAmount: _saleEntity!.changeAmount,
       dispatchCode: _saleEntity!.dispatchCode,

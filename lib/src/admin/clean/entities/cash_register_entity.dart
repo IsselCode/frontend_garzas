@@ -1,10 +1,7 @@
-
-
 import 'package:equatable/equatable.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 
 class CashRegisterEntity extends Equatable {
-
   int id;
   String openedByUid;
   String openedByUsername;
@@ -41,10 +38,12 @@ class CashRegisterEntity extends Equatable {
       openedByUid: data["opened_by_uid"],
       openedByUsername: data["opened_by_username"],
       openingAmount: data["opening_amount"],
-      openedAt: DateTime.parse(data["opened_at"]),
+      openedAt: DateTime.parse(data["opened_at"]).toLocal(),
       closedByUid: data["closed_by_uid"],
       closedByUsername: data["closed_by_username"],
-      closedAt: data["closed_at"] != null ? DateTime.parse(data["closed_at"]) : null,
+      closedAt: data["closed_at"] != null
+          ? DateTime.parse(data["closed_at"]).toLocal()
+          : null,
       status: CashRegisterStatus.fromString(data["status"]),
       cashTotal: data["cash_total"],
       cardTotal: data["card_total"],
@@ -54,6 +53,11 @@ class CashRegisterEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, openedByUid, closedByUid, cashTotal, cardTotal];
-
+  List<Object?> get props => [
+    id,
+    openedByUid,
+    closedByUid,
+    cashTotal,
+    cardTotal,
+  ];
 }

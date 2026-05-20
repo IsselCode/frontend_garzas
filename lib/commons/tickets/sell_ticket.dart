@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:barcode/barcode.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/general_config_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -24,6 +25,7 @@ class SellTicketEntity {
   UnitOfMeasurement unitOfMeasurement;
   double quantity;
   double total;
+  PaymentMethod paymentMethod;
   double amountPaid;
   double changeAmount;
   String dispatchCode;
@@ -38,6 +40,7 @@ class SellTicketEntity {
     required this.unitOfMeasurement,
     required this.quantity,
     required this.total,
+    required this.paymentMethod,
     required this.amountPaid,
     required this.changeAmount,
     required this.dispatchCode,
@@ -65,6 +68,7 @@ Future<Uint8List> sellTicketPdf(
   final clientPhone = (sellTicketEntity.clientPhone ?? '').trim();
   final quantityText =
       '${sellTicketEntity.quantity.toStringAsFixed(2)} ${sellTicketEntity.unitOfMeasurement.abbr}';
+  final isCashPayment = sellTicketEntity.paymentMethod == PaymentMethod.cash;
 
   String twoDigits(int value) => value.toString().padLeft(2, '0');
   String formatDate(DateTime date) =>
@@ -148,15 +152,19 @@ Future<Uint8List> sellTicketPdf(
               'Cliente',
               clientName.isEmpty ? 'Publico general' : clientName,
             ),
-            dataRow('Telefono', clientPhone.isEmpty ? 'N/A' : clientPhone),
+            if (clientPhone.isNotEmpty)
+            dataRow('Telefono', clientPhone),
             dataRow('Tipo de agua', sellTicketEntity.waterType.dp),
             dataRow('Cantidad', quantityText),
             pw.SizedBox(height: 4),
             pw.Divider(),
             pw.SizedBox(height: 4),
             dataRow('Total', formatMoney(sellTicketEntity.total)),
-            dataRow('Pago', formatMoney(sellTicketEntity.amountPaid)),
-            dataRow('Cambio', formatMoney(sellTicketEntity.changeAmount)),
+            dataRow('Forma de pago', sellTicketEntity.paymentMethod.label),
+            if (isCashPayment) ...[
+              dataRow('Pago', formatMoney(sellTicketEntity.amountPaid)),
+              dataRow('Cambio', formatMoney(sellTicketEntity.changeAmount)),
+            ],
             pw.SizedBox(height: 14),
             pw.BarcodeWidget(
               barcode: Barcode.code128(),

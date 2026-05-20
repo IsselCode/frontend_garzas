@@ -135,7 +135,7 @@ class _StartOrderViewState extends State<StartOrderView> {
                             Column(
                               spacing: 10,
                               children: [
-                                Text("Selecciona el tipo de agua", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
+                                Text("Selecciona la unidad", style: textTheme.bodyLarge?.copyWith(color: colorScheme.outline),),
                                 IsselTabSwitcher(
                                   state: orderController.stateUnit,
                                   leftText: "Metros Cubicos",

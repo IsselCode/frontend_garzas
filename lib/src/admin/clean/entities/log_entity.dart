@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 
 class LogEntity extends Equatable {
-
   int id;
   String userUid;
   String username;
@@ -38,11 +37,21 @@ class LogEntity extends Equatable {
       info: data["info"],
       statusCode: data["status_code"],
       durationMs: data["duration_ms"],
-      createdAt: DateTime.parse(data["created_at"])
+      createdAt: DateTime.parse(data["created_at"]).toLocal(),
     );
   }
 
   @override
-  List<Object?> get props => [id, userUid, username, displayName, role, tipo, info, statusCode, durationMs, createdAt];
-
+  List<Object?> get props => [
+    id,
+    userUid,
+    username,
+    displayName,
+    role,
+    tipo,
+    info,
+    statusCode,
+    durationMs,
+    createdAt,
+  ];
 }

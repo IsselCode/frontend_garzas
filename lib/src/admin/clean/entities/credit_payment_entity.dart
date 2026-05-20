@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 
 class CreditPaymentEntity extends Equatable {
-
   String saleFolio;
   String clientPhone;
   int cashCutId;
@@ -20,7 +19,7 @@ class CreditPaymentEntity extends Equatable {
     required this.receivedByUsername,
     required this.paymentMethod,
     required this.amount,
-    required this.createdAt
+    required this.createdAt,
   });
 
   factory CreditPaymentEntity.fromMap(Map<String, dynamic> map) {
@@ -33,11 +32,19 @@ class CreditPaymentEntity extends Equatable {
       receivedByUsername: map["received_by_username"],
       paymentMethod: PaymentMethod.fromString(map["payment_method"]),
       amount: map["amount"],
-      createdAt: DateTime.parse(map["created_at"])
+      createdAt: DateTime.parse(map["created_at"]).toLocal(),
     );
   }
 
   @override
-  List<Object?> get props => [saleFolio, clientPhone, cashCutId, receivedByUid, receivedByUsername, paymentMethod, amount, createdAt];
-
+  List<Object?> get props => [
+    saleFolio,
+    clientPhone,
+    cashCutId,
+    receivedByUid,
+    receivedByUsername,
+    paymentMethod,
+    amount,
+    createdAt,
+  ];
 }

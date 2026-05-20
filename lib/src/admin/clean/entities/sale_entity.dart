@@ -3,7 +3,6 @@ import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 
 class SaleEntity extends Equatable {
-
   String folio;
   String dispatchCode;
   int cashCutId;
@@ -30,7 +29,6 @@ class SaleEntity extends Equatable {
   double dispatchedLiters;
   double remainingLiters;
 
-
   SaleEntity({
     required this.folio,
     required this.dispatchCode,
@@ -56,7 +54,7 @@ class SaleEntity extends Equatable {
     required this.paidByUsername,
     required this.totalLiters,
     required this.dispatchedLiters,
-    required this.remainingLiters
+    required this.remainingLiters,
   });
 
   factory SaleEntity.fromMap(Map<String, dynamic> data) {
@@ -69,7 +67,9 @@ class SaleEntity extends Equatable {
       clientPhone: data["client_phone"],
       clientName: data["client_name"],
       waterType: WaterType.fromString(data["water_type"]),
-      unitOfMeasurement: UnitOfMeasurement.fromString(data["unit_of_measurement"]),
+      unitOfMeasurement: UnitOfMeasurement.fromString(
+        data["unit_of_measurement"],
+      ),
       quantity: data["quantity"],
       unitPrice: data["unit_price"],
       total: data["total"],
@@ -77,7 +77,7 @@ class SaleEntity extends Equatable {
       amountPaid: data["amount_paid"],
       changeAmount: data["change_amount"],
       isDispatched: data["is_dispatched"],
-      createdAt: DateTime.parse(data["created_at"]),
+      createdAt: DateTime.parse(data["created_at"]).toLocal(),
       pendingAmount: data["pending_amount"],
       isPaid: data["is_paid"],
       paidAt: data["paid_at"],
@@ -85,7 +85,7 @@ class SaleEntity extends Equatable {
       paidByUsername: data["paid_by_username"],
       totalLiters: data["total_liters"],
       dispatchedLiters: data["dispatched_liters"],
-      remainingLiters: data["remaining_liters"]
+      remainingLiters: data["remaining_liters"],
     );
   }
 
@@ -120,6 +120,13 @@ class SaleEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [folio, dispatchCode, sellerUid, isDispatched, totalLiters, dispatchedLiters, remainingLiters];
-
+  List<Object?> get props => [
+    folio,
+    dispatchCode,
+    sellerUid,
+    isDispatched,
+    totalLiters,
+    dispatchedLiters,
+    remainingLiters,
+  ];
 }

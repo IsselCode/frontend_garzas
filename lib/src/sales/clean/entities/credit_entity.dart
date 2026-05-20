@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class CreditEntity extends Equatable {
-
   String saleFolio;
   String clientPhone;
   String clientName;
@@ -17,7 +16,7 @@ class CreditEntity extends Equatable {
     required this.total,
     required this.amountPaid,
     required this.salePendingAmount,
-    required this.createdAt
+    required this.createdAt,
   });
 
   factory CreditEntity.fromMap(Map<String, dynamic> map) {
@@ -29,11 +28,18 @@ class CreditEntity extends Equatable {
       total: map["total"],
       amountPaid: map["amount_paid"],
       salePendingAmount: map["sale_pending_amount"],
-      createdAt: DateTime.parse(map["created_at"])
+      createdAt: DateTime.parse(map["created_at"]).toLocal(),
     );
   }
 
   @override
-  List<Object?> get props => [saleFolio, clientPhone, clientName, total, amountPaid, salePendingAmount, createdAt];
-
+  List<Object?> get props => [
+    saleFolio,
+    clientPhone,
+    clientName,
+    total,
+    amountPaid,
+    salePendingAmount,
+    createdAt,
+  ];
 }

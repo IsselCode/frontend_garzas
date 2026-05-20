@@ -60,7 +60,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
 
   void _syncControllers() {
     final config = controller.generalConfigEntity;
-    if (config == null ) return;
+    if (config == null) return;
 
     businessNameCtrl.text = config.businessName;
     bussinessAddressCtrl.text = config.businessAddress;
@@ -103,7 +103,12 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
 
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.only(top: kWindowCaptionHeight + 10, left: 10, right: 10, bottom: 10),
+        padding: EdgeInsets.only(
+          top: kWindowCaptionHeight + 10,
+          left: 10,
+          right: 10,
+          bottom: 10,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 20,
@@ -112,22 +117,38 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
             FutureBuilder(
               future: _loadGeneralConfig,
               builder: (context, snapshot) {
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Expanded(
                     child: Row(
                       spacing: 25,
                       children: [
-                        Expanded(child: IsselShimmer(width: double.infinity, height: double.infinity)),
-                        Expanded(child: IsselShimmer(width: double.infinity, height: double.infinity)),
-                        Expanded(child: IsselShimmer(width: double.infinity, height: double.infinity)),
+                        Expanded(
+                          child: IsselShimmer(
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Expanded(
+                          child: IsselShimmer(
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Expanded(
+                          child: IsselShimmer(
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
                       ],
                     ),
                   );
                 }
 
                 if (generalConfigController.generalConfigEntity == null) {
-                  return Center(child: Text("No hay una configuración disponible"),);
+                  return Center(
+                    child: Text("No hay una configuración disponible"),
+                  );
                 }
 
                 return Expanded(
@@ -141,184 +162,271 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                           children: [
                             Expanded(
                               child: Container(
-                                  padding: EdgeInsets.all(25),
-                                  decoration: BoxDecoration(
-                                      color: colorScheme.surface,
-                                      borderRadius: BorderRadius.circular(10)
-                                  ),
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      spacing: 10,
-                                      children: [
-                                        Text("Logs", style: textTheme.titleMedium,),
-                                        IsselToggleField(
-                                          title: "Datos de la carga",
-                                          value: generalConfigController.generalConfigEntity!.waterSupply,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.waterSupply, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Usuario creado",
-                                          value: generalConfigController.generalConfigEntity!.userCreated,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.userCreated, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Usuario eliminado",
-                                          value: generalConfigController.generalConfigEntity!.userDeleted,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.userDeleted, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Usuario modificado",
-                                          value: generalConfigController.generalConfigEntity!.userModified,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.userDeleted, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Inicio de sesión",
-                                          value: generalConfigController.generalConfigEntity!.login,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.login, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Cierre de sesión",
-                                          value: generalConfigController.generalConfigEntity!.logout,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.logout, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Cliente creado",
-                                          value: generalConfigController.generalConfigEntity!.clientCreated,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.clientCreated, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Cliente modificado",
-                                          value: generalConfigController.generalConfigEntity!.clientModified,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.clientModified, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Cliente eliminado",
-                                          value: generalConfigController.generalConfigEntity!.clientDeleted,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.clientDeleted, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Apertura de corte",
-                                          value: generalConfigController.generalConfigEntity!.cashRegisterOpening,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.cashRegisterOpening, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Cierre de corte",
-                                          value: generalConfigController.generalConfigEntity!.cashRegisterClosing,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.cashRegisterClosing, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Venta creada",
-                                          value: generalConfigController.generalConfigEntity!.saleCreated,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.saleCreated, value),
-                                        ),
-                                        IsselToggleField(
-                                          title: "Despacho completo",
-                                          value: generalConfigController.generalConfigEntity!.dispatchCompleted,
-                                          backColor: colorScheme.surfaceContainer,
-                                          onChanged: (value) => updateLogs(GeneralConfigLogField.dispatchCompleted, value),
-                                        )
-                                      ],
-                                    ),
-                                  ),
+                                padding: EdgeInsets.all(25),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                  padding: EdgeInsets.all(25),
-                                  decoration: BoxDecoration(
-                                      color: colorScheme.surface,
-                                      borderRadius: BorderRadius.circular(10)
-                                  ),
+                                child: SingleChildScrollView(
                                   child: Column(
                                     spacing: 10,
                                     children: [
-                                      Text("Precios", style: textTheme.titleMedium,),
-                                      IsselTabSwitcher(
-                                        state: state,
-                                        leftText: "Potable",
-                                        rightText: "Pozo",
-                                        onChanged: onChangeWaterType,
-                                        color: colorScheme.surfaceContainer,
+                                      Text(
+                                        "Logs",
+                                        style: textTheme.titleMedium,
                                       ),
-                                      SizedBox(
-                                        height: 110,
-                                        child: PageView(
-                                          controller: pageController,
-                                          children: [
-                                            Column(
-                                              spacing: 10,
-                                              children: [
-                                                IsselStepperField(
-                                                  height: 50,
-                                                  title: "M3",
-                                                  onChanged: (value) => potableM3Pricing = value,
-                                                  maxValue: 10000,
-                                                  minValue: 0,
-                                                  initValue: potableM3Pricing,
-                                                  backColor: colorScheme.surfaceContainer,
-                                                  counterColor: colorScheme.surface,
-                                                ),
-                                                IsselStepperField(
-                                                  height: 50,
-                                                  title: "Galón",
-                                                  onChanged: (value) => potableGallonPricing = value,
-                                                  maxValue: 10000,
-                                                  minValue: 0,
-                                                  initValue: potableGallonPricing,
-                                                  backColor: colorScheme.surfaceContainer,
-                                                  counterColor: colorScheme.surface,
-                                                ),
-                                              ],
-                                            ),
-                                            Column(
-                                              spacing: 10,
-                                              children: [
-                                                IsselStepperField(
-                                                  height: 50,
-                                                  title: "M3",
-                                                  onChanged: (value) => pozoM3Pricing = value,
-                                                  maxValue: 10000,
-                                                  minValue: 0,
-                                                  initValue: pozoM3Pricing,
-                                                  backColor: colorScheme.surfaceContainer,
-                                                  counterColor: colorScheme.surface,
-                                                ),
-                                                IsselStepperField(
-                                                  height: 50,
-                                                  title: "Galón",
-                                                  onChanged: (value) => pozoGallonPricing = value,
-                                                  maxValue: 10000,
-                                                  minValue: 0,
-                                                  initValue: pozoGallonPricing,
-                                                  backColor: colorScheme.surfaceContainer,
-                                                  counterColor: colorScheme.surface,
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                                      IsselToggleField(
+                                        title: "Datos de la carga",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .waterSupply,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.waterSupply,
+                                          value,
                                         ),
                                       ),
-                                      IsselButton(
-                                        height: 50,
-                                        text: "Actualizar",
-                                        onTap: () => updatePrices(),
-                                      )
+                                      IsselToggleField(
+                                        title: "Usuario creado",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .userCreated,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.userCreated,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Usuario eliminado",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .userDeleted,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.userDeleted,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Usuario modificado",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .userModified,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.userDeleted,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Inicio de sesión",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .login,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.login,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Cierre de sesión",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .logout,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.logout,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Cliente creado",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .clientCreated,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.clientCreated,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Cliente modificado",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .clientModified,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.clientModified,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Cliente eliminado",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .clientDeleted,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.clientDeleted,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Apertura de corte",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .cashRegisterOpening,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField
+                                              .cashRegisterOpening,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Cierre de corte",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .cashRegisterClosing,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField
+                                              .cashRegisterClosing,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Venta creada",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .saleCreated,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField.saleCreated,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
+                                        title: "Despacho completo",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .dispatchCompleted,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField
+                                              .dispatchCompleted,
+                                          value,
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                )
-                            )
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(25),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  spacing: 10,
+                                  children: [
+                                    Text(
+                                      "Precios",
+                                      style: textTheme.titleMedium,
+                                    ),
+                                    IsselTabSwitcher(
+                                      state: state,
+                                      leftText: "Potable",
+                                      rightText: "Pozo",
+                                      onChanged: onChangeWaterType,
+                                      color: colorScheme.surfaceContainer,
+                                    ),
+                                    SizedBox(
+                                      height: 110,
+                                      child: PageView(
+                                        controller: pageController,
+                                        children: [
+                                          Column(
+                                            spacing: 10,
+                                            children: [
+                                              IsselStepperField(
+                                                height: 50,
+                                                title: "M3",
+                                                onChanged: (value) =>
+                                                    potableM3Pricing = value,
+                                                maxValue: 10000,
+                                                minValue: 0,
+                                                initValue: potableM3Pricing,
+                                                backColor: colorScheme
+                                                    .surfaceContainer,
+                                                counterColor:
+                                                    colorScheme.surface,
+                                              ),
+                                              IsselStepperField(
+                                                height: 50,
+                                                title: "Galón",
+                                                onChanged: (value) =>
+                                                    potableGallonPricing =
+                                                        value,
+                                                maxValue: 10000,
+                                                minValue: 0,
+                                                initValue: potableGallonPricing,
+                                                backColor: colorScheme
+                                                    .surfaceContainer,
+                                                counterColor:
+                                                    colorScheme.surface,
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            spacing: 10,
+                                            children: [
+                                              IsselStepperField(
+                                                height: 50,
+                                                title: "M3",
+                                                onChanged: (value) =>
+                                                    pozoM3Pricing = value,
+                                                maxValue: 10000,
+                                                minValue: 0,
+                                                initValue: pozoM3Pricing,
+                                                backColor: colorScheme
+                                                    .surfaceContainer,
+                                                counterColor:
+                                                    colorScheme.surface,
+                                              ),
+                                              IsselStepperField(
+                                                height: 50,
+                                                title: "Galón",
+                                                onChanged: (value) =>
+                                                    pozoGallonPricing = value,
+                                                maxValue: 10000,
+                                                minValue: 0,
+                                                initValue: pozoGallonPricing,
+                                                backColor: colorScheme
+                                                    .surfaceContainer,
+                                                counterColor:
+                                                    colorScheme.surface,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    IsselButton(
+                                      height: 50,
+                                      text: "Actualizar",
+                                      onTap: () => updatePrices(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -327,8 +435,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                         child: Container(
                           padding: EdgeInsets.all(25),
                           decoration: BoxDecoration(
-                              color: colorScheme.surface,
-                              borderRadius: BorderRadius.circular(10)
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Form(
                             key: formKey,
@@ -336,22 +444,35 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                               spacing: 10,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text("Información del ticket", style: textTheme.titleMedium, textAlign: TextAlign.center,),
-                                Text("Nombre de la empresa", style: textTheme.titleSmall,),
+                                Text(
+                                  "Información del ticket",
+                                  style: textTheme.titleMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                                Text(
+                                  "Nombre de la empresa",
+                                  style: textTheme.titleSmall,
+                                ),
                                 IsselTextFormField(
                                   hintText: "PABN PURIFICADORA",
                                   prefixIcon: Icons.title_outlined,
                                   fillColor: colorScheme.surfaceContainer,
                                   controller: businessNameCtrl,
                                 ),
-                                Text("Dirección de la empresa", style: textTheme.titleSmall),
+                                Text(
+                                  "Dirección de la empresa",
+                                  style: textTheme.titleSmall,
+                                ),
                                 IsselTextFormField(
                                   hintText: "Monzón 81000",
                                   prefixIcon: Icons.directions_outlined,
                                   fillColor: colorScheme.surfaceContainer,
                                   controller: bussinessAddressCtrl,
                                 ),
-                                Text("Información adicional", style: textTheme.titleSmall),
+                                Text(
+                                  "Información adicional",
+                                  style: textTheme.titleSmall,
+                                ),
                                 IsselTextFormField(
                                   hintText: "Gracias por su compra.",
                                   prefixIcon: Icons.info_outline,
@@ -368,7 +489,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                   height: 50,
                                   text: "Actualizar",
                                   onTap: () => updateTicket(),
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -378,8 +499,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                              color: colorScheme.surface,
-                              borderRadius: BorderRadius.circular(10)
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
@@ -388,23 +509,27 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                 Expanded(
                                   child: PdfPreview.builder(
                                     useActions: false,
-                                    pdfPreviewPageDecoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      boxShadow: [],
-                                    ),
+                                    pdfPreviewPageDecoration:
+                                        const BoxDecoration(
+                                          color: Colors.white,
+                                          boxShadow: [],
+                                        ),
                                     scrollViewDecoration: BoxDecoration(
                                       color: colorScheme.surface,
                                     ),
                                     pagesBuilder: (context, pages) {
                                       if (pages.isEmpty) {
-                                        return const Center(child: CircularProgressIndicator());
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
                                       }
 
                                       final page = pages.first;
 
                                       return LayoutBuilder(
                                         builder: (context, constraints) {
-                                          final width = constraints.maxWidth * 0.95;
+                                          final width =
+                                              constraints.maxWidth * 0.95;
 
                                           return Center(
                                             child: SingleChildScrollView(
@@ -428,26 +553,31 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                       );
                                     },
                                     build: (format) {
-                                      final config = _buildPreviewConfig(generalConfigController.generalConfigEntity!);
+                                      final config = _buildPreviewConfig(
+                                        generalConfigController
+                                            .generalConfigEntity!,
+                                      );
                                       final ticket = SellTicketEntity(
                                         folio: "1839174451",
                                         dispatchCode: "16383917445163345",
                                         clientName: "Juan",
                                         clientPhone: "6568794524",
                                         total: 500,
+                                        paymentMethod: PaymentMethod.cash,
                                         amountPaid: 600,
                                         changeAmount: 100,
                                         waterType: WaterType.potable,
-                                        unitOfMeasurement: UnitOfMeasurement.gallons,
+                                        unitOfMeasurement:
+                                            UnitOfMeasurement.gallons,
                                         quantity: 125,
                                         createdAt: DateTime.now(),
-                                        sellerName: "Prueba"
+                                        sellerName: "Prueba",
                                       );
 
                                       return sellTicketPdf(config, ticket);
                                     },
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -456,9 +586,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                     ],
                   ),
                 );
-
               },
-            )
+            ),
           ],
         ),
       ),
@@ -468,23 +597,33 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   void onChangeWaterType(TabSwitcherAlignStates newState) {
     state = newState;
     if (state == TabSwitcherAlignStates.left) {
-      pageController.animateToPage(0, duration: const Duration(milliseconds: 250), curve: Curves.linearToEaseOut);
+      pageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.linearToEaseOut,
+      );
     } else {
-      pageController.animateToPage(1, duration: const Duration(milliseconds: 250), curve: Curves.linearToEaseOut);
+      pageController.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.linearToEaseOut,
+      );
     }
     setState(() {});
   }
 
   void updateLogs(GeneralConfigLogField field, bool newValue) async {
-
-    if (!formKey.currentState!.validate()){
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
     GeneralConfigController controller = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await controller.updatedLogs(field: field, value: newValue);
+    CtrlResponse response = await controller.updatedLogs(
+      field: field,
+      value: newValue,
+    );
     if (!mounted) return;
     context.loaderOverlay.hide();
 
@@ -494,19 +633,22 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     } else {
       toastService.error(response.message!);
     }
-
   }
 
   void updateTicket() async {
-
-    if (!formKey.currentState!.validate()){
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
     GeneralConfigController controller = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await controller.updateTicketInfo(businessNameCtrl.text, bussinessAddressCtrl.text, extraInfo1Ctrl.text, extraInfo2Ctrl.text);
+    CtrlResponse response = await controller.updateTicketInfo(
+      businessNameCtrl.text,
+      bussinessAddressCtrl.text,
+      extraInfo1Ctrl.text,
+      extraInfo2Ctrl.text,
+    );
     if (!mounted) return;
     context.loaderOverlay.hide();
 
@@ -516,19 +658,22 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     } else {
       toastService.error(response.message!);
     }
-
   }
 
   void updatePrices() async {
-
-    if (!formKey.currentState!.validate()){
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
     GeneralConfigController controller = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await controller.updatePrices(potableGallonPricing, potableM3Pricing, pozoGallonPricing, pozoM3Pricing);
+    CtrlResponse response = await controller.updatePrices(
+      potableGallonPricing,
+      potableM3Pricing,
+      pozoGallonPricing,
+      pozoM3Pricing,
+    );
     if (!mounted) return;
     context.loaderOverlay.hide();
 
@@ -538,7 +683,6 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     } else {
       toastService.error(response.message!);
     }
-
   }
 
   GeneralConfigEntity _buildPreviewConfig(GeneralConfigEntity baseConfig) {
@@ -551,7 +695,6 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   }
 
   String? _serverValidator(String? value) {
-
     final endpoint = _parseEndpoint(value);
 
     if (endpoint == null) {
@@ -578,6 +721,4 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
 
     return "${uri.host}:${uri.port}";
   }
-
-
 }

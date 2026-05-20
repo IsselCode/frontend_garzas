@@ -85,9 +85,6 @@ Future<void> injectContainer() async {
       salesApi: locator(),
       garzasApi: locator(),
       dispatchSessionsApi: locator(),
-      generalConfigController: locator(),
-      printerService: locator(),
-      authController: locator(),
     ),
   );
 
