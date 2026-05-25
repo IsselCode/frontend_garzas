@@ -37,6 +37,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   TextEditingController extraInfo2Ctrl = TextEditingController();
 
   TextEditingController plcController = TextEditingController();
+  int printQnty = 0;
 
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
   double potableM3Pricing = 0;
@@ -75,7 +76,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     pozoGallonPricing = config.pozoGalPricing;
     pozoM3Pricing = config.pozoM3Pricing;
     plcController.text = config.plcEndpoint;
-
+    printQnty = config.printQnty;
   }
 
   @override
@@ -440,21 +441,26 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                       // Información del ticket
 
                       Expanded(
-                        child: Container(
-                          padding: EdgeInsets.all(25),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            spacing: 10,
-                            children: [
-                              // Actualizar PLC
-                              Form(
+                        child: Column(
+                          spacing: 10,
+                          children: [
+                        
+                            Container(
+                              padding: EdgeInsets.all(25),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Form(
                                 key: plcFormKey,
                                 child: Column(
                                   spacing: 10,
                                   children: [
+                                    Text(
+                                      "IP/PUERTO del PLC",
+                                      style: textTheme.titleMedium,
+                                      textAlign: TextAlign.center,
+                                    ),
                                     IsselTextFormField(
                                       hintText: "IP:PUERTO",
                                       prefixIcon: Icons.settings_ethernet_outlined,
@@ -470,65 +476,85 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                   ],
                                 ),
                               ),
-
-                              // Información del ticket
-                              Form(
-                                key: formKey,
-                                child: Column(
-                                  spacing: 10,
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    Text(
-                                      "Información del ticket",
-                                      style: textTheme.titleMedium,
-                                      textAlign: TextAlign.center,
+                            ),
+                        
+                            Expanded(
+                              child: Container(
+                                padding: EdgeInsets.all(25),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Form(
+                                  key: formKey,
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      spacing: 10,
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          "Información del ticket",
+                                          style: textTheme.titleMedium,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        IsselStepperField(
+                                          title: "Impresiones",
+                                          initValue: printQnty.toDouble(),
+                                          minValue: 0,
+                                          maxValue: 10,
+                                          onChanged: (value) => printQnty = value.toInt(),
+                                          backColor: colorScheme.surfaceContainer,
+                                          counterColor: colorScheme.surface,
+                                        ),
+                                        Text(
+                                          "Nombre de la empresa",
+                                          style: textTheme.titleSmall,
+                                        ),
+                                        IsselTextFormField(
+                                          hintText: "PABN PURIFICADORA",
+                                          prefixIcon: Icons.title_outlined,
+                                          fillColor: colorScheme.surfaceContainer,
+                                          controller: businessNameCtrl,
+                                        ),
+                                        Text(
+                                          "Dirección de la empresa",
+                                          style: textTheme.titleSmall,
+                                        ),
+                                        IsselTextFormField(
+                                          hintText: "Monzón 81000",
+                                          prefixIcon: Icons.directions_outlined,
+                                          fillColor: colorScheme.surfaceContainer,
+                                          controller: bussinessAddressCtrl,
+                                        ),
+                                        Text(
+                                          "Información adicional",
+                                          style: textTheme.titleSmall,
+                                        ),
+                                        IsselTextFormField(
+                                          hintText: "Gracias por su compra.",
+                                          prefixIcon: Icons.info_outline,
+                                          fillColor: colorScheme.surfaceContainer,
+                                          controller: extraInfo1Ctrl,
+                                        ),
+                                        IsselTextFormField(
+                                          hintText: "¡Vuelva Pronto!",
+                                          prefixIcon: Icons.info_outline,
+                                          fillColor: colorScheme.surfaceContainer,
+                                          controller: extraInfo2Ctrl,
+                                        ),
+                                        IsselButton(
+                                          height: 50,
+                                          text: "Actualizar",
+                                          onTap: () => updateTicket(),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      "Nombre de la empresa",
-                                      style: textTheme.titleSmall,
-                                    ),
-                                    IsselTextFormField(
-                                      hintText: "PABN PURIFICADORA",
-                                      prefixIcon: Icons.title_outlined,
-                                      fillColor: colorScheme.surfaceContainer,
-                                      controller: businessNameCtrl,
-                                    ),
-                                    Text(
-                                      "Dirección de la empresa",
-                                      style: textTheme.titleSmall,
-                                    ),
-                                    IsselTextFormField(
-                                      hintText: "Monzón 81000",
-                                      prefixIcon: Icons.directions_outlined,
-                                      fillColor: colorScheme.surfaceContainer,
-                                      controller: bussinessAddressCtrl,
-                                    ),
-                                    Text(
-                                      "Información adicional",
-                                      style: textTheme.titleSmall,
-                                    ),
-                                    IsselTextFormField(
-                                      hintText: "Gracias por su compra.",
-                                      prefixIcon: Icons.info_outline,
-                                      fillColor: colorScheme.surfaceContainer,
-                                      controller: extraInfo1Ctrl,
-                                    ),
-                                    IsselTextFormField(
-                                      hintText: "¡Vuelva Pronto!",
-                                      prefixIcon: Icons.info_outline,
-                                      fillColor: colorScheme.surfaceContainer,
-                                      controller: extraInfo2Ctrl,
-                                    ),
-                                    IsselButton(
-                                      height: 50,
-                                      text: "Actualizar",
-                                      onTap: () => updateTicket(),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
+                            )
+                        
+                          ],
                         ),
                       ),
 
@@ -591,10 +617,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                       );
                                     },
                                     build: (format) {
-                                      final config = _buildPreviewConfig(
-                                        generalConfigController
-                                            .generalConfigEntity!,
-                                      );
+                                      final config = _buildPreviewConfig(generalConfigController.generalConfigEntity!,);
                                       final ticket = SellTicketEntity(
                                         folio: "1839174451",
                                         dispatchCode: "16383917445163345",
@@ -686,6 +709,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
       bussinessAddressCtrl.text,
       extraInfo1Ctrl.text,
       extraInfo2Ctrl.text,
+      printQnty
     );
     if (!mounted) return;
     context.loaderOverlay.hide();

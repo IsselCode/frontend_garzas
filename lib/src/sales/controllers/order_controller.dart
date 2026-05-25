@@ -204,7 +204,7 @@ class OrderController extends ChangeNotifier {
       return;
     }
 
-    final config = generalConfigController.generalConfigEntity;
+    final config = generalConfigController.generalConfigEntity!;
     final ticket = SellTicketEntity(
       folio: _saleEntity!.folio,
       clientName: _saleEntity!.clientName,
@@ -222,19 +222,18 @@ class OrderController extends ChangeNotifier {
     );
 
     //TODO: Para probar o guardar ticket en PC
-    Uint8List bytes = await sellTicketPdf(config!, ticket);
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename: "CUALQUIER NOMBRE",
-    );
+    Uint8List bytes = await sellTicketPdf(config, ticket);
+    await Printing.sharePdf(bytes: bytes, filename: "CUALQUIER NOMBRE");
 
-    await Printing.directPrintPdf(
-      printer: printer,
-      format: sellTicketPageFormat,
-      dynamicLayout: false,
-      usePrinterSettings: true,
-      onLayout: (format) => sellTicketPdf(config!, ticket, pageFormat: format),
-    );
+    for (int copy = 0; copy < config.printQnty; copy++) {
+      await Printing.directPrintPdf(
+        printer: printer,
+        format: sellTicketPageFormat,
+        dynamicLayout: false,
+        usePrinterSettings: true,
+        onLayout: (format) => sellTicketPdf(config, ticket, pageFormat: format),
+      );
+    }
   }
 
   // Credits

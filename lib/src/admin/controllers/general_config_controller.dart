@@ -78,10 +78,16 @@ class GeneralConfigController extends ChangeNotifier {
 
   }
 
-  Future<CtrlResponse> updateTicketInfo(String businessName, String businessAddress, String extraInfo1, String extraInfo2) async {
+  Future<CtrlResponse> updateTicketInfo(String businessName, String businessAddress, String extraInfo1, String extraInfo2, int printQnty) async {
 
     GeneralConfigEntity previousConfig = generalConfigEntity!;
-    GeneralConfigEntity newConfig = generalConfigEntity!.copyWith(businessName: businessName, businessAddress: businessAddress, extraInfo1: extraInfo1, extraInfo2: extraInfo2);
+    GeneralConfigEntity newConfig = generalConfigEntity!.copyWith(
+      businessName: businessName,
+      businessAddress: businessAddress,
+      extraInfo1: extraInfo1,
+      extraInfo2: extraInfo2,
+      printQnty: printQnty,
+    );
 
     if (newConfig == previousConfig) {
       return CtrlResponse(success: true);

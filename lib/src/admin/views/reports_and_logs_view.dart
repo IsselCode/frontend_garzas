@@ -1,16 +1,21 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/commons/tickets/sell_ticket.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
+import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/date_range_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/monthly_garza_total_entity.dart';
+import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/statistic_garza_container.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/statistic_garza_container_2.dart';
+import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import '../../../inject_container.dart';
@@ -85,7 +90,6 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
           children: [
-
             //* AppBar
             Row(
               spacing: 10,
@@ -157,13 +161,11 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
               child: Row(
                 spacing: 10,
                 children: [
-
                   //* Ventas y Reportes
                   Expanded(
                     child: PageView(
                       controller: pageController,
                       children: [
-
                         //* Ventas
                         FutureBuilder(
                           future: _loadSells,
@@ -183,178 +185,234 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                             }
 
                             return Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: colorScheme.surface,
-                                ),
-                                child: Column(
-                                  spacing: 20,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Title and Actions
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "Venta",
-                                          style: textTheme.titleLarge,
-                                        ),
-                                        // Actions
-                                        Flex(
-                                          direction: Axis.horizontal,
-                                          spacing: 10,
-                                          children: [
-                                            // Campo de busqueda
-                                            SizedBox(
-                                              width: 250,
-                                              child: IsselTextFormField(
-                                                focusNode: findByFolioNode,
-                                                height: 50,
-                                                prefixIcon: Icons.search,
-                                                fillColor: colorScheme.surfaceContainer,
-                                                hintText: "Folio",
-                                                onSubmitted: findClientByFolio,
-                                              ),
-                                            ),
-                                            // Rango de fecha
-                                            IsselPill(
-                                              text: _formatSalesDateRange(),
-                                              color: colorScheme.surfaceContainer,
-                                              onTap: () =>
-                                                  _openSalesDateRangeDialog(),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                    // Table
-                                    Expanded(
-                                      child: IsselTableWidget(
-                                        header: IsselHeaderTable(
-                                          titleHeaders: [
-                                            "Empleado",
-                                            "Cliente",
-                                            "Cantidad",
-                                            "Total",
-                                            "Método",
-                                            "Fecha",
-                                          ],
-                                        ),
-                                        rows: statistics.showedSales
-                                            .map(
-                                              (sell) => IsselRowTable(
-                                                cells: [
-                                                  // Empleado
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    padding: EdgeInsets.zero,
-                                                    widget: Tooltip(
-                                                      message: sell.sellerUsername,
-                                                      child: Container(
-                                                        alignment: Alignment.centerLeft,
-                                                        margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: Text(
-                                                          sell.sellerUsername,
-                                                          style: textTheme.labelMedium,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    alignment: Alignment.centerLeft,
-                                                  ),
-                                                  // Cliente
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    padding: EdgeInsets.zero,
-                                                    widget: Tooltip(
-                                                      message: sell.clientName != null ? "${sell.clientName}: ${sell.clientPhone}" : "Público General",
-                                                      child: Container(
-                                                        alignment: Alignment.centerLeft,
-                                                        margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: Text(
-                                                          sell.clientName ?? "Público General",
-                                                          style: textTheme.labelMedium,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    alignment: Alignment.centerLeft,
-                                                  ),
-                                                  // Cantidades
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    widget: AutoSizeText(
-                                                      "${sell.quantity} ${sell.unitOfMeasurement.abbr}",
-                                                      style: textTheme.labelMedium,
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                  ),
-                                                  // Total
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    widget: AutoSizeText(
-                                                      "\$${sell.total.toStringAsFixed(2)}",
-                                                      style: textTheme.labelMedium,
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    alignment: Alignment.centerLeft,
-                                                  ),
-                                                  // Forma de pago
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    widget: Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          sell.paymentMethod.label,
-                                                          style: textTheme.labelMedium,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                        Image.asset(
-                                                          sell.paymentMethod.image,
-                                                          width: 24,
-                                                          height: 24,
-                                                        )
-                                                      ],
-                                                    ),
-                                                    alignment: Alignment.centerLeft,
-                                                  ),
-                                                  // Fecha
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    padding: EdgeInsets.zero,
-                                                    widget: Tooltip(
-                                                      message: DateFormat("dd/MM/yy hh:mm:ss a",).format(sell.createdAt),
-                                                      child: Container(
-                                                        alignment: Alignment.center,
-                                                        margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: AutoSizeText(
-                                                          DateFormat("dd/MM/yy hh:mm:ss a",).format(sell.createdAt),
-                                                          style: textTheme.labelMedium,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    alignment: Alignment.center,
-                                                  ),
-                                                  // IsselPill(widget: IconButton(onPressed: () => print("Eliminando"), icon: Icon(Icons.delete, color: Colors.red,)),),
-                                                ],
-                                              ),
-                                            )
-                                            .toList(),
+                              padding: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: colorScheme.surface,
+                              ),
+                              child: Column(
+                                spacing: 20,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Title and Actions
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Venta",
+                                        style: textTheme.titleLarge,
                                       ),
+                                      // Actions
+                                      Flex(
+                                        direction: Axis.horizontal,
+                                        spacing: 10,
+                                        children: [
+                                          // Campo de busqueda
+                                          SizedBox(
+                                            width: 250,
+                                            child: IsselTextFormField(
+                                              focusNode: findByFolioNode,
+                                              height: 50,
+                                              prefixIcon: Icons.search,
+                                              fillColor:
+                                                  colorScheme.surfaceContainer,
+                                              hintText: "Folio",
+                                              onSubmitted: findClientByFolio,
+                                            ),
+                                          ),
+                                          // Rango de fecha
+                                          IsselPill(
+                                            text: _formatSalesDateRange(),
+                                            color: colorScheme.surfaceContainer,
+                                            onTap: () =>
+                                                _openSalesDateRangeDialog(),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  // Table
+                                  Expanded(
+                                    child: IsselTableWidget(
+                                      onTapRow: (index) => _showSaleDetails(
+                                        statistics.showedSales[index],
+                                      ),
+                                      header: IsselHeaderTable(
+                                        titleHeaders: [
+                                          "Empleado",
+                                          "Cliente",
+                                          "Cantidad",
+                                          "Total",
+                                          "Método",
+                                          "Fecha",
+                                        ],
+                                      ),
+                                      rows: statistics.showedSales
+                                          .map(
+                                            (sell) => IsselRowTable(
+                                              cells: [
+                                                // Empleado
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  padding: EdgeInsets.zero,
+                                                  widget: Tooltip(
+                                                    message:
+                                                        sell.sellerUsername,
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 20,
+                                                          ),
+                                                      child: Text(
+                                                        sell.sellerUsername,
+                                                        style: textTheme
+                                                            .labelMedium,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                // Cliente
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  padding: EdgeInsets.zero,
+                                                  widget: Tooltip(
+                                                    message:
+                                                        sell.clientName != null
+                                                        ? "${sell.clientName}: ${sell.clientPhone}"
+                                                        : "Público General",
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 20,
+                                                          ),
+                                                      child: Text(
+                                                        sell.clientName ??
+                                                            "Público General",
+                                                        style: textTheme
+                                                            .labelMedium,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                // Cantidades
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  widget: AutoSizeText(
+                                                    "${sell.quantity} ${sell.unitOfMeasurement.abbr}",
+                                                    style:
+                                                        textTheme.labelMedium,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                // Total
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  widget: AutoSizeText(
+                                                    "\$${sell.total.toStringAsFixed(2)}",
+                                                    style:
+                                                        textTheme.labelMedium,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                // Forma de pago
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  widget: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        sell
+                                                            .paymentMethod
+                                                            .label,
+                                                        style: textTheme
+                                                            .labelMedium,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      Image.asset(
+                                                        sell
+                                                            .paymentMethod
+                                                            .image,
+                                                        width: 24,
+                                                        height: 24,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                // Fecha
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  padding: EdgeInsets.zero,
+                                                  widget: Tooltip(
+                                                    message: DateFormat(
+                                                      "dd/MM/yy hh:mm:ss a",
+                                                    ).format(sell.createdAt),
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 20,
+                                                          ),
+                                                      child: AutoSizeText(
+                                                        DateFormat(
+                                                          "dd/MM/yy hh:mm:ss a",
+                                                        ).format(
+                                                          sell.createdAt,
+                                                        ),
+                                                        style: textTheme
+                                                            .labelMedium,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  alignment: Alignment.center,
+                                                ),
+                                                // IsselPill(widget: IconButton(onPressed: () => print("Eliminando"), icon: Icon(Icons.delete, color: Colors.red,)),),
+                                              ],
+                                            ),
+                                          )
+                                          .toList(),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),
@@ -378,126 +436,154 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                             }
 
                             return Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: colorScheme.surface,
-                                ),
-                                child: Column(
-                                  spacing: 20,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "Logs",
-                                          style: textTheme.titleLarge,
-                                        ),
-                                        // Rango de fecha
-                                        IsselPill(
-                                          text: _formatLogsDateRange(),
-                                          color: colorScheme.surfaceContainer,
-                                          onTap: () =>
-                                              _openLogsDateRangeDialog(),
-                                        ),
-                                      ],
-                                    ),
-                                    Expanded(
-                                      child: IsselTableWidget(
-                                        header: IsselHeaderTable(
-                                          titleHeaders: [
-                                            "Tipo",
-                                            "Usuario",
-                                            "Información",
-                                            "Fecha",
-                                          ],
-                                        ),
-                                        rows: statistics.showedLogs
-                                            .map(
-                                              (log) => IsselRowTable(
-                                                cells: [
-                                                  // Empleado
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    padding: EdgeInsets.zero,
-                                                    widget: Tooltip(
-                                                      message: log.tipo,
-                                                      child: Container(
-                                                        alignment: Alignment.centerLeft,
-                                                        margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: Text(
-                                                          log.tipo,
-                                                          style: textTheme.labelMedium,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    alignment: Alignment.centerLeft,
-                                                  ),
-                                                  // Cantidades
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    widget: Text(
-                                                      log.username,
-                                                      style: textTheme.labelMedium, maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,),
-                                                    alignment: Alignment.centerLeft,
-                                                  ),
-                                                  // Información
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    padding: EdgeInsets.zero,
-                                                    widget: Tooltip(
-                                                      message: log.info,
-                                                      child: Container(
-                                                        alignment: Alignment.centerLeft,
-                                                        margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: AutoSizeText(
-                                                          log.info,
-                                                          style: textTheme.labelMedium,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    alignment: Alignment.centerLeft,
-                                                  ),
-                                                  IsselPill(
-                                                    color: colorScheme.surfaceContainer,
-                                                    padding: EdgeInsets.zero,
-                                                    widget: Tooltip(
-                                                      message: DateFormat("dd/MM/yy hh:mm:ss a",).format(log.createdAt),
-                                                      child: Container(
-                                                        alignment: Alignment.centerLeft,
-                                                        margin: EdgeInsets.symmetric(horizontal: 20,),
-                                                        child: Text(
-                                                          DateFormat("dd/MM/yy hh:mm:ss a",).format(log.createdAt), style: textTheme.labelMedium,
-                                                          maxLines: 1,
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    alignment: Alignment.center,
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                            .toList(),
+                              padding: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: colorScheme.surface,
+                              ),
+                              child: Column(
+                                spacing: 20,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("Logs", style: textTheme.titleLarge),
+                                      // Rango de fecha
+                                      IsselPill(
+                                        text: _formatLogsDateRange(),
+                                        color: colorScheme.surfaceContainer,
+                                        onTap: () => _openLogsDateRangeDialog(),
                                       ),
+                                    ],
+                                  ),
+                                  Expanded(
+                                    child: IsselTableWidget(
+                                      header: IsselHeaderTable(
+                                        titleHeaders: [
+                                          "Tipo",
+                                          "Usuario",
+                                          "Información",
+                                          "Fecha",
+                                        ],
+                                      ),
+                                      rows: statistics.showedLogs
+                                          .map(
+                                            (log) => IsselRowTable(
+                                              cells: [
+                                                // Empleado
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  padding: EdgeInsets.zero,
+                                                  widget: Tooltip(
+                                                    message: log.tipo,
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 20,
+                                                          ),
+                                                      child: Text(
+                                                        log.tipo,
+                                                        style: textTheme
+                                                            .labelMedium,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                // Cantidades
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  widget: Text(
+                                                    log.username,
+                                                    style:
+                                                        textTheme.labelMedium,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                // Información
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  padding: EdgeInsets.zero,
+                                                  widget: Tooltip(
+                                                    message: log.info,
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 20,
+                                                          ),
+                                                      child: AutoSizeText(
+                                                        log.info,
+                                                        style: textTheme
+                                                            .labelMedium,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                ),
+                                                IsselPill(
+                                                  color: colorScheme
+                                                      .surfaceContainer,
+                                                  padding: EdgeInsets.zero,
+                                                  widget: Tooltip(
+                                                    message: DateFormat(
+                                                      "dd/MM/yy hh:mm:ss a",
+                                                    ).format(log.createdAt),
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 20,
+                                                          ),
+                                                      child: Text(
+                                                        DateFormat(
+                                                          "dd/MM/yy hh:mm:ss a",
+                                                        ).format(log.createdAt),
+                                                        style: textTheme
+                                                            .labelMedium,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  alignment: Alignment.center,
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                          .toList(),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),
-
                       ],
                     ),
                   ),
-
 
                   SizedBox(
                     width: 300,
@@ -508,25 +594,37 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                         FutureBuilder(
                           future: _loadStatistics,
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return Column(
                                 spacing: 10,
                                 children: [
                                   Expanded(
-                                    child: IsselShimmer(width: 300, height: 150),
+                                    child: IsselShimmer(
+                                      width: 300,
+                                      height: 150,
+                                    ),
                                   ),
                                   Expanded(
-                                    child: IsselShimmer(width: 300, height: 150),
+                                    child: IsselShimmer(
+                                      width: 300,
+                                      height: 150,
+                                    ),
                                   ),
                                   Expanded(
-                                    child: IsselShimmer(width: 300, height: 150),
+                                    child: IsselShimmer(
+                                      width: 300,
+                                      height: 150,
+                                    ),
                                   ),
                                 ],
                               );
                             }
 
                             if (!snapshot.data!.success) {
-                              return Center(child: Text(snapshot.data!.message!));
+                              return Center(
+                                child: Text(snapshot.data!.message!),
+                              );
                             }
 
                             return Column(
@@ -564,28 +662,43 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                         FutureBuilder(
                           future: _loadMonthlyGarzaTotals,
                           builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
                               return Column(
                                 spacing: 10,
                                 children: [
                                   Expanded(
-                                    child: IsselShimmer(width: 300, height: 150),
+                                    child: IsselShimmer(
+                                      width: 300,
+                                      height: 150,
+                                    ),
                                   ),
                                   Expanded(
-                                    child: IsselShimmer(width: 300, height: 150),
+                                    child: IsselShimmer(
+                                      width: 300,
+                                      height: 150,
+                                    ),
                                   ),
                                   Expanded(
-                                    child: IsselShimmer(width: 300, height: 150),
+                                    child: IsselShimmer(
+                                      width: 300,
+                                      height: 150,
+                                    ),
                                   ),
                                   Expanded(
-                                    child: IsselShimmer(width: 300, height: 150),
+                                    child: IsselShimmer(
+                                      width: 300,
+                                      height: 150,
+                                    ),
                                   ),
                                 ],
                               );
                             }
 
                             if (!snapshot.data!.success) {
-                              return Center(child: Text(snapshot.data!.message!));
+                              return Center(
+                                child: Text(snapshot.data!.message!),
+                              );
                             }
 
                             return Column(
@@ -606,7 +719,9 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                   return Expanded(
                                     child: StatisticGarzaContainer_2(
                                       asset: AppAssets.waterTank,
-                                      title: garza?.garzaTitle ?? "Garza $garzaNumber",
+                                      title:
+                                          garza?.garzaTitle ??
+                                          "Garza $garzaNumber",
                                       total: garza?.totalAmount ?? 0,
                                       liters: garza?.totalLiters ?? 0,
                                     ),
@@ -618,7 +733,7 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -628,24 +743,204 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
     );
   }
 
+  Future<void> _showSaleDetails(SaleEntity sale) async {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final clientName = sale.clientName?.trim().isNotEmpty == true
+        ? sale.clientName!
+        : "Público general";
+    final clientPhone = sale.clientPhone?.trim().isNotEmpty == true
+        ? sale.clientPhone!
+        : "N/A";
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: colorScheme.surface,
+        title: Text("Detalle de venta", style: textTheme.titleLarge),
+        content: SizedBox(
+          width: 650,
+          child: SingleChildScrollView(
+            child: Column(
+              spacing: 12,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: Text("Ticket", style: textTheme.titleMedium)),
+                _saleDetailRow(
+                  "Folio",
+                  sale.folio,
+                  "Fecha",
+                  DateFormat("dd/MM/yy hh:mm a").format(sale.createdAt),
+                ),
+                _saleDetailRow(
+                  "Código",
+                  sale.dispatchCode,
+                  "Empleado",
+                  sale.sellerUsername,
+                ),
+                Center(
+                  child: Text(
+                    "Cliente y producto",
+                    style: textTheme.titleMedium,
+                  ),
+                ),
+                _saleDetailRow("Cliente", clientName, "Teléfono", clientPhone),
+                _saleDetailRow(
+                  "Tipo de agua",
+                  sale.waterType.dp,
+                  "Cantidad",
+                  "${sale.quantity.toStringAsFixed(2)} ${sale.unitOfMeasurement.abbr}",
+                ),
+                Center(child: Text("Cobro", style: textTheme.titleMedium)),
+                _saleDetailRow(
+                  "Método",
+                  sale.paymentMethod.label,
+                  "Precio unitario",
+                  "\$${sale.unitPrice.toStringAsFixed(2)}",
+                ),
+                _saleDetailRow(
+                  "Total",
+                  "\$${sale.total.toStringAsFixed(2)}",
+                  "Pago",
+                  "\$${sale.amountPaid.toStringAsFixed(2)}",
+                ),
+                _saleDetailRow(
+                  "Cambio",
+                  "\$${sale.changeAmount.toStringAsFixed(2)}",
+                  "Estado",
+                  sale.isDispatched ? "Despachada" : "Pendiente",
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          IsselButton(
+            text: "Cerrar",
+            width: 120,
+            height: 50,
+            onTap: () => Navigator.of(dialogContext).pop(),
+          ),
+          IsselButton(
+            width: 210,
+            height: 50,
+            text: "Reimprimir ticket",
+            onTap: () => _reprintTicket(sale),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _saleDetailRow(
+    String firstTitle,
+    String firstValue,
+    String secondTitle,
+    String secondValue,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      spacing: 10,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: IsselInfoField(
+            title: firstTitle,
+            value: firstValue,
+            backColor: colorScheme.surfaceContainer,
+            valueBackColor: colorScheme.surface,
+          ),
+        ),
+        Expanded(
+          child: IsselInfoField(
+            title: secondTitle,
+            value: secondValue,
+            backColor: colorScheme.surfaceContainer,
+            valueBackColor: colorScheme.surface,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _reprintTicket(SaleEntity sale) async {
+    final toastService = locator<ToastService>();
+    final printerService = locator<PrinterService>();
+    final configController = context.read<GeneralConfigController>();
+
+    context.loaderOverlay.show();
+
+    try {
+      final printer = await printerService.getSelectedPrinter();
+      if (printer == null) {
+        toastService.error("No hay ninguna impresora seleccionada");
+        return;
+      }
+
+      if (configController.generalConfigEntity == null) {
+        final response = await configController.loadGeneralConfig();
+        if (!response.success || configController.generalConfigEntity == null) {
+          toastService.error(
+            response.message ?? "No se pudo cargar la configuración del ticket",
+          );
+          return;
+        }
+      }
+
+      final config = configController.generalConfigEntity!;
+      final ticket = SellTicketEntity(
+        folio: sale.folio,
+        clientName: sale.clientName,
+        clientPhone: sale.clientPhone,
+        waterType: sale.waterType,
+        unitOfMeasurement: sale.unitOfMeasurement,
+        quantity: sale.quantity,
+        total: sale.total,
+        paymentMethod: sale.paymentMethod,
+        amountPaid: sale.amountPaid,
+        changeAmount: sale.changeAmount,
+        dispatchCode: sale.dispatchCode,
+        createdAt: sale.createdAt,
+        sellerName: sale.sellerUsername,
+      );
+
+      await Printing.directPrintPdf(
+        printer: printer,
+        format: sellTicketPageFormat,
+        dynamicLayout: false,
+        usePrinterSettings: true,
+        onLayout: (format) => sellTicketPdf(config, ticket, pageFormat: format),
+      );
+
+      toastService.success("Ticket reimpreso correctamente");
+    } catch (_) {
+      toastService.error("No se pudo reimprimir el ticket");
+    } finally {
+      if (mounted) {
+        context.loaderOverlay.hide();
+      }
+    }
+  }
+
   void findClientByFolio(String folio) async {
     StatisticsController statisticsController = context.read();
 
     context.loaderOverlay.show();
     CtrlResponse response = await statisticsController.findSaleByFolio(folio);
+    if (!mounted) return;
     context.loaderOverlay.hide();
 
     if (response.success) {
       _salesDateRange = null;
       ToastService toastService = locator();
-      toastService.success("Folio: ${folio} encontrado");
+      toastService.success("Folio: $folio encontrado");
     } else {
       ToastService toastService = locator();
       toastService.error(response.message!);
     }
 
     findByFolioNode.requestFocus();
-
   }
 
   String _formatSalesDateRange() {
@@ -714,14 +1009,15 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
   Future<void> _openLogsDateRangeDialog() async {
     final StatisticsController statisticsController = context.read();
     final ToastService toastService = locator();
-    final DateRangeDialogResult? result = await showDialog<DateRangeDialogResult>(
-      context: context,
-      builder: (context) => DateRangeDialog(
-        initialRange: _logsDateRange,
-        firstDate: DateTime(2020),
-        lastDate: DateTime.now().add(const Duration(days: 365)),
-      ),
-    );
+    final DateRangeDialogResult? result =
+        await showDialog<DateRangeDialogResult>(
+          context: context,
+          builder: (context) => DateRangeDialog(
+            initialRange: _logsDateRange,
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now().add(const Duration(days: 365)),
+          ),
+        );
 
     if (result == null) return;
 
