@@ -33,6 +33,7 @@ class DispatchController extends ChangeNotifier {
   DispatchSessionEntity? activeSession;
   GarzaRuntimeEntity? selectedRuntimeGarza;
   List<GarzaRuntimeEntity> runtimeGarzas = [];
+  String? runtimeMessage;
 
   StreamSubscription<GarzaRuntimeResponseEntity>? _runtimeSubscription;
   bool _runtimeStreamEnabled = false;
@@ -55,6 +56,8 @@ class DispatchController extends ChangeNotifier {
       .toList();
 
   int get runtimePanelGarzasCount => busyGarzasCount + alarmGarzas.length;
+
+  bool get hasRuntimeWarning => runtimeMessage?.trim().isNotEmpty ?? false;
 
   bool isGarzaOccupied(int garzaNumber) {
     final runtimeGarza = getRuntimeGarza(garzaNumber);
@@ -206,6 +209,7 @@ class DispatchController extends ChangeNotifier {
     _runtimeReconnectScheduled = false;
     _hasReceivedRuntimeSnapshot = false;
     runtimeGarzas = [];
+    runtimeMessage = null;
     _activeAlarmsByGarza.clear();
     _selectedRuntimeGarzaStartedOccupied = false;
     selectedRuntimeGarzaWasReleased = false;
@@ -224,6 +228,7 @@ class DispatchController extends ChangeNotifier {
 
   void _handleRuntimeSnapshot(GarzaRuntimeResponseEntity snapshot) {
     runtimeGarzas = snapshot.garzas;
+    runtimeMessage = snapshot.message;
     _syncActiveSessionFromRuntime(snapshot.garzas);
     _notifyNewAlarms(snapshot.garzas);
     _hasReceivedRuntimeSnapshot = true;

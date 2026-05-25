@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/tickets/sell_ticket.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
@@ -219,12 +221,12 @@ class OrderController extends ChangeNotifier {
       sellerName: authController.session!.displayName,
     );
 
-    // Para probar o guardar ticket en PC
-    // Uint8List bytes = await sellTicketPdf(config!, ticket);
-    // await Printing.sharePdf(
-    //   bytes: bytes,
-    //   filename: "CUALQUIER NOMBRE",
-    // );
+    //TODO: Para probar o guardar ticket en PC
+    Uint8List bytes = await sellTicketPdf(config!, ticket);
+    await Printing.sharePdf(
+      bytes: bytes,
+      filename: "CUALQUIER NOMBRE",
+    );
 
     await Printing.directPrintPdf(
       printer: printer,

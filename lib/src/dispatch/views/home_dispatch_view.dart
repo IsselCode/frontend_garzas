@@ -163,6 +163,7 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
                 child: _GarzasRuntimePanel(
                   busyGarzas: dispatchController.busyGarzas,
                   alarmGarzas: dispatchController.alarmGarzas,
+                  runtimeMessage: dispatchController.runtimeMessage,
                   onTap: _openRuntimeGarza,
                 ),
               ),
@@ -170,10 +171,22 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
               right: 20,
               bottom: 20,
               child: Badge(
-                isLabelVisible: dispatchController.runtimePanelGarzasCount > 0,
-                label: Text('${dispatchController.runtimePanelGarzasCount}'),
+                isLabelVisible:
+                    dispatchController.hasRuntimeWarning ||
+                    dispatchController.runtimePanelGarzasCount > 0,
+                label: Text(
+                  dispatchController.hasRuntimeWarning
+                      ? '!'
+                      : '${dispatchController.runtimePanelGarzasCount}',
+                ),
                 backgroundColor: colorScheme.error,
                 child: FloatingActionButton(
+                  backgroundColor: dispatchController.hasRuntimeWarning
+                      ? colorScheme.error
+                      : null,
+                  foregroundColor: dispatchController.hasRuntimeWarning
+                      ? colorScheme.onError
+                      : null,
                   onPressed: () {
                     setState(() {
                       _showRuntimePanel = !_showRuntimePanel;
@@ -183,6 +196,8 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
                   child: Icon(
                     _showRuntimePanel
                         ? Icons.close
+                        : dispatchController.hasRuntimeWarning
+                        ? Icons.warning_amber_rounded
                         : Icons.local_drink_outlined,
                   ),
                 ),
@@ -214,11 +229,13 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
 class _GarzasRuntimePanel extends StatelessWidget {
   final List<GarzaRuntimeEntity> busyGarzas;
   final List<GarzaRuntimeEntity> alarmGarzas;
+  final String? runtimeMessage;
   final void Function(GarzaRuntimeEntity garza) onTap;
 
   const _GarzasRuntimePanel({
     required this.busyGarzas,
     required this.alarmGarzas,
+    required this.runtimeMessage,
     required this.onTap,
   });
 
@@ -227,6 +244,8 @@ class _GarzasRuntimePanel extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final warningMessage = runtimeMessage?.trim();
+    final hasRuntimeWarning = warningMessage?.isNotEmpty ?? false;
 
     return Material(
       color: Colors.transparent,
@@ -253,6 +272,11 @@ class _GarzasRuntimePanel extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               child: Text('Garzas en atención', style: textTheme.titleMedium),
             ),
+            if (hasRuntimeWarning)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _RuntimeWarning(message: warningMessage!),
+              ),
             if (busyGarzas.isEmpty && alarmGarzas.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -296,6 +320,49 @@ class _GarzasRuntimePanel extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RuntimeWarning extends StatelessWidget {
+  final String message;
+
+  const _RuntimeWarning({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.error),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: colorScheme.onErrorContainer,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onErrorContainer,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

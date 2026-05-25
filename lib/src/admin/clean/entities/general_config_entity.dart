@@ -23,6 +23,7 @@ class GeneralConfigEntity extends Equatable {
   double potableGalPricing;
   double pozoM3Pricing;
   double pozoGalPricing;
+  String plcEndpoint;
 
   GeneralConfigEntity({
     required this.waterSupply,
@@ -46,6 +47,7 @@ class GeneralConfigEntity extends Equatable {
     required this.potableGalPricing,
     required this.pozoM3Pricing,
     required this.pozoGalPricing,
+    required this.plcEndpoint,
   });
 
   factory GeneralConfigEntity.fromMap(Map<String, dynamic> map) {
@@ -71,6 +73,7 @@ class GeneralConfigEntity extends Equatable {
       potableGalPricing: map["potable_gal_pricing"],
       pozoM3Pricing: map["pozo_m3_pricing"],
       pozoGalPricing: map["pozo_gal_pricing"],
+      plcEndpoint: map["plc_endpoint"]
     );
   }
 
@@ -120,6 +123,7 @@ class GeneralConfigEntity extends Equatable {
       potableGalPricing: potableGalPricing ?? this.potableGalPricing,
       pozoM3Pricing: pozoM3Pricing ?? this.pozoM3Pricing,
       pozoGalPricing: pozoGalPricing ?? this.pozoGalPricing,
+      plcEndpoint: plcEndpoint ?? this.plcEndpoint
     );
   }
 
@@ -146,6 +150,7 @@ class GeneralConfigEntity extends Equatable {
       "potable_gal_pricing": potableGalPricing,
       "pozo_m3_pricing": pozoM3Pricing,
       "pozo_gal_pricing": pozoGalPricing,
+      "plc_endpoint": plcEndpoint
     };
   }
 
@@ -172,6 +177,7 @@ class GeneralConfigEntity extends Equatable {
     potableGalPricing,
     pozoM3Pricing,
     pozoGalPricing,
+    plcEndpoint,
   ];
 
 

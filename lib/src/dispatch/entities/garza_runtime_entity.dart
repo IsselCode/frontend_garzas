@@ -4,10 +4,12 @@ import 'package:frontend_garzas/src/dispatch/entities/dispatch_session_entity.da
 class GarzaRuntimeResponseEntity extends Equatable {
   final List<GarzaRuntimeEntity> garzas;
   final String? updatedAt;
+  final String? message;
 
   const GarzaRuntimeResponseEntity({
     required this.garzas,
     required this.updatedAt,
+    required this.message,
   });
 
   factory GarzaRuntimeResponseEntity.fromMap(Map<String, dynamic> map) {
@@ -18,11 +20,12 @@ class GarzaRuntimeResponseEntity extends Equatable {
     return GarzaRuntimeResponseEntity(
       garzas: garzas,
       updatedAt: map['updated_at'],
+      message: map['message'],
     );
   }
 
   @override
-  List<Object?> get props => [garzas, updatedAt];
+  List<Object?> get props => [garzas, updatedAt, message];
 }
 
 class GarzaRuntimeEntity extends Equatable {
