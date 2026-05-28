@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
-import 'package:frontend_garzas/core/services/regex_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
-import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/app/consts.dart';
 import '../../../../inject_container.dart';
-
 
 class CreateClientDialog extends StatefulWidget {
   const CreateClientDialog({super.key});
@@ -20,14 +17,12 @@ class CreateClientDialog extends StatefulWidget {
 }
 
 class _CreateUserPageState extends State<CreateClientDialog> {
-
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  TextEditingController name = TextEditingController();
-  TextEditingController phone = TextEditingController();
+  TextEditingController commercialName = TextEditingController();
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
-  double potableM3Pricing = 0;
+  double potableLiterPricing = 0;
   double potableGallonPricing = 0;
-  double pozoM3Pricing = 0;
+  double pozoLiterPricing = 0;
   double pozoGallonPricing = 0;
   PageController pageController = PageController();
 
@@ -39,7 +34,6 @@ class _CreateUserPageState extends State<CreateClientDialog> {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    TextTheme textTheme = theme.textTheme;
     ColorScheme colorScheme = theme.colorScheme;
 
     return Dialog(
@@ -48,18 +42,14 @@ class _CreateUserPageState extends State<CreateClientDialog> {
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24)
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           spacing: 10,
           children: [
             //* Imagen
-            IsselAssetContainer(
-              asset: AppAssets.logo,
-              height: 84,
-              width: 84,
-            ),
+            IsselAssetContainer(asset: AppAssets.logo, height: 84, width: 84),
             //* Separación
             const SizedBox(),
             //* Inputs
@@ -70,26 +60,25 @@ class _CreateUserPageState extends State<CreateClientDialog> {
                 spacing: 10,
                 children: [
                   IsselTextFormField(
-                    controller: name,
-                    hintText: "Nombre",
-                    prefixIcon: Icons.person_outline,
+                    controller: commercialName,
+                    hintText: "Nombre comercial",
+                    prefixIcon: Icons.storefront_outlined,
                     fillColor: theme.scaffoldBackgroundColor,
                     validator: (value) {
-                      if (value == null || value.isEmpty) return "Campo requerido";
-                      if (value.length < 3) return "El nombre es demasiado corto";
-                      if (value.length > 45) return "El nombre es demasiado largo";
-                    },
-                  ),
-                  IsselTextFormField(
-                    controller: phone,
-                    hintText: "Teléfono",
-                    prefixIcon: Icons.phone_outlined,
-                    inputFormatters: [RegexService.phoneFormatter],
-                    fillColor: theme.scaffoldBackgroundColor,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return "Campo requerido";
-                      if (value.length < 7) return "El teléfono es demasiado corto";
-                      if (value.length > 12) return "El teléfono es demasiado largo";
+                      final text = value?.trim() ?? "";
+
+                      if (text.isEmpty) return "Campo requerido";
+                      if (text.length < 3) {
+                        return "El nombre comercial es demasiado corto";
+                      }
+                      if (text.length > 45) {
+                        return "El nombre comercial es demasiado largo";
+                      }
+                      if (!RegExp(r'^[A-Za-z0-9 .ñÑ]+$').hasMatch(text)) {
+                        return "Solo letras sin acento, números, espacios, puntos y ñ";
+                      }
+
+                      return null;
                     },
                   ),
                 ],
@@ -113,11 +102,11 @@ class _CreateUserPageState extends State<CreateClientDialog> {
                     children: [
                       IsselStepperField(
                         height: 50,
-                        title: "M3",
-                        onChanged: (value) => potableM3Pricing = value,
+                        title: "Litro",
+                        onChanged: (value) => potableLiterPricing = value,
                         maxValue: 10000,
                         minValue: 0,
-                        initValue: potableM3Pricing,
+                        initValue: potableLiterPricing,
                         backColor: colorScheme.surfaceContainer,
                         counterColor: colorScheme.surface,
                       ),
@@ -138,11 +127,11 @@ class _CreateUserPageState extends State<CreateClientDialog> {
                     children: [
                       IsselStepperField(
                         height: 50,
-                        title: "M3",
-                        onChanged: (value) => pozoM3Pricing = value,
+                        title: "Litro",
+                        onChanged: (value) => pozoLiterPricing = value,
                         maxValue: 10000,
                         minValue: 0,
-                        initValue: pozoM3Pricing,
+                        initValue: pozoLiterPricing,
                         backColor: colorScheme.surfaceContainer,
                         counterColor: colorScheme.surface,
                       ),
@@ -162,10 +151,7 @@ class _CreateUserPageState extends State<CreateClientDialog> {
               ),
             ),
             //* Botón de registrar
-            IsselButton(
-              text: "Crear",
-              onTap: createClient,
-            )
+            IsselButton(text: "Crear", onTap: createClient),
           ],
         ),
       ),
@@ -173,36 +159,50 @@ class _CreateUserPageState extends State<CreateClientDialog> {
   }
 
   void createClient() async {
-
-    if (!formKey.currentState!.validate()){
+    if (!formKey.currentState!.validate()) {
       return;
     }
 
     ClientsController clientsController = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await clientsController.createClient(name.text, phone.text, potableM3Pricing, potableGallonPricing, pozoM3Pricing, pozoGallonPricing);
+    CtrlResponse response = await clientsController.createClient(
+      commercialName.text,
+      potableLiterPricing,
+      potableGallonPricing,
+      pozoLiterPricing,
+      pozoGallonPricing,
+    );
+    if (!mounted) {
+      return;
+    }
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();
     NavigationService navigationService = locator();
     if (response.success) {
-      toastService.success("Usuario creado");
+      toastService.success("Cliente creado");
       navigationService.goBack();
     } else {
       toastService.error(response.message!);
     }
-
   }
 
   void onChangeWaterType(TabSwitcherAlignStates newState) {
     state = newState;
     if (state == TabSwitcherAlignStates.left) {
-      pageController.animateToPage(0, duration: const Duration(milliseconds: 250), curve: Curves.linearToEaseOut);
+      pageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.linearToEaseOut,
+      );
     } else {
-      pageController.animateToPage(1, duration: const Duration(milliseconds: 250), curve: Curves.linearToEaseOut);
+      pageController.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.linearToEaseOut,
+      );
     }
     setState(() {});
   }
-
 }

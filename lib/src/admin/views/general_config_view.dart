@@ -12,7 +12,6 @@ import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../../commons/entities/client_entity.dart';
 import '../../../commons/text_back_button.dart';
 import '../../../inject_container.dart';
 
@@ -40,9 +39,9 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
   int printQnty = 0;
 
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
-  double potableM3Pricing = 0;
+  double potableLiterPricing = 0;
   double potableGallonPricing = 0;
-  double pozoM3Pricing = 0;
+  double pozoLiterPricing = 0;
   double pozoGallonPricing = 0;
   PageController pageController = PageController();
 
@@ -72,9 +71,9 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     extraInfo1Ctrl.text = config.extraInfo1;
     extraInfo2Ctrl.text = config.extraInfo2;
     potableGallonPricing = config.potableGalPricing;
-    potableM3Pricing = config.potableM3Pricing;
+    potableLiterPricing = config.potableLiterPricing;
     pozoGallonPricing = config.pozoGalPricing;
-    pozoM3Pricing = config.pozoM3Pricing;
+    pozoLiterPricing = config.pozoLiterPricing;
     plcController.text = config.plcEndpoint;
     printQnty = config.printQnty;
   }
@@ -365,12 +364,12 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                             children: [
                                               IsselStepperField(
                                                 height: 50,
-                                                title: "M3",
+                                                title: "Litro",
                                                 onChanged: (value) =>
-                                                    potableM3Pricing = value,
+                                                    potableLiterPricing = value,
                                                 maxValue: 10000,
                                                 minValue: 0,
-                                                initValue: potableM3Pricing,
+                                                initValue: potableLiterPricing,
                                                 backColor: colorScheme
                                                     .surfaceContainer,
                                                 counterColor:
@@ -397,12 +396,12 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                             children: [
                                               IsselStepperField(
                                                 height: 50,
-                                                title: "M3",
+                                                title: "Litro",
                                                 onChanged: (value) =>
-                                                    pozoM3Pricing = value,
+                                                    pozoLiterPricing = value,
                                                 maxValue: 10000,
                                                 minValue: 0,
-                                                initValue: pozoM3Pricing,
+                                                initValue: pozoLiterPricing,
                                                 backColor: colorScheme
                                                     .surfaceContainer,
                                                 counterColor:
@@ -438,13 +437,12 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                           ],
                         ),
                       ),
-                      // Información del ticket
 
+                      // Información del ticket
                       Expanded(
                         child: Column(
                           spacing: 10,
                           children: [
-                        
                             Container(
                               padding: EdgeInsets.all(25),
                               decoration: BoxDecoration(
@@ -463,7 +461,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                     ),
                                     IsselTextFormField(
                                       hintText: "IP:PUERTO",
-                                      prefixIcon: Icons.settings_ethernet_outlined,
+                                      prefixIcon:
+                                          Icons.settings_ethernet_outlined,
                                       fillColor: colorScheme.surfaceContainer,
                                       controller: plcController,
                                       validator: _serverValidator,
@@ -472,12 +471,12 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                       text: "Actualizar",
                                       height: 50,
                                       onTap: updatePlc,
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
-                        
+
                             Expanded(
                               child: Container(
                                 padding: EdgeInsets.all(25),
@@ -490,7 +489,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                   child: SingleChildScrollView(
                                     child: Column(
                                       spacing: 10,
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
                                       children: [
                                         Text(
                                           "Información del ticket",
@@ -502,8 +502,10 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                           initValue: printQnty.toDouble(),
                                           minValue: 0,
                                           maxValue: 10,
-                                          onChanged: (value) => printQnty = value.toInt(),
-                                          backColor: colorScheme.surfaceContainer,
+                                          onChanged: (value) =>
+                                              printQnty = value.toInt(),
+                                          backColor:
+                                              colorScheme.surfaceContainer,
                                           counterColor: colorScheme.surface,
                                         ),
                                         Text(
@@ -513,7 +515,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                         IsselTextFormField(
                                           hintText: "PABN PURIFICADORA",
                                           prefixIcon: Icons.title_outlined,
-                                          fillColor: colorScheme.surfaceContainer,
+                                          fillColor:
+                                              colorScheme.surfaceContainer,
                                           controller: businessNameCtrl,
                                         ),
                                         Text(
@@ -523,7 +526,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                         IsselTextFormField(
                                           hintText: "Monzón 81000",
                                           prefixIcon: Icons.directions_outlined,
-                                          fillColor: colorScheme.surfaceContainer,
+                                          fillColor:
+                                              colorScheme.surfaceContainer,
                                           controller: bussinessAddressCtrl,
                                         ),
                                         Text(
@@ -533,13 +537,15 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                         IsselTextFormField(
                                           hintText: "Gracias por su compra.",
                                           prefixIcon: Icons.info_outline,
-                                          fillColor: colorScheme.surfaceContainer,
+                                          fillColor:
+                                              colorScheme.surfaceContainer,
                                           controller: extraInfo1Ctrl,
                                         ),
                                         IsselTextFormField(
                                           hintText: "¡Vuelva Pronto!",
                                           prefixIcon: Icons.info_outline,
-                                          fillColor: colorScheme.surfaceContainer,
+                                          fillColor:
+                                              colorScheme.surfaceContainer,
                                           controller: extraInfo2Ctrl,
                                         ),
                                         IsselButton(
@@ -552,12 +558,10 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                   ),
                                 ),
                               ),
-                            )
-                        
+                            ),
                           ],
                         ),
                       ),
-
 
                       // Previsualización del Ticket
                       Expanded(
@@ -617,12 +621,14 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                       );
                                     },
                                     build: (format) {
-                                      final config = _buildPreviewConfig(generalConfigController.generalConfigEntity!,);
+                                      final config = _buildPreviewConfig(
+                                        generalConfigController
+                                            .generalConfigEntity!,
+                                      );
                                       final ticket = SellTicketEntity(
                                         folio: "1839174451",
                                         dispatchCode: "16383917445163345",
-                                        clientName: "Juan",
-                                        clientPhone: "6568794524",
+                                        commercialName: "ACME S.A.",
                                         total: 500,
                                         paymentMethod: PaymentMethod.cash,
                                         amountPaid: 600,
@@ -709,7 +715,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
       bussinessAddressCtrl.text,
       extraInfo1Ctrl.text,
       extraInfo2Ctrl.text,
-      printQnty
+      printQnty,
     );
     if (!mounted) return;
     context.loaderOverlay.hide();
@@ -740,7 +746,6 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     } else {
       toastService.error(response.message!);
     }
-
   }
 
   void updatePrices() async {
@@ -753,9 +758,9 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
     context.loaderOverlay.show();
     CtrlResponse response = await controller.updatePrices(
       potableGallonPricing,
-      potableM3Pricing,
+      potableLiterPricing,
       pozoGallonPricing,
-      pozoM3Pricing,
+      pozoLiterPricing,
     );
     if (!mounted) return;
     context.loaderOverlay.hide();

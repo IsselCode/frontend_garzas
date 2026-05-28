@@ -102,6 +102,7 @@ class DispatchSessionsApi {
 
           final decoded = jsonDecode(data);
           if (decoded is Map<String, dynamic>) {
+            print(GarzaRuntimeResponseEntity.fromMap(decoded));
             yield GarzaRuntimeResponseEntity.fromMap(decoded);
           }
         }

@@ -25,36 +25,34 @@ class SalesApi {
   String _dispatchValidatePath(String code) => "/sales/$code/dispatch/validate";
   String _dispatchPath(String code) => "/sales/$code/dispatch";
 
-  String _listPendingCreditSalesByClientPath(String phoneNumber) => "/sales/credit/by-client/$phoneNumber";
-  String _createCreditPaymentPath(String folio) => "/sales/$folio/credit-payments";
-  String _listCreditPaymentsPath(String folio) => "/sales/$folio/credit-payments";
+  String _listPendingCreditSalesByClientPath(int clientId) =>
+      "/sales/credit/by-client/$clientId";
+  String _createCreditPaymentPath(String folio) =>
+      "/sales/$folio/credit-payments";
+  String _listCreditPaymentsPath(String folio) =>
+      "/sales/$folio/credit-payments";
   final String _getPendingCreditsPath = "/sales/credit/pending";
 
   Future<List<SaleEntity>> listSales() async {
-
     try {
+      List response = await apiClient.get(_salesPath, authRequired: true);
 
-      List response = await apiClient.get(
-        _salesPath,
-        authRequired: true,
-      );
-
-      return response.map((e) => SaleEntity.fromMap(e),).toList();
+      return response.map((e) => SaleEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<StatisticsEntity> getMonthlyPaymentTotals() async {
-
+  Future<StatisticsEntity> getMonthlyPaymentTotals({DateTime? month}) async {
     try {
-
       Map<String, dynamic> response = await apiClient.get(
         _getMonthlyPaymentTotalsPath,
         authRequired: true,
+        queryParams: month == null
+            ? null
+            : {"month": month.toIso8601String().split("T").first},
       );
 
       return StatisticsEntity.fromMap(response);
@@ -63,16 +61,18 @@ class SalesApi {
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<MonthlyGarzaTotalEntity> getMonthlyGarzaTotals() async {
-
+  Future<MonthlyGarzaTotalEntity> getMonthlyGarzaTotals({
+    DateTime? month,
+  }) async {
     try {
-
       Map<String, dynamic> response = await apiClient.get(
         _getMonthlyGarzaTotals,
         authRequired: true,
+        queryParams: month == null
+            ? null
+            : {"month": month.toIso8601String().split("T").first},
       );
 
       return MonthlyGarzaTotalEntity.fromMap(response);
@@ -81,13 +81,10 @@ class SalesApi {
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
   Future<SaleEntity> findSaleByPhone(String folio) async {
-
     try {
-
       Map<String, dynamic> response = await apiClient.get(
         "$_salesPath/$folio",
         authRequired: true,
@@ -99,11 +96,12 @@ class SalesApi {
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<List<SaleEntity>> listByDateRange(DateTime startDate, DateTime endDate) async {
-
+  Future<List<SaleEntity>> listByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     String start = startDate.toIso8601String().split("T").first;
     String end = endDate.toIso8601String().split("T").first;
 
@@ -111,79 +109,76 @@ class SalesApi {
       List response = await apiClient.get(
         _salesByDateRangePath,
         authRequired: true,
-        queryParams: {"start_date": start, "end_date": end}
+        queryParams: {"start_date": start, "end_date": end},
       );
 
-      return response.map((e) => SaleEntity.fromMap(e),).toList();
+      return response.map((e) => SaleEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<double> quotSale(WaterType waterType, UnitOfMeasurement unitOfMeasurement, double quantity, String? clientPhone) async {
-
+  Future<double> quotSale(
+    WaterType waterType,
+    UnitOfMeasurement unitOfMeasurement,
+    double quantity,
+    int? clientId,
+  ) async {
     Map<String, dynamic> body = {
       "water_type": waterType.name,
       "unit_of_measurement": unitOfMeasurement.name,
       "quantity": quantity,
     };
 
-    if (clientPhone != null) body["client_phone"] = clientPhone;
+    if (clientId != null) body["client_id"] = clientId;
 
     Map<String, dynamic> response = await apiClient.post(
       _salesQuotePath,
       authRequired: true,
-      body: body
+      body: body,
     );
 
     return response["total"];
-
   }
 
   Future<SaleEntity> createSale(SaleInfoDto dto) async {
-
     Map<String, dynamic> response = await apiClient.post(
       _salesPath,
       authRequired: true,
-      body: dto.toJson()
+      body: dto.toJson(),
     );
 
     return SaleEntity.fromMap(response);
-
   }
 
   // Dispatch
   Future<DispatchValidateEntity> validateDispatch(String barcode) async {
-
     Map<String, dynamic> response = await apiClient.get(
-        _dispatchValidatePath(barcode),
-        authRequired: true,
+      _dispatchValidatePath(barcode),
+      authRequired: true,
     );
 
     return DispatchValidateEntity.fromMap(response);
-
   }
 
   Future<SaleEntity> dispatch(String barcode, int garzaNumber) async {
-
     Map<String, dynamic> response = await apiClient.post(
       _dispatchPath(barcode),
       authRequired: true,
-      body: {"garza_number": garzaNumber}
+      body: {"garza_number": garzaNumber},
     );
 
     return SaleEntity.fromMap(response);
-
   }
 
   // Credits
-  Future<List<CreditEntity>> getPendingCredits({DateTime? startDate, DateTime? endDate}) async {
-
+  Future<List<CreditEntity>> getPendingCredits({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
-
       late dynamic start;
       late dynamic end;
       Map<String, dynamic>? queryParams;
@@ -194,80 +189,72 @@ class SalesApi {
         queryParams = {"start_date": start, "end_date": end};
       }
 
-
       List response = await apiClient.get(
         _getPendingCreditsPath,
         authRequired: true,
-        queryParams: queryParams
+        queryParams: queryParams,
       );
 
-      return response.map((e) => CreditEntity.fromMap(e),).toList();
+      return response.map((e) => CreditEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
   Future<List<CreditPaymentEntity>> getCreditPayments(String folio) async {
-
     try {
-
       List response = await apiClient.get(
         _listCreditPaymentsPath(folio),
         authRequired: true,
       );
 
-      return response.map((e) => CreditPaymentEntity.fromMap(e),).toList();
+      return response.map((e) => CreditPaymentEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<List<CreditEntity>> listPendingCreditSalesByClient(String phoneNumber) async {
-
+  Future<List<CreditEntity>> listPendingCreditSalesByClient(
+    int clientId,
+  ) async {
     try {
-
       List response = await apiClient.get(
-        _listPendingCreditSalesByClientPath(phoneNumber),
+        _listPendingCreditSalesByClientPath(clientId),
         authRequired: true,
       );
 
-      return response.map((e) => CreditEntity.fromMap(e),).toList();
+      return response.map((e) => CreditEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<void> createCreditPayment(String folio, PaymentMethod method, double total) async {
-
+  Future<void> createCreditPayment(
+    String folio,
+    PaymentMethod method,
+    double total,
+  ) async {
     try {
-
       Map<String, dynamic> body = {
         "payment_method": method.name,
         "amount": total,
       };
 
-      Map<String, dynamic> response = await apiClient.post(
+      await apiClient.post(
         _createCreditPaymentPath(folio),
         authRequired: true,
-        body: body
+        body: body,
       );
-
     } on AppException {
       rethrow;
     } catch (e) {
-      print(e.toString());
       throw AppException(message: e.toString());
     }
-
   }
-
 }

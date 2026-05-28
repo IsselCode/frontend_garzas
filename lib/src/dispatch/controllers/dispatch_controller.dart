@@ -274,8 +274,9 @@ class DispatchController extends ChangeNotifier {
     }
     activeSession = session.copyWith(
       state: runtimeGarza.currentState,
-      authorizedVolumeLiters: runtimeGarza.authorizedVolumeLiters,
-      dispensedVolumeFinalLiters: runtimeGarza.dispensedVolumeLiters,
+      unitOfMeasurement: runtimeGarza.unitOfMeasurement,
+      authorizedVolume: runtimeGarza.authorizedVolume,
+      dispensedVolume: runtimeGarza.dispensedVolume,
       updatedAt: runtimeGarza.updatedAt,
     );
   }

@@ -63,7 +63,7 @@ class FinishDispatchView extends StatelessWidget {
                           readOnly: true,
                         ),
                         Text(
-                          "Cantidad en ${unit == UnitOfMeasurement.cubic_meters ? "Metros Cubicos" : "Galones"}",
+                          "Cantidad en ${unit == UnitOfMeasurement.liters ? "Litros" : "Galones"}",
                           style: textTheme.titleMedium,
                         ),
                         IsselTextFormField(
@@ -149,7 +149,7 @@ class FinishDispatchView extends StatelessWidget {
 
   double _litersToUnit(double liters, UnitOfMeasurement unit) {
     switch (unit) {
-      case UnitOfMeasurement.cubic_meters:
+      case UnitOfMeasurement.liters:
         return liters / 1000;
       case UnitOfMeasurement.gallons:
         return liters / 3.785411784;

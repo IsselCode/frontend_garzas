@@ -5,8 +5,7 @@ import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import '../../../admin/clean/widgets/config_garza_container.dart';
 
 class SaleInfoDto extends Equatable {
-
-  final String? customerPhone;
+  final int? clientId;
   final WaterType waterType;
   final UnitOfMeasurement unitOfMeasurement;
   final double quantity;
@@ -15,7 +14,7 @@ class SaleInfoDto extends Equatable {
   final double changeAmount; // Para guardar dato de la venta
 
   const SaleInfoDto._({
-    required this.customerPhone,
+    required this.clientId,
     required this.waterType,
     required this.unitOfMeasurement,
     required this.quantity,
@@ -25,7 +24,7 @@ class SaleInfoDto extends Equatable {
   });
 
   factory SaleInfoDto({
-    String? customerPhone,
+    int? clientId,
     required WaterType? waterType,
     required UnitOfMeasurement? unitOfMeasurement,
     required double? quantity,
@@ -33,7 +32,6 @@ class SaleInfoDto extends Equatable {
     required double? amountPaid,
     required double? changeAmount,
   }) {
-
     if (waterType == null) {
       throw AppException(message: "El tipo de agua es obligatorio");
     }
@@ -65,36 +63,34 @@ class SaleInfoDto extends Equatable {
     }
 
     return SaleInfoDto._(
-      customerPhone: customerPhone,
+      clientId: clientId,
       waterType: waterType,
       unitOfMeasurement: unitOfMeasurement,
       quantity: quantity,
       paymentMethod: paymentMethod,
       amountPaid: amountPaid,
-      changeAmount: changeAmount
+      changeAmount: changeAmount,
     );
   }
 
   Map<String, dynamic> toJson() {
-
     Map<String, dynamic> body = {
       "water_type": waterType.name,
       "unit_of_measurement": unitOfMeasurement.name,
       "quantity": quantity,
       "payment_method": paymentMethod.name,
       "amount_paid": amountPaid,
-      "change_amount": changeAmount
+      "change_amount": changeAmount,
     };
 
-    if (customerPhone != null) body["client_phone"] = customerPhone;
+    if (clientId != null) body["client_id"] = clientId;
 
     return body;
   }
 
   @override
-  List<Object?> get props => [quantity, waterType, paymentMethod, customerPhone];
+  List<Object?> get props => [quantity, waterType, paymentMethod, clientId];
 
   @override
   String toString() => toJson().toString();
-
 }

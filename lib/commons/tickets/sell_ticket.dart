@@ -19,8 +19,7 @@ const PdfPageFormat sellTicketPageFormat = PdfPageFormat(
 
 class SellTicketEntity {
   String folio;
-  String? clientName;
-  String? clientPhone;
+  String? commercialName;
   WaterType waterType;
   UnitOfMeasurement unitOfMeasurement;
   double quantity;
@@ -34,8 +33,7 @@ class SellTicketEntity {
 
   SellTicketEntity({
     required this.folio,
-    required this.clientName,
-    required this.clientPhone,
+    required this.commercialName,
     required this.waterType,
     required this.unitOfMeasurement,
     required this.quantity,
@@ -64,8 +62,7 @@ Future<Uint8List> sellTicketPdf(
   final extraInfo2 = generalConfigEntity.extraInfo2.trim();
   final createdAt = sellTicketEntity.createdAt;
   final barcodeData = sellTicketEntity.dispatchCode;
-  final clientName = (sellTicketEntity.clientName ?? '').trim();
-  final clientPhone = (sellTicketEntity.clientPhone ?? '').trim();
+  final commercialName = (sellTicketEntity.commercialName ?? '').trim();
   final quantityText =
       '${sellTicketEntity.quantity.toStringAsFixed(2)} ${sellTicketEntity.unitOfMeasurement.abbr}';
   final isCashPayment = sellTicketEntity.paymentMethod == PaymentMethod.cash;
@@ -150,10 +147,8 @@ Future<Uint8List> sellTicketPdf(
             pw.SizedBox(height: 6),
             dataRow(
               'Cliente',
-              clientName.isEmpty ? 'Publico general' : clientName,
+              commercialName.isEmpty ? 'Publico general' : commercialName,
             ),
-            if (clientPhone.isNotEmpty)
-            dataRow('Telefono', clientPhone),
             dataRow('Tipo de agua', sellTicketEntity.waterType.dp),
             dataRow('Cantidad', quantityText),
             pw.SizedBox(height: 4),

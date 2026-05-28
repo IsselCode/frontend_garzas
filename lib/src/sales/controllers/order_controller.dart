@@ -118,16 +118,18 @@ class OrderController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> getSearchClients(String phone) async {
-    if (phone.isEmpty) {
+  Future<CtrlResponse> getSearchClients(String commercialName) async {
+    if (commercialName.trim().isEmpty) {
       showedClients = clients;
       notifyListeners();
       return CtrlResponse(success: true);
     }
 
     try {
-      ClientEntity tempClient = await clientsApi.getClientByPhone(phone);
-      showedClients = [tempClient];
+      showedClients = await clientsApi.listClients(
+        limit: 10,
+        search: commercialName,
+      );
 
       notifyListeners();
       return CtrlResponse(success: true);
@@ -143,13 +145,13 @@ class OrderController extends ChangeNotifier {
         stateUnit,
       );
       double quantity = double.parse(quantityController.text);
-      String? customerPhone = selectedClient?.phone;
+      int? clientId = selectedClient?.id;
 
       double response = await salesApi.quotSale(
         waterType,
         unitOfMeasurement,
         quantity,
-        customerPhone,
+        clientId,
       );
 
       total = response;
@@ -161,6 +163,13 @@ class OrderController extends ChangeNotifier {
 
   Future<CtrlResponse<SaleEntity>> createSell() async {
     try {
+      if (paymentMethod == PaymentMethod.credit && selectedClient == null) {
+        return CtrlResponse(
+          success: false,
+          message: "Selecciona un cliente para una venta a credito",
+        );
+      }
+
       Printer? printer = await printerService.getSelectedPrinter();
       if (printer == null) {
         return CtrlResponse(
@@ -170,7 +179,7 @@ class OrderController extends ChangeNotifier {
       }
 
       SaleInfoDto dto = SaleInfoDto(
-        customerPhone: selectedClient?.phone,
+        clientId: selectedClient?.id,
         waterType: WaterType.fromTabSwitcher(state),
         unitOfMeasurement: UnitOfMeasurement.fromTabSwitcher(stateUnit),
         quantity: double.tryParse(quantityController.text),
@@ -207,8 +216,7 @@ class OrderController extends ChangeNotifier {
     final config = generalConfigController.generalConfigEntity!;
     final ticket = SellTicketEntity(
       folio: _saleEntity!.folio,
-      clientName: _saleEntity!.clientName,
-      clientPhone: _saleEntity!.clientPhone,
+      commercialName: _saleEntity!.commercialName,
       waterType: _saleEntity!.waterType,
       unitOfMeasurement: _saleEntity!.unitOfMeasurement,
       quantity: _saleEntity!.quantity,
@@ -238,12 +246,12 @@ class OrderController extends ChangeNotifier {
 
   // Credits
 
-  Future<CtrlResponse<List<CreditEntity>>> findCreditClientByPhoneNumber(
-    String phoneNumber,
+  Future<CtrlResponse<List<CreditEntity>>> findCreditClientById(
+    int clientId,
   ) async {
     try {
       List<CreditEntity> tempCredits = await salesApi
-          .listPendingCreditSalesByClient(phoneNumber);
+          .listPendingCreditSalesByClient(clientId);
       return CtrlResponse(success: true, element: tempCredits);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);

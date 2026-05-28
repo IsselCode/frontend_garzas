@@ -18,7 +18,6 @@ import '../../admin/clean/widgets/config_garza_container.dart';
 import '../clean/widgets/select_payment_method_sale_widget.dart';
 
 class FinishOrderView extends StatelessWidget {
-
   FinishOrderView._();
 
   static Widget init(BuildContext context) {
@@ -57,26 +56,36 @@ class FinishOrderView extends StatelessWidget {
                       spacing: 20,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Cliente", style: textTheme.titleMedium,),
+                        Text("Cliente", style: textTheme.titleMedium),
                         IsselTextFormField(
                           hintText: "Publico general",
-                          controller: TextEditingController(text: orderController.selectedClient?.name),
+                          controller: TextEditingController(
+                            text:
+                                orderController.selectedClient?.commercialName,
+                          ),
                           readOnly: true,
                         ),
-                        Text("Tipo de agua", style: textTheme.titleMedium,),
+                        Text("Tipo de agua", style: textTheme.titleMedium),
                         IsselTextFormField(
                           hintText: "Tipo de agua",
-                          controller: TextEditingController(text: WaterType.fromTabSwitcher(orderController.state).dp),
+                          controller: TextEditingController(
+                            text: WaterType.fromTabSwitcher(
+                              orderController.state,
+                            ).dp,
+                          ),
                           readOnly: true,
                         ),
-                        Text("${orderController.stateUnit == TabSwitcherAlignStates.left ? "Metros Cubicos" : "Galones"} a vender", style: textTheme.titleMedium),
+                        Text(
+                          "${orderController.stateUnit == TabSwitcherAlignStates.left ? "Litros" : "Galones"} a vender",
+                          style: textTheme.titleMedium,
+                        ),
                         IsselTextFormField(
                           hintText: "Tipo de agua",
                           controller: orderController.quantityController,
                           readOnly: true,
                         ),
                         Text("Cantidad a cobrar", style: textTheme.titleMedium),
-                        _TotalText()
+                        const _TotalText(),
                       ],
                     ),
                   ),
@@ -85,84 +94,112 @@ class FinishOrderView extends StatelessWidget {
 
               //* Right
               Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: AppGradients.primaryToSecondary
-                    ),
-                    child: Center(
-                      child: SizedBox(
-                        width: 320,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 30,
-                          children: [
-                            Text("Termina tu venta", style: textTheme.displaySmall?.copyWith(color: colorScheme.onPrimary),),
-
-                            Row(
-                              spacing: 10,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SelectPaymentMethodSaleWidget(
-                                  image: AppAssets.cash,
-                                  selected: orderController.paymentMethod == PaymentMethod.cash,
-                                  onTap: () => orderController.paymentMethod = PaymentMethod.cash,
-                                ),
-                                SelectPaymentMethodSaleWidget(
-                                  image: AppAssets.card,
-                                  selected: orderController.paymentMethod == PaymentMethod.card,
-                                  onTap: () => orderController.paymentMethod = PaymentMethod.card,
-                                ),
-                                SelectPaymentMethodSaleWidget(
-                                  image: AppAssets.credit,
-                                  selected: orderController.paymentMethod == PaymentMethod.credit,
-                                  onTap: () => orderController.paymentMethod = PaymentMethod.credit,
-                                ),
-                              ],
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.primaryToSecondary,
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: 320,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 30,
+                        children: [
+                          Text(
+                            "Termina tu venta",
+                            style: textTheme.displaySmall?.copyWith(
+                              color: colorScheme.onPrimary,
                             ),
+                          ),
 
-                            if (orderController.paymentMethod == PaymentMethod.cash)
+                          Row(
+                            spacing: 10,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SelectPaymentMethodSaleWidget(
+                                image: AppAssets.cash,
+                                selected:
+                                    orderController.paymentMethod ==
+                                    PaymentMethod.cash,
+                                onTap: () => orderController.paymentMethod =
+                                    PaymentMethod.cash,
+                              ),
+                              SelectPaymentMethodSaleWidget(
+                                image: AppAssets.card,
+                                selected:
+                                    orderController.paymentMethod ==
+                                    PaymentMethod.card,
+                                onTap: () => orderController.paymentMethod =
+                                    PaymentMethod.card,
+                              ),
+                              SelectPaymentMethodSaleWidget(
+                                image: AppAssets.credit,
+                                selected:
+                                    orderController.paymentMethod ==
+                                    PaymentMethod.credit,
+                                onTap: () => orderController.paymentMethod =
+                                    PaymentMethod.credit,
+                              ),
+                            ],
+                          ),
+
+                          if (orderController.paymentMethod ==
+                              PaymentMethod.cash)
                             Flex(
                               direction: Axis.vertical,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               spacing: 5,
                               children: [
-                                Text("Cliente paga con:", style: textTheme.titleSmall?.copyWith(color: colorScheme.onPrimary),),
+                                Text(
+                                  "Cliente paga con:",
+                                  style: textTheme.titleSmall?.copyWith(
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
                                 IsselTextFormField(
                                   hintText: "\$500",
                                   textAlign: TextAlign.center,
-                                  inputFormatters: [RegexService.positiveNumberFormatter],
+                                  inputFormatters: [
+                                    RegexService.positiveNumberFormatter,
+                                  ],
                                   controller: orderController.clientMoneyCtrl,
                                   autofocus: true,
                                   focusNode: clientMoneyFocus,
-                                  onSubmitted: (value) => calculateTotalRemaining(context),
+                                  onSubmitted: (value) =>
+                                      calculateTotalRemaining(context),
                                 ),
-                                Text("Cantidad a devolver", style: textTheme.titleSmall?.copyWith(color: colorScheme.onPrimary),),
+                                Text(
+                                  "Cantidad a devolver",
+                                  style: textTheme.titleSmall?.copyWith(
+                                    color: colorScheme.onPrimary,
+                                  ),
+                                ),
                                 IsselPill(
-                                  text: "\$${orderController.totalRemaining ?? 0.0}",
+                                  text:
+                                      "\$${orderController.totalRemaining ?? 0.0}",
                                   textColor: colorScheme.primary,
                                   height: 60,
                                 ),
                               ],
                             ),
-                            IsselButton(
-                              text: "Generar Venta",
-                              focusNode: buttonFocus,
-                              onTap: () => createSell(context),
-                            )
-                          ],
-                        ),
+                          IsselButton(
+                            text: "Generar Venta",
+                            focusNode: buttonFocus,
+                            onTap: () => createSell(context),
+                          ),
+                        ],
                       ),
                     ),
-                  )
-              )
-
+                  ),
+                ),
+              ),
             ],
           ),
           // AppBar
           Positioned(
-              top: kWindowCaptionHeight + 10,
-              left: 10,
-              child: TextBackButton()
+            top: kWindowCaptionHeight + 10,
+            left: 10,
+            child: TextBackButton(),
           ),
         ],
       ),
@@ -185,29 +222,26 @@ class FinishOrderView extends StatelessWidget {
   void createSell(BuildContext context) async {
     OrderController orderController = context.read();
     CtrlResponse<SaleEntity> response = await orderController.createSell();
+    if (!context.mounted) return;
 
-    if (response.success){
+    if (response.success) {
       NavigationService navigationService = locator();
       navigationService.pushAndRemoveUntil(GenerateTicketView.init(context));
     } else {
       ToastService toastService = locator();
       toastService.error(response.message!);
     }
-
   }
-
 }
 
-
 class _TotalText extends StatefulWidget {
-  const _TotalText({super.key});
+  const _TotalText();
 
   @override
   State<_TotalText> createState() => _TotalTextState();
 }
 
 class _TotalTextState extends State<_TotalText> {
-
   late Future<CtrlResponse<double>> _future;
 
   @override
@@ -227,12 +261,11 @@ class _TotalTextState extends State<_TotalText> {
     return FutureBuilder(
       future: _future,
       builder: (context, snapshot) {
-
-        if (snapshot.connectionState == ConnectionState.waiting){
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return IsselShimmer(
             delay: Duration(milliseconds: 0),
             width: double.infinity,
-            height: 60
+            height: 60,
           );
         }
 
@@ -243,9 +276,10 @@ class _TotalTextState extends State<_TotalText> {
           style: textTheme.titleLarge?.copyWith(color: colorScheme.primary),
           textAlign: TextAlign.center,
           readOnly: true,
-          controller: TextEditingController(text: "\$${value.toStringAsFixed(2)}"),
+          controller: TextEditingController(
+            text: "\$${value.toStringAsFixed(2)}",
+          ),
         );
-
       },
     );
   }

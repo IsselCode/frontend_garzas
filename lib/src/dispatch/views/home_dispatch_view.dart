@@ -447,7 +447,7 @@ class _GarzaRuntimeTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '$state  ${garza.dispensedVolumeLiters.toStringAsFixed(1)} / ${garza.authorizedVolumeLiters.toStringAsFixed(1)} L',
+                    '$state  ${garza.dispensedVolume.toStringAsFixed(1)} / ${garza.authorizedVolume.toStringAsFixed(1)} ${garza.unitOfMeasurement.abbr}',
                     style: textTheme.bodySmall?.copyWith(
                       color: colorScheme.outline,
                     ),

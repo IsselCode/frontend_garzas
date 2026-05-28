@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/dispatch/entities/dispatch_session_entity.dart';
 
 class GarzaRuntimeResponseEntity extends Equatable {
@@ -37,8 +38,9 @@ class GarzaRuntimeEntity extends Equatable {
   final int? activeSessionId;
   final String? saleFolio;
   final String? dispatchCode;
-  final double authorizedVolumeLiters;
-  final double dispensedVolumeLiters;
+  final UnitOfMeasurement unitOfMeasurement;
+  final double authorizedVolume;
+  final double dispensedVolume;
   final Map<String, bool> alarms;
   final String updatedAt;
 
@@ -51,8 +53,9 @@ class GarzaRuntimeEntity extends Equatable {
     required this.activeSessionId,
     required this.saleFolio,
     required this.dispatchCode,
-    required this.authorizedVolumeLiters,
-    required this.dispensedVolumeLiters,
+    required this.unitOfMeasurement,
+    required this.authorizedVolume,
+    required this.dispensedVolume,
     required this.alarms,
     required this.updatedAt,
   });
@@ -90,9 +93,11 @@ class GarzaRuntimeEntity extends Equatable {
       activeSessionId: map['active_session_id'],
       saleFolio: map['sale_folio'],
       dispatchCode: map['dispatch_code'],
-      authorizedVolumeLiters: (map['authorized_volume_liters'] as num)
-          .toDouble(),
-      dispensedVolumeLiters: (map['dispensed_volume_liters'] as num).toDouble(),
+      unitOfMeasurement: UnitOfMeasurement.fromString(
+        map['unit_of_measurement'],
+      ),
+      authorizedVolume: (map['authorized_volume'] as num).toDouble(),
+      dispensedVolume: (map['dispensed_volume'] as num).toDouble(),
       alarms: Map<String, bool>.from(map['alarms'] ?? {}),
       updatedAt: map['updated_at'],
     );
@@ -108,8 +113,9 @@ class GarzaRuntimeEntity extends Equatable {
     activeSessionId,
     saleFolio,
     dispatchCode,
-    authorizedVolumeLiters,
-    dispensedVolumeLiters,
+    unitOfMeasurement,
+    authorizedVolume,
+    dispensedVolume,
     alarms,
     updatedAt,
   ];

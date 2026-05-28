@@ -10,14 +10,10 @@ import 'package:frontend_garzas/src/admin/data/logs_api.dart';
 import '../data/sales_api.dart';
 
 class StatisticsController extends ChangeNotifier {
-
   LogsApi logsApi;
   SalesApi salesApi;
 
-  StatisticsController({
-    required this.logsApi,
-    required this.salesApi
-  });
+  StatisticsController({required this.logsApi, required this.salesApi});
 
   StatisticsEntity? statistics;
   MonthlyGarzaTotalEntity? monthlyGarzaTotalEntity;
@@ -28,10 +24,11 @@ class StatisticsController extends ChangeNotifier {
   List<LogEntity> logs = [];
   List<LogEntity> showedLogs = [];
 
-  Future<CtrlResponse> getMonthlyPaymentTotals() async {
+  Future<CtrlResponse> getMonthlyPaymentTotals({DateTime? month}) async {
     try {
-
-      StatisticsEntity tempStatistics = await salesApi.getMonthlyPaymentTotals();
+      StatisticsEntity tempStatistics = await salesApi.getMonthlyPaymentTotals(
+        month: month,
+      );
       statistics = tempStatistics;
       notifyListeners();
       return CtrlResponse(success: true);
@@ -40,10 +37,10 @@ class StatisticsController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> getMonthlyGarzaTotals() async {
+  Future<CtrlResponse> getMonthlyGarzaTotals({DateTime? month}) async {
     try {
-
-      MonthlyGarzaTotalEntity tempMonthlyGarzaTotal = await salesApi.getMonthlyGarzaTotals();
+      MonthlyGarzaTotalEntity tempMonthlyGarzaTotal = await salesApi
+          .getMonthlyGarzaTotals(month: month);
       monthlyGarzaTotalEntity = tempMonthlyGarzaTotal;
       notifyListeners();
       return CtrlResponse(success: true);
@@ -54,7 +51,6 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> getSales() async {
     try {
-
       List<SaleEntity> tempSells = await salesApi.listSales();
 
       sales = tempSells;
@@ -69,7 +65,6 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> findSaleByFolio(String folio) async {
     try {
-
       if (folio.isEmpty) {
         clearSalesDateRange();
         return CtrlResponse(success: true);
@@ -87,7 +82,6 @@ class StatisticsController extends ChangeNotifier {
 
   Future<CtrlResponse> getLogs() async {
     try {
-
       List<LogEntity> tempLogs = await logsApi.listLogs();
       logs = tempLogs;
       showedLogs = tempLogs;
@@ -98,9 +92,15 @@ class StatisticsController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> getSalesByDateRange({required DateTime startDate, required DateTime endDate,}) async {
+  Future<CtrlResponse> getSalesByDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
     try {
-      List<SaleEntity> tempSells = await salesApi.listByDateRange(startDate, endDate);
+      List<SaleEntity> tempSells = await salesApi.listByDateRange(
+        startDate,
+        endDate,
+      );
 
       showedSales = tempSells;
       notifyListeners();
@@ -116,9 +116,15 @@ class StatisticsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<CtrlResponse> getLogsByDateRange({required DateTime startDate, required DateTime endDate,}) async {
+  Future<CtrlResponse> getLogsByDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
     try {
-      List<LogEntity> tempLogs = await logsApi.listByDateRange(startDate, endDate);
+      List<LogEntity> tempLogs = await logsApi.listByDateRange(
+        startDate,
+        endDate,
+      );
 
       showedLogs = tempLogs;
       notifyListeners();

@@ -3,40 +3,40 @@ import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 
 class SaleEntity extends Equatable {
-  String folio;
-  String dispatchCode;
-  int cashCutId;
-  String sellerUid;
-  String sellerUsername;
-  String? clientPhone;
-  String? clientName;
-  WaterType waterType;
-  UnitOfMeasurement unitOfMeasurement;
-  double quantity;
-  double unitPrice;
-  double total;
-  PaymentMethod paymentMethod;
-  double amountPaid;
-  double changeAmount;
-  bool isDispatched;
-  DateTime createdAt;
-  double pendingAmount;
-  bool isPaid;
-  String? paidAt;
-  String? paidByUid;
-  String? paidByUsername;
-  double totalLiters;
-  double dispatchedLiters;
-  double remainingLiters;
+  final String folio;
+  final String dispatchCode;
+  final int cashCutId;
+  final String sellerUid;
+  final String sellerUsername;
+  final int? clientId;
+  final String? commercialName;
+  final WaterType waterType;
+  final UnitOfMeasurement unitOfMeasurement;
+  final double quantity;
+  final double unitPrice;
+  final double total;
+  final PaymentMethod paymentMethod;
+  final double amountPaid;
+  final double changeAmount;
+  final bool isDispatched;
+  final DateTime createdAt;
+  final double pendingAmount;
+  final bool isPaid;
+  final String? paidAt;
+  final String? paidByUid;
+  final String? paidByUsername;
+  final double totalLiters;
+  final double dispatchedLiters;
+  final double remainingLiters;
 
-  SaleEntity({
+  const SaleEntity({
     required this.folio,
     required this.dispatchCode,
     required this.cashCutId,
     required this.sellerUid,
     required this.sellerUsername,
-    required this.clientPhone,
-    required this.clientName,
+    required this.clientId,
+    required this.commercialName,
     required this.waterType,
     required this.unitOfMeasurement,
     required this.quantity,
@@ -64,8 +64,8 @@ class SaleEntity extends Equatable {
       cashCutId: data["cash_cut_id"],
       sellerUid: data["seller_uid"],
       sellerUsername: data["seller_username"],
-      clientPhone: data["client_phone"],
-      clientName: data["client_name"],
+      clientId: data["client_id"],
+      commercialName: data["commercial_name"],
       waterType: WaterType.fromString(data["water_type"]),
       unitOfMeasurement: UnitOfMeasurement.fromString(
         data["unit_of_measurement"],
@@ -96,8 +96,8 @@ class SaleEntity extends Equatable {
       "cash_cut_id": cashCutId,
       "seller_uid": sellerUid,
       "seller_username": sellerUsername,
-      "client_phone": clientPhone,
-      "client_name": clientName,
+      "client_id": clientId,
+      "commercial_name": commercialName,
       "water_type": waterType,
       "unit_of_measurement": unitOfMeasurement,
       "quantity": quantity,

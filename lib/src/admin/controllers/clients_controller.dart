@@ -5,93 +5,103 @@ import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 
 class ClientsController extends ChangeNotifier {
-
   ClientsApi clientsApi;
 
-  ClientsController({
-    required this.clientsApi,
-  });
+  ClientsController({required this.clientsApi});
 
   List<ClientEntity> allClients = [];
   List<ClientEntity> showedClients = [];
 
   Future<CtrlResponse> getClients() async {
-
     try {
-
       List<ClientEntity> tempClients = await clientsApi.listClients();
       allClients = tempClients;
       showedClients = tempClients;
       notifyListeners();
       return CtrlResponse(success: true);
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
-  Future<CtrlResponse> getClientsByPhone(String phone) async {
-
+  Future<CtrlResponse> searchClients(String commercialName) async {
     try {
-
-      if (phone.isEmpty) {
-       showedClients = allClients;
-       notifyListeners();
-       return CtrlResponse(success: true);
+      if (commercialName.trim().isEmpty) {
+        showedClients = allClients;
+        notifyListeners();
+        return CtrlResponse(success: true);
       }
 
-      ClientEntity tempClient = await clientsApi.getClientByPhone(phone);
-      showedClients = [tempClient];
+      showedClients = await clientsApi.listClients(search: commercialName);
       notifyListeners();
       return CtrlResponse(success: true);
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
-  Future<CtrlResponse> createClient(String name, String phone, double potableM3Pricing, double potableGallonPricing, double pozoM3Pricing, double pozoGallonPricing) async {
-
+  Future<CtrlResponse> createClient(
+    String commercialName,
+    double potableLiterPricing,
+    double potableGallonPricing,
+    double pozoLiterPricing,
+    double pozoGallonPricing,
+  ) async {
     try {
-
-      ClientEntity tempClient = await clientsApi.createClient(name.trim(), phone, potableGallonPricing, potableM3Pricing, pozoGallonPricing, pozoM3Pricing);
+      ClientEntity tempClient = await clientsApi.createClient(
+        commercialName.trim(),
+        potableGallonPricing,
+        potableLiterPricing,
+        pozoGallonPricing,
+        pozoLiterPricing,
+      );
       allClients.insert(0, tempClient);
       showedClients = allClients;
       notifyListeners();
       return CtrlResponse(success: true);
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
-  Future<CtrlResponse> updateClientByPhone(String clientPhone, String name, String newPhone, double potableM3Pricing, double potableGallonPricing, double pozoM3Pricing, double pozoGallonPricing) async {
-
+  Future<CtrlResponse> updateClientById(
+    int clientId,
+    String commercialName,
+    double potableLiterPricing,
+    double potableGallonPricing,
+    double pozoLiterPricing,
+    double pozoGallonPricing,
+  ) async {
     try {
-      ClientEntity tempClient = await clientsApi.updateClientByPhone(clientPhone, name.trim(), newPhone, potableGallonPricing, potableM3Pricing, pozoGallonPricing, pozoM3Pricing);
-      int tempIndexClient = allClients.indexWhere((element) => element.phone == clientPhone,);
+      ClientEntity tempClient = await clientsApi.updateClientById(
+        clientId,
+        commercialName.trim(),
+        potableGallonPricing,
+        potableLiterPricing,
+        pozoGallonPricing,
+        pozoLiterPricing,
+      );
+      int tempIndexClient = allClients.indexWhere(
+        (element) => element.id == clientId,
+      );
       allClients[tempIndexClient] = tempClient;
       showedClients = allClients;
       notifyListeners();
       return CtrlResponse(success: true);
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
 
-  Future<CtrlResponse> deleteClientByPhone(String phone) async {
-
+  Future<CtrlResponse> deleteClientById(int id) async {
     try {
-
-      await clientsApi.deleteClientByPhone(phone);
-      allClients.removeWhere((element) => element.phone == phone,);
+      await clientsApi.deleteClientById(id);
+      allClients.removeWhere((element) => element.id == id);
+      showedClients.removeWhere((element) => element.id == id);
       notifyListeners();
       return CtrlResponse(success: true);
-    } on AppException catch(e){
+    } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
-
   }
-
 }

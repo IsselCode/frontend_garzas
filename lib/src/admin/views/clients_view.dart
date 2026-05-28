@@ -21,9 +21,8 @@ class ClientsView extends StatefulWidget {
 }
 
 class _ReportsAndLogsViewState extends State<ClientsView> {
-
   late Future<CtrlResponse> _getClients;
-  FocusNode findByPhoneNode = FocusNode();
+  FocusNode searchNode = FocusNode();
 
   @override
   void initState() {
@@ -36,7 +35,6 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
   Widget build(BuildContext context) {
     // Theme
     ThemeData theme = Theme.of(context);
-    TextTheme textTheme = theme.textTheme;
     ColorScheme colorScheme = theme.colorScheme;
 
     // Controllers
@@ -69,11 +67,11 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                         SizedBox(
                           width: 250,
                           child: IsselTextFormField(
-                            focusNode: findByPhoneNode,
+                            focusNode: searchNode,
                             height: 50,
                             prefixIcon: Icons.search,
-                            hintText: "Teléfono",
-                            onSubmitted: findClientByPhone,
+                            hintText: "Nombre comercial",
+                            onSubmitted: searchClients,
                           ),
                         ),
                         SizedBox(
@@ -83,29 +81,36 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                             height: 50,
                             onTap: createClient,
                           ),
-                        )
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
-
               ],
             ),
             // Body
             FutureBuilder(
               future: _getClients,
               builder: (context, snapshot) {
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Expanded(child: IsselShimmer(width: double.infinity, height: double.infinity));
+                  return Expanded(
+                    child: IsselShimmer(
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  );
                 }
 
                 if (!snapshot.data!.success) {
-                  return Expanded(child: Center(child: Text(snapshot.data!.message!)));
+                  return Expanded(
+                    child: Center(child: Text(snapshot.data!.message!)),
+                  );
                 }
 
-                if (clientsController.showedClients.isEmpty){
-                  return Expanded(child: Center(child: Text("No hay clientes disponibles"),));
+                if (clientsController.showedClients.isEmpty) {
+                  return Expanded(
+                    child: Center(child: Text("No hay clientes disponibles")),
+                  );
                 }
 
                 List<ClientEntity> clients = clientsController.showedClients;
@@ -113,19 +118,22 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                 return Expanded(
                   child: IsselTableWidget(
                     header: IsselHeaderTable(
-                      titleHeaders: ["Nombre", "Teléfono", "Costo agua potable", "Costo agua pozo", "Acciones"],
+                      titleHeaders: [
+                        "Nombre comercial",
+                        "Costo agua potable",
+                        "Costo agua pozo",
+                        "Acciones",
+                      ],
                     ),
                     rows: clients.map((client) {
                       return IsselRowTable(
                         cells: [
                           IsselPill(
-                            widget: Text(client.name, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                            color: colorScheme.surfaceContainer,
-                            alignment: Alignment.centerLeft,
-                            height: 60,
-                          ),
-                          IsselPill(
-                            widget: Text(client.phone, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                            widget: Text(
+                              client.commercialName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             color: colorScheme.surfaceContainer,
                             height: 60,
                             alignment: Alignment.centerLeft,
@@ -136,8 +144,16 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("M3: ${client.potableM3Pricing != 0 ? "\$${client.potableM3Pricing}" : "n/a"}", maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                Text("Gal: ${client.potableGalPricing != 0 ? "\$${client.potableGalPricing}" : "n/a"}", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text(
+                                  "Litro: ${client.potableLiterPricing != 0 ? "\$${client.potableLiterPricing}" : "n/a"}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  "Gal: ${client.potableGalPricing != 0 ? "\$${client.potableGalPricing}" : "n/a"}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ],
                             ),
                             color: colorScheme.surfaceContainer,
@@ -149,8 +165,16 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("M3: ${client.pozoM3Pricing != 0 ? "\$${client.pozoM3Pricing}" : "n/a" }", maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                Text("Gal: ${client.pozoGalPricing != 0 ? "\$${client.pozoGalPricing}" : "n/a" }", maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                Text(
+                                  "Litro: ${client.pozoLiterPricing != 0 ? "\$${client.pozoLiterPricing}" : "n/a"}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  "Gal: ${client.pozoGalPricing != 0 ? "\$${client.pozoGalPricing}" : "n/a"}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ],
                             ),
                             color: colorScheme.surfaceContainer,
@@ -164,35 +188,43 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               children: [
                                 IconButton(
                                   onPressed: () => editClient(client),
-                                  icon: Icon(Icons.edit, color: colorScheme.primary,)
+                                  icon: Icon(
+                                    Icons.edit,
+                                    color: colorScheme.primary,
+                                  ),
                                 ),
                                 IconButton(
-                                  onPressed: () => deleteClient(client.phone),
-                                  icon: Icon(Icons.delete_outline, color: Colors.red,)
+                                  onPressed: () => deleteClient(client),
+                                  icon: Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                  ),
                                 ),
                               ],
                             ),
                             color: colorScheme.surfaceContainer,
                           ),
-                        ]
+                        ],
                       );
-                    },).toList()
+                    }).toList(),
                   ),
                 );
-
               },
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  void findClientByPhone(String phone) async {
+  void searchClients(String commercialName) async {
     ClientsController clientsController = context.read();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await clientsController.getClientsByPhone(phone);
+    CtrlResponse response = await clientsController.searchClients(
+      commercialName,
+    );
+    if (!mounted) return;
     context.loaderOverlay.hide();
 
     if (!response.success) {
@@ -200,32 +232,33 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
       toastService.error(response.message!);
     }
 
-    findByPhoneNode.requestFocus();
-
+    searchNode.requestFocus();
   }
 
   void editClient(ClientEntity client) async {
-
     await showDialog(
       context: context,
       builder: (context) => UpdateClientDialog(clientEntity: client),
     );
-
   }
 
-  void deleteClient(String phone) async {
-
+  void deleteClient(ClientEntity client) async {
     ClientsController clientsController = context.read();
 
-    bool dialogResponse = await showDialog(
-      context: context,
-      builder: (context) => ConfirmDeleteClientDialog(client: phone),
-    ) ?? false;
+    bool dialogResponse =
+        await showDialog(
+          context: context,
+          builder: (context) =>
+              ConfirmDeleteClientDialog(client: client.commercialName),
+        ) ??
+        false;
 
+    if (!mounted) return;
     if (!dialogResponse) return;
 
     context.loaderOverlay.show();
-    CtrlResponse response = await clientsController.deleteClientByPhone(phone);
+    CtrlResponse response = await clientsController.deleteClientById(client.id);
+    if (!mounted) return;
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();
@@ -234,16 +267,18 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
     } else {
       toastService.error(response.message!);
     }
-
   }
 
   void createClient() async {
-
     await showDialog(
       context: context,
       builder: (context) => CreateClientDialog(),
     );
-
   }
 
+  @override
+  void dispose() {
+    searchNode.dispose();
+    super.dispose();
+  }
 }

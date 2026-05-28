@@ -9,90 +9,82 @@ class ClientsApi {
 
   final String _clientsPath = "/clients";
 
-  Future<List<ClientEntity>> listClients({int? limit}) async {
-
-    Map<String, dynamic>? queryParams;
-
-    if (limit != null) queryParams = {"limit": limit};
+  Future<List<ClientEntity>> listClients({int? limit, String? search}) async {
+    final queryParams = <String, dynamic>{};
+    if (limit != null) queryParams["limit"] = limit;
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams["search"] = search.trim();
+    }
 
     try {
       List response = await apiClient.get(
         _clientsPath,
         authRequired: true,
-        queryParams:  queryParams
+        queryParams: queryParams.isEmpty ? null : queryParams,
       );
 
-      return response.map((e) => ClientEntity.fromMap(e),).toList();
+      return response.map((e) => ClientEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<ClientEntity> getClientByPhone(String phone) async {
-
-    Map<String, dynamic> response = await apiClient.get(
-      "$_clientsPath/$phone",
-      authRequired: true,
-    );
-
-    return ClientEntity.fromMap(response);
-
-  }
-
-  Future<ClientEntity> createClient(String name, String phone, double potableGalPricing, double potableM3Pricing, double pozoGalPricing, double pozoM3Pricing) async {
-
+  Future<ClientEntity> createClient(
+    String commercialName,
+    double potableGalPricing,
+    double potableLiterPricing,
+    double pozoGalPricing,
+    double pozoLiterPricing,
+  ) async {
     Map<String, dynamic> body = {
-      "name": name,
-      "phone": phone,
+      "commercial_name": commercialName,
       "potable_gal_pricing": potableGalPricing,
-      "potable_m3_pricing": potableM3Pricing,
+      "potable_liter_pricing": potableLiterPricing,
       "pozo_gal_pricing": pozoGalPricing,
-      "pozo_m3_pricing": pozoM3Pricing,
+      "pozo_liter_pricing": pozoLiterPricing,
     };
 
     Map<String, dynamic> response = await apiClient.post(
       _clientsPath,
       authRequired: true,
-      body: body
+      body: body,
     );
 
     return ClientEntity.fromMap(response);
   }
 
-  Future<void> deleteClientByPhone(String phone) async {
-
-    await apiClient.delete(
-      "$_clientsPath/$phone",
-      authRequired: true
-    );
-
+  Future<void> deleteClientById(int id) async {
+    await apiClient.delete("$_clientsPath/$id", authRequired: true);
   }
 
-  Future<ClientEntity> updateClientByPhone(String clientPhone, String name, String newPhone, double potableGalPricing, double potableM3Pricing, double pozoGalPricing, double pozoM3Pricing) async {
-
+  Future<ClientEntity> updateClientById(
+    int clientId,
+    String commercialName,
+    double potableGalPricing,
+    double potableLiterPricing,
+    double pozoGalPricing,
+    double pozoLiterPricing,
+  ) async {
     Map<String, dynamic> body = {
-      "name": name,
-      "phone": newPhone,
+      "commercial_name": commercialName,
       "potable_gal_pricing": potableGalPricing,
-      "potable_m3_pricing": potableM3Pricing,
+      "potable_liter_pricing": potableLiterPricing,
       "pozo_gal_pricing": pozoGalPricing,
-      "pozo_m3_pricing": pozoM3Pricing,
+      "pozo_liter_pricing": pozoLiterPricing,
     };
 
-    body.removeWhere((key, value) => value == null || (value is String && value.isEmpty));
+    body.removeWhere(
+      (key, value) => value == null || (value is String && value.isEmpty),
+    );
 
     Map<String, dynamic> response = await apiClient.patch(
-      "$_clientsPath/$clientPhone",
+      "$_clientsPath/$clientId",
       authRequired: true,
       body: body,
     );
 
     return ClientEntity.fromMap(response);
-
   }
-
-
 }

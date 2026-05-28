@@ -1,38 +1,36 @@
 import 'package:equatable/equatable.dart';
 
-import '../../src/admin/clean/enums/enums.dart';
-
 class ClientEntity extends Equatable {
-  final String name;
-  final String phone;
+  final int id;
+  final String commercialName;
   final double potableGalPricing;
-  final double potableM3Pricing;
+  final double potableLiterPricing;
   final double pozoGalPricing;
-  final double pozoM3Pricing;
+  final double pozoLiterPricing;
   final DateTime createdAt;
 
-  ClientEntity({
-    required this.name,
-    required this.phone,
+  const ClientEntity({
+    required this.id,
+    required this.commercialName,
     required this.potableGalPricing,
-    required this.potableM3Pricing,
+    required this.potableLiterPricing,
     required this.pozoGalPricing,
-    required this.pozoM3Pricing,
+    required this.pozoLiterPricing,
     required this.createdAt,
   });
 
   factory ClientEntity.fromMap(Map<String, dynamic> map) {
     return ClientEntity(
-      name: map["name"],
-      phone: map["phone"],
+      id: map["id"],
+      commercialName: map["commercial_name"],
       potableGalPricing: map["potable_gal_pricing"],
-      potableM3Pricing: map["potable_m3_pricing"],
+      potableLiterPricing: map["potable_liter_pricing"],
       pozoGalPricing: map["pozo_gal_pricing"],
-      pozoM3Pricing: map["pozo_m3_pricing"],
+      pozoLiterPricing: map["pozo_liter_pricing"],
       createdAt: DateTime.parse(map["created_at"]).toLocal(),
     );
   }
 
   @override
-  List<Object?> get props => [name, phone];
+  List<Object?> get props => [id];
 }

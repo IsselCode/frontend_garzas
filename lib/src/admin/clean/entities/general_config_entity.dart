@@ -19,9 +19,9 @@ class GeneralConfigEntity extends Equatable {
   String businessAddress;
   String extraInfo1;
   String extraInfo2;
-  double potableM3Pricing;
+  double potableLiterPricing;
   double potableGalPricing;
-  double pozoM3Pricing;
+  double pozoLiterPricing;
   double pozoGalPricing;
   String plcEndpoint;
   int printQnty;
@@ -44,9 +44,9 @@ class GeneralConfigEntity extends Equatable {
     required this.businessAddress,
     required this.extraInfo1,
     required this.extraInfo2,
-    required this.potableM3Pricing,
+    required this.potableLiterPricing,
     required this.potableGalPricing,
-    required this.pozoM3Pricing,
+    required this.pozoLiterPricing,
     required this.pozoGalPricing,
     required this.plcEndpoint,
     required this.printQnty,
@@ -71,9 +71,9 @@ class GeneralConfigEntity extends Equatable {
       businessAddress: map['business_address'],
       extraInfo1: map['extra_info_1'],
       extraInfo2: map['extra_info_2'],
-      potableM3Pricing: map["potable_m3_pricing"],
+      potableLiterPricing: map["potable_liter_pricing"],
       potableGalPricing: map["potable_gal_pricing"],
-      pozoM3Pricing: map["pozo_m3_pricing"],
+      pozoLiterPricing: map["pozo_liter_pricing"],
       pozoGalPricing: map["pozo_gal_pricing"],
       plcEndpoint: map["plc_endpoint"],
       printQnty: map["print_qnty"]
@@ -98,9 +98,9 @@ class GeneralConfigEntity extends Equatable {
     String? businessAddress,
     String? extraInfo1,
     String? extraInfo2,
-    double? potableM3Pricing,
+    double? potableLiterPricing,
     double? potableGalPricing,
-    double? pozoM3Pricing,
+    double? pozoLiterPricing,
     double? pozoGalPricing,
     String? plcEndpoint,
     int? printQnty,
@@ -123,9 +123,9 @@ class GeneralConfigEntity extends Equatable {
       businessAddress: businessAddress ?? this.businessAddress,
       extraInfo1: extraInfo1 ?? this.extraInfo1,
       extraInfo2: extraInfo2 ?? this.extraInfo2,
-      potableM3Pricing: potableM3Pricing ?? this.potableM3Pricing,
+      potableLiterPricing: potableLiterPricing ?? this.potableLiterPricing,
       potableGalPricing: potableGalPricing ?? this.potableGalPricing,
-      pozoM3Pricing: pozoM3Pricing ?? this.pozoM3Pricing,
+      pozoLiterPricing: pozoLiterPricing ?? this.pozoLiterPricing,
       pozoGalPricing: pozoGalPricing ?? this.pozoGalPricing,
       plcEndpoint: plcEndpoint ?? this.plcEndpoint,
       printQnty: printQnty ?? this.printQnty,
@@ -151,9 +151,9 @@ class GeneralConfigEntity extends Equatable {
       'business_address': businessAddress,
       'extra_info_1': extraInfo1,
       'extra_info_2': extraInfo2,
-      "potable_m3_pricing": potableM3Pricing,
+      "potable_liter_pricing": potableLiterPricing,
       "potable_gal_pricing": potableGalPricing,
-      "pozo_m3_pricing": pozoM3Pricing,
+      "pozo_liter_pricing": pozoLiterPricing,
       "pozo_gal_pricing": pozoGalPricing,
       "plc_endpoint": plcEndpoint,
       "print_qnty": printQnty,
@@ -179,9 +179,9 @@ class GeneralConfigEntity extends Equatable {
     businessAddress,
     extraInfo1,
     extraInfo2,
-    potableM3Pricing,
+    potableLiterPricing,
     potableGalPricing,
-    pozoM3Pricing,
+    pozoLiterPricing,
     pozoGalPricing,
     plcEndpoint,
     printQnty,

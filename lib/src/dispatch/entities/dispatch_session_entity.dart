@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 
 enum DispatchState {
   authorized(label: 'Autorizada'),
@@ -59,8 +60,9 @@ class DispatchSessionEntity extends Equatable {
   final String? operatorUid;
   final String? operatorUsername;
   final DispatchMode mode;
-  final double authorizedVolumeLiters;
-  final double dispensedVolumeFinalLiters;
+  final UnitOfMeasurement unitOfMeasurement;
+  final double authorizedVolume;
+  final double dispensedVolume;
   final DispatchState state;
   final String? closeReason;
   final String? lastPlcSnapshotJson;
@@ -79,8 +81,9 @@ class DispatchSessionEntity extends Equatable {
     required this.operatorUid,
     required this.operatorUsername,
     required this.mode,
-    required this.authorizedVolumeLiters,
-    required this.dispensedVolumeFinalLiters,
+    required this.unitOfMeasurement,
+    required this.authorizedVolume,
+    required this.dispensedVolume,
     required this.state,
     required this.closeReason,
     required this.lastPlcSnapshotJson,
@@ -101,12 +104,12 @@ class DispatchSessionEntity extends Equatable {
       operatorUid: map['operator_uid'],
       operatorUsername: map['operator_username'],
       mode: DispatchMode.fromString(map['mode']),
-      authorizedVolumeLiters: (map['authorized_volume_liters'] as num)
-          .toDouble(),
-      dispensedVolumeFinalLiters: (map['dispensed_volume_final_liters'] as num)
-          .toDouble(),
-      state:
-          DispatchState.fromString(map['state']) ?? DispatchState.interrupted,
+      unitOfMeasurement: UnitOfMeasurement.fromString(
+        map['unit_of_measurement'],
+      ),
+      authorizedVolume: (map['authorized_volume'] as num).toDouble(),
+      dispensedVolume: (map['dispensed_volume'] as num).toDouble(),
+      state: DispatchState.fromString(map['state']) ?? DispatchState.interrupted,
       closeReason: map['close_reason'],
       lastPlcSnapshotJson: map['last_plc_snapshot_json'],
       startedAt: map['started_at'],
@@ -126,8 +129,9 @@ class DispatchSessionEntity extends Equatable {
     String? operatorUid,
     String? operatorUsername,
     DispatchMode? mode,
-    double? authorizedVolumeLiters,
-    double? dispensedVolumeFinalLiters,
+    UnitOfMeasurement? unitOfMeasurement,
+    double? authorizedVolume,
+    double? dispensedVolume,
     DispatchState? state,
     String? closeReason,
     String? lastPlcSnapshotJson,
@@ -146,10 +150,9 @@ class DispatchSessionEntity extends Equatable {
       operatorUid: operatorUid ?? this.operatorUid,
       operatorUsername: operatorUsername ?? this.operatorUsername,
       mode: mode ?? this.mode,
-      authorizedVolumeLiters:
-          authorizedVolumeLiters ?? this.authorizedVolumeLiters,
-      dispensedVolumeFinalLiters:
-          dispensedVolumeFinalLiters ?? this.dispensedVolumeFinalLiters,
+      unitOfMeasurement: unitOfMeasurement ?? this.unitOfMeasurement,
+      authorizedVolume: authorizedVolume ?? this.authorizedVolume,
+      dispensedVolume: dispensedVolume ?? this.dispensedVolume,
       state: state ?? this.state,
       closeReason: closeReason ?? this.closeReason,
       lastPlcSnapshotJson: lastPlcSnapshotJson ?? this.lastPlcSnapshotJson,
@@ -171,8 +174,9 @@ class DispatchSessionEntity extends Equatable {
     operatorUid,
     operatorUsername,
     mode,
-    authorizedVolumeLiters,
-    dispensedVolumeFinalLiters,
+    unitOfMeasurement,
+    authorizedVolume,
+    dispensedVolume,
     state,
     closeReason,
     lastPlcSnapshotJson,

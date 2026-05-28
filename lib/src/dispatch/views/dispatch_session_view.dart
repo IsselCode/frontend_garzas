@@ -297,13 +297,17 @@ class _SessionSummary extends StatelessWidget {
         ? DispatchState.completed.label
         : runtimeGarza?.currentState?.label ?? session?.state.label ?? '-';
     final authorized =
-        runtimeGarza?.authorizedVolumeLiters ??
-        session?.authorizedVolumeLiters ??
+        runtimeGarza?.authorizedVolume ??
+        session?.authorizedVolume ??
         0;
     final dispensed =
-        runtimeGarza?.dispensedVolumeLiters ??
-        session?.dispensedVolumeFinalLiters ??
+        runtimeGarza?.dispensedVolume ??
+        session?.dispensedVolume ??
         0;
+    final unitOfMeasurement =
+        runtimeGarza?.unitOfMeasurement ?? session?.unitOfMeasurement;
+    final unitLabel = unitOfMeasurement?.dp ?? 'Cantidad';
+    final unitAbbr = unitOfMeasurement?.abbr ?? '';
 
     return Center(
       child: SizedBox(
@@ -341,12 +345,12 @@ class _SessionSummary extends StatelessWidget {
               readOnly: true,
             ),
 
-            Text("Litros", style: textTheme.titleMedium),
+            Text(unitLabel, style: textTheme.titleMedium),
             IsselTextFormField(
-              hintText: "Litros",
+              hintText: unitLabel,
               controller: TextEditingController(
                 text:
-                    '${dispensed.toStringAsFixed(2)} / ${authorized.toStringAsFixed(2)}',
+                    '${dispensed.toStringAsFixed(2)} / ${authorized.toStringAsFixed(2)} $unitAbbr',
               ),
               readOnly: true,
             ),

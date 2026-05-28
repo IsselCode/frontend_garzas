@@ -169,6 +169,7 @@ class MyApp extends StatelessWidget {
                                                 ).colorScheme.primary,
                                               ),
                                         ),
+                                        // Tema
                                         IsselToggle(
                                           onChanged: (value) =>
                                               titleBarController.toggleTheme(),
@@ -183,9 +184,7 @@ class MyApp extends StatelessWidget {
                                     ),
                                   ),
                                   actions: [
-                                    if (authController.session != null &&
-                                        authController.session!.role !=
-                                            AppRole.admin)
+                                    if (authController.session != null && authController.session!.role != AppRole.dispatch)
                                       IsselWindowCaptionAction(
                                         icon: Icon(Icons.print_outlined),
                                         onPressed: () {
@@ -201,9 +200,7 @@ class MyApp extends StatelessWidget {
                                           );
                                         },
                                       ),
-                                    if (authController.session != null &&
-                                        authController.session!.role ==
-                                            AppRole.seller)
+                                    if (authController.session != null && authController.session!.role == AppRole.seller)
                                       IsselWindowCaptionAction(
                                         icon: Icon(
                                           Icons.payment,
@@ -226,10 +223,8 @@ class MyApp extends StatelessWidget {
                                           );
                                         },
                                       ),
-                                    if (authController.session != null &&
-                                        authController.session!.role ==
-                                            AppRole.seller &&
-                                        cashRegisterController.openCash)
+                                    // Corte
+                                    if (authController.session != null && authController.session!.role == AppRole.seller && cashRegisterController.openCash)
                                       IsselWindowCaptionAction(
                                         icon: FaIcon(
                                           FontAwesomeIcons.cashRegister,
@@ -239,10 +234,7 @@ class MyApp extends StatelessWidget {
                                         onPressed: () {
                                           authController.session!.role ==
                                               AppRole.seller;
-                                          final dialogContext =
-                                              navigationService
-                                                  .navigatorKey
-                                                  .currentContext;
+                                          final dialogContext = navigationService.navigatorKey.currentContext;
                                           if (dialogContext == null) return;
                                           showDialog(
                                             context: dialogContext,
@@ -251,6 +243,7 @@ class MyApp extends StatelessWidget {
                                           );
                                         },
                                       ),
+                                    // Exit
                                     if (authController.session != null)
                                       IsselWindowCaptionAction(
                                         icon: Icon(

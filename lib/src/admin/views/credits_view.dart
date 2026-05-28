@@ -1,9 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
-import 'package:frontend_garzas/src/admin/clean/widgets/pie_widget.dart';
-import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/credits_controller.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +22,6 @@ class CreditsView extends StatefulWidget {
 }
 
 class _CashRegisterViewState extends State<CreditsView> {
-
   late Future<CtrlResponse> _getCredits;
   DateTimeRange? _salesDateRange;
 
@@ -64,9 +60,7 @@ class _CashRegisterViewState extends State<CreditsView> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextBackButton(),
-                  ],
+                  children: [TextBackButton()],
                 ),
               ],
             ),
@@ -81,7 +75,7 @@ class _CashRegisterViewState extends State<CreditsView> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: colorScheme.surface
+                        color: colorScheme.surface,
                       ),
                       padding: EdgeInsets.all(20),
                       child: Column(
@@ -91,7 +85,7 @@ class _CashRegisterViewState extends State<CreditsView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               // Titulo
-                              Text("Creditos", style: textTheme.titleLarge,),
+                              Text("Creditos", style: textTheme.titleLarge),
                               // Rango de fecha
                               IsselPill(
                                 text: _formatSalesDateRange(),
@@ -104,82 +98,102 @@ class _CashRegisterViewState extends State<CreditsView> {
                             child: FutureBuilder(
                               future: _getCredits,
                               builder: (context, snapshot) {
-                            
-                                if (snapshot.connectionState == ConnectionState.waiting){
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
                                   return ListView.separated(
                                     itemCount: 5,
-                                    separatorBuilder: (context, index) => const SizedBox(height: 10,),
+                                    separatorBuilder: (context, index) =>
+                                        const SizedBox(height: 10),
                                     itemBuilder: (context, index) {
-                                      return IsselShimmer(width: double.infinity, height: 50);
+                                      return IsselShimmer(
+                                        width: double.infinity,
+                                        height: 50,
+                                      );
                                     },
                                   );
                                 }
-                            
+
                                 if (!snapshot.data!.success) {
-                                  return Center(child: Text(snapshot.data!.message!),);
+                                  return Center(
+                                    child: Text(snapshot.data!.message!),
+                                  );
                                 }
-                            
+
                                 if (creditsController.showedCredits.isEmpty) {
-                                  return Center(child: Text("No hay creditos disponibles"),);
+                                  return Center(
+                                    child: Text("No hay creditos disponibles"),
+                                  );
                                 }
-                            
-                                List<CreditEntity> credits = creditsController.showedCredits;
-                            
+
+                                List<CreditEntity> credits =
+                                    creditsController.showedCredits;
+
                                 return IsselTableWidget(
-                                    color: colorScheme.surfaceContainer,
-                                    onTapRow: (index) => loadCreditPayments(credits[index]),
-                                    header: IsselHeaderTable(
-                                      titleHeaders: ["Cliente", "Total", "Pagado", "Pendiente", "Fecha"],
-                                      colorPills: colorScheme.surfaceContainer,
-                                    ),
-                                    rows: credits.map((credit) {
-                                      return IsselRowTable(
-                                        cells: [
-                                          IsselPill(
-                                            color: colorScheme.surface,
-                                            widget: AutoSizeText(
-                                              credit.clientPhone,
-                                              style: textTheme.bodyMedium,
-                                              maxLines: 1,
-                                            ),
+                                  color: colorScheme.surfaceContainer,
+                                  onTapRow: (index) =>
+                                      loadCreditPayments(credits[index]),
+                                  header: IsselHeaderTable(
+                                    titleHeaders: [
+                                      "Cliente",
+                                      "Total",
+                                      "Pagado",
+                                      "Pendiente",
+                                      "Fecha",
+                                    ],
+                                    colorPills: colorScheme.surfaceContainer,
+                                  ),
+                                  rows: credits.map((credit) {
+                                    return IsselRowTable(
+                                      cells: [
+                                        IsselPill(
+                                          color: colorScheme.surface,
+                                          widget: AutoSizeText(
+                                            credit.commercialName,
+                                            style: textTheme.bodyMedium,
+                                            maxLines: 1,
                                           ),
-                                          IsselPill(
-                                            color: colorScheme.surface,
-                                            widget: AutoSizeText(
-                                              credit.total.toStringAsFixed(2),
-                                              style: textTheme.bodyMedium,
-                                              maxLines: 1,
-                                            ),
+                                        ),
+                                        IsselPill(
+                                          color: colorScheme.surface,
+                                          widget: AutoSizeText(
+                                            credit.total.toStringAsFixed(2),
+                                            style: textTheme.bodyMedium,
+                                            maxLines: 1,
                                           ),
-                                          IsselPill(
-                                            color: colorScheme.surface,
-                                            widget: AutoSizeText(
-                                              credit.amountPaid.toStringAsFixed(2),
-                                              style: textTheme.bodyMedium,
-                                              maxLines: 1,
+                                        ),
+                                        IsselPill(
+                                          color: colorScheme.surface,
+                                          widget: AutoSizeText(
+                                            credit.amountPaid.toStringAsFixed(
+                                              2,
                                             ),
+                                            style: textTheme.bodyMedium,
+                                            maxLines: 1,
                                           ),
-                                          IsselPill(
-                                            color: colorScheme.surface,
-                                            widget: AutoSizeText(
-                                              credit.salePendingAmount.toStringAsFixed(2),
-                                              style: textTheme.bodyMedium,
-                                              maxLines: 1,
-                                            ),
+                                        ),
+                                        IsselPill(
+                                          color: colorScheme.surface,
+                                          widget: AutoSizeText(
+                                            credit.salePendingAmount
+                                                .toStringAsFixed(2),
+                                            style: textTheme.bodyMedium,
+                                            maxLines: 1,
                                           ),
-                                          IsselPill(
-                                            color: colorScheme.surface,
-                                            widget: AutoSizeText(
-                                              DateFormat("dd-MM-yy").format(credit.createdAt),
-                                              style: textTheme.bodyMedium,
-                                              maxLines: 1,
-                                            ),
+                                        ),
+                                        IsselPill(
+                                          color: colorScheme.surface,
+                                          widget: AutoSizeText(
+                                            DateFormat(
+                                              "dd-MM-yy",
+                                            ).format(credit.createdAt),
+                                            style: textTheme.bodyMedium,
+                                            maxLines: 1,
                                           ),
-                                        ]
-                                      );
-                                    },).toList()
+                                        ),
+                                      ],
+                                    );
+                                  }).toList(),
                                 );
-                            
                               },
                             ),
                           ),
@@ -190,65 +204,80 @@ class _CashRegisterViewState extends State<CreditsView> {
                   // Right Summary
                   Expanded(
                     flex: 2,
-                    child: creditsController.creditPayments.isEmpty || creditsController.selectedCredit == null
-                      ? Container(
-                        child: Center(
-                          child: Text(creditsController.selectedCredit != null ? "No hay ningun pago" : "Selecciona un credito para ver información"),
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: colorScheme.surface
-                        ),
-                      )
-                      : IsselTableWidget(
-                      color: colorScheme.surfaceContainer,
-                      header: IsselHeaderTable(
-                        titleHeaders: ["Cobrador", "Método", "Cantidad", "Fecha"],
-                        colorPills: colorScheme.surfaceContainer,
-                      ),
-                      rows: creditsController.creditPayments.map((payment) {
-                        return IsselRowTable(
-                            cells: [
-                              IsselPill(
-                                color: colorScheme.surface,
-                                widget: AutoSizeText(
-                                  payment.receivedByUsername,
-                                  style: textTheme.bodyMedium,
-                                  maxLines: 1,
-                                ),
+                    child:
+                        creditsController.creditPayments.isEmpty ||
+                            creditsController.selectedCredit == null
+                        ? Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: colorScheme.surface,
+                            ),
+                            child: Center(
+                              child: Text(
+                                creditsController.selectedCredit != null
+                                    ? "No hay ningun pago"
+                                    : "Selecciona un credito para ver información",
                               ),
-                              IsselPill(
-                                color: colorScheme.surface,
-                                widget: AutoSizeText(
-                                  payment.paymentMethod.label,
-                                  style: textTheme.bodyMedium,
-                                  maxLines: 1,
-                                ),
-                              ),
-                              IsselPill(
-                                color: colorScheme.surface,
-                                widget: AutoSizeText(
-                                  payment.amount.toStringAsFixed(2),
-                                  style: textTheme.bodyMedium,
-                                  maxLines: 1,
-                                ),
-                              ),
-                              IsselPill(
-                                color: colorScheme.surface,
-                                widget: AutoSizeText(
-                                  DateFormat("dd-MM-yy").format(payment.createdAt),
-                                  style: textTheme.bodyMedium,
-                                  maxLines: 1,
-                                ),
-                              ),
-                            ]
-                        );
-                      },).toList()
-                    ),
-                  )
+                            ),
+                          )
+                        : IsselTableWidget(
+                            color: colorScheme.surfaceContainer,
+                            header: IsselHeaderTable(
+                              titleHeaders: [
+                                "Cobrador",
+                                "Método",
+                                "Cantidad",
+                                "Fecha",
+                              ],
+                              colorPills: colorScheme.surfaceContainer,
+                            ),
+                            rows: creditsController.creditPayments.map((
+                              payment,
+                            ) {
+                              return IsselRowTable(
+                                cells: [
+                                  IsselPill(
+                                    color: colorScheme.surface,
+                                    widget: AutoSizeText(
+                                      payment.receivedByUsername,
+                                      style: textTheme.bodyMedium,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                  IsselPill(
+                                    color: colorScheme.surface,
+                                    widget: AutoSizeText(
+                                      payment.paymentMethod.label,
+                                      style: textTheme.bodyMedium,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                  IsselPill(
+                                    color: colorScheme.surface,
+                                    widget: AutoSizeText(
+                                      payment.amount.toStringAsFixed(2),
+                                      style: textTheme.bodyMedium,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                  IsselPill(
+                                    color: colorScheme.surface,
+                                    widget: AutoSizeText(
+                                      DateFormat(
+                                        "dd-MM-yy",
+                                      ).format(payment.createdAt),
+                                      style: textTheme.bodyMedium,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -268,15 +297,16 @@ class _CashRegisterViewState extends State<CreditsView> {
     final CreditsController creditsController = context.read();
     final ToastService toastService = locator();
     final DateRangeDialogResult? result =
-    await showDialog<DateRangeDialogResult>(
-      context: context,
-      builder: (context) => DateRangeDialog(
-        initialRange: _salesDateRange,
-        firstDate: DateTime(2020),
-        lastDate: DateTime.now().add(const Duration(days: 365)),
-      ),
-    );
+        await showDialog<DateRangeDialogResult>(
+          context: context,
+          builder: (context) => DateRangeDialog(
+            initialRange: _salesDateRange,
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now().add(const Duration(days: 365)),
+          ),
+        );
 
+    if (!mounted) return;
     if (result == null) return;
 
     if (result.cleared) {
@@ -294,6 +324,7 @@ class _CashRegisterViewState extends State<CreditsView> {
       endDate: result.range!.end,
     );
 
+    if (!mounted) return;
     if (response.success) {
       toastService.success("Creditos filtrados correctamente");
     } else {
@@ -309,11 +340,11 @@ class _CashRegisterViewState extends State<CreditsView> {
   }
 
   Future<void> loadCreditPayments(CreditEntity credit) async {
-
     CreditsController creditsController = context.read();
 
     context.loaderOverlay.show();
     CtrlResponse response = await creditsController.loadCreditPayments(credit);
+    if (!mounted) return;
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();
@@ -324,7 +355,5 @@ class _CashRegisterViewState extends State<CreditsView> {
     } else {
       toastService.error(response.message!);
     }
-
   }
-
 }
