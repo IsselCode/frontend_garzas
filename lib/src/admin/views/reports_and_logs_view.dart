@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
@@ -887,6 +889,14 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
           ),
         ),
         actions: [
+          if (!sale.isDispatched)
+            IsselButton(
+              width: 170,
+              height: 50,
+              text: "Eliminar venta",
+              color: Colors.red,
+              onTap: () => _requestSaleDeletion(dialogContext, sale),
+            ),
           IsselButton(
             text: "Cerrar",
             width: 120,
@@ -902,6 +912,52 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
         ],
       ),
     );
+  }
+
+  Future<void> _requestSaleDeletion(
+    BuildContext saleDetailsContext,
+    SaleEntity sale,
+  ) async {
+    final saleDetailsNavigator = Navigator.of(saleDetailsContext);
+    final bool? confirmed = await showDialog<bool>(
+      context: saleDetailsContext,
+      barrierDismissible: false,
+      builder: (context) => _ConfirmDeleteSaleDialog(folio: sale.folio),
+    );
+
+    if (!mounted || confirmed != true) return;
+
+    final statisticsController = context.read<StatisticsController>();
+    final toastService = locator<ToastService>();
+
+    context.loaderOverlay.show();
+    final CtrlResponse response = await statisticsController.deleteSaleByFolio(
+      sale.folio,
+    );
+
+    if (!mounted) return;
+
+    context.loaderOverlay.hide();
+
+    if (!response.success) {
+      toastService.error(response.message ?? "No se pudo eliminar la venta");
+      return;
+    }
+
+    toastService.success("Venta eliminada correctamente");
+
+    setState(() {
+      _loadStatistics = statisticsController.getMonthlyPaymentTotals(
+        month: _selectedTotalsMonth,
+      );
+      _loadMonthlyGarzaTotals = statisticsController.getMonthlyGarzaTotals(
+        month: _selectedTotalsMonth,
+      );
+    });
+
+    if (saleDetailsNavigator.canPop()) {
+      saleDetailsNavigator.pop();
+    }
   }
 
   Widget _saleDetailRow(
@@ -1117,5 +1173,95 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
     setState(() {
       _logsDateRange = result.range;
     });
+  }
+}
+
+class _ConfirmDeleteSaleDialog extends StatefulWidget {
+  final String folio;
+
+  const _ConfirmDeleteSaleDialog({required this.folio});
+
+  @override
+  State<_ConfirmDeleteSaleDialog> createState() =>
+      _ConfirmDeleteSaleDialogState();
+}
+
+class _ConfirmDeleteSaleDialogState extends State<_ConfirmDeleteSaleDialog> {
+  static const int _confirmationSeconds = 3;
+
+  late int _secondsRemaining;
+  Timer? _timer;
+
+  bool get _canConfirm => _secondsRemaining == 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _secondsRemaining = _confirmationSeconds;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining <= 1) {
+        timer.cancel();
+        setState(() => _secondsRemaining = 0);
+        return;
+      }
+
+      setState(() => _secondsRemaining--);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return AlertDialog(
+      backgroundColor: colorScheme.surface,
+      title: Text("Eliminar venta", style: textTheme.titleLarge),
+      content: SizedBox(
+        width: 420,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 12,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Esta accion eliminara permanentemente la venta con folio ${widget.folio}.",
+              style: textTheme.bodyMedium,
+            ),
+            Text(
+              _canConfirm
+                  ? "Confirma la eliminacion para continuar."
+                  : "Espera $_secondsRemaining segundos para confirmar.",
+              style: textTheme.bodyMedium?.copyWith(
+                color: _canConfirm ? colorScheme.error : colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        IsselButton(
+          text: "Cancelar",
+          width: 120,
+          height: 50,
+          onTap: () => Navigator.of(context).pop(false),
+        ),
+        IsselButton(
+          text: _canConfirm ? "Eliminar" : "Eliminar ($_secondsRemaining)",
+          width: 150,
+          height: 50,
+          color: Colors.red,
+          onTap: _canConfirm ? () => Navigator.of(context).pop(true) : null,
+        ),
+      ],
+    );
   }
 }

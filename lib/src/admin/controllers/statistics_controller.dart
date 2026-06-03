@@ -63,6 +63,20 @@ class StatisticsController extends ChangeNotifier {
     }
   }
 
+  Future<CtrlResponse> deleteSaleByFolio(String folio) async {
+    try {
+      await salesApi.deleteSaleByFolio(folio);
+
+      sales = sales.where((sale) => sale.folio != folio).toList();
+      showedSales = showedSales.where((sale) => sale.folio != folio).toList();
+      notifyListeners();
+
+      return CtrlResponse(success: true);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
   Future<CtrlResponse> findSaleByFolio(String folio) async {
     try {
       if (folio.isEmpty) {

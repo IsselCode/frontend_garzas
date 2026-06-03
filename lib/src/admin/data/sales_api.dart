@@ -18,6 +18,7 @@ class SalesApi {
 
   final String _salesPath = "/sales";
   final String _salesQuotePath = "/sales/quote";
+  String _deleteSaleByFolio(String folio) => "/sales/$folio";
   final String _salesByDateRangePath = "/sales/range";
   final String _getMonthlyPaymentTotalsPath = "/sales/monthly-payment-totals";
   final String _getMonthlyGarzaTotals = "/sales/monthly-garza-totals";
@@ -25,12 +26,9 @@ class SalesApi {
   String _dispatchValidatePath(String code) => "/sales/$code/dispatch/validate";
   String _dispatchPath(String code) => "/sales/$code/dispatch";
 
-  String _listPendingCreditSalesByClientPath(int clientId) =>
-      "/sales/credit/by-client/$clientId";
-  String _createCreditPaymentPath(String folio) =>
-      "/sales/$folio/credit-payments";
-  String _listCreditPaymentsPath(String folio) =>
-      "/sales/$folio/credit-payments";
+  String _listPendingCreditSalesByClientPath(int clientId) => "/sales/credit/by-client/$clientId";
+  String _createCreditPaymentPath(String folio) => "/sales/$folio/credit-payments";
+  String _listCreditPaymentsPath(String folio) => "/sales/$folio/credit-payments";
   final String _getPendingCreditsPath = "/sales/credit/pending";
 
   Future<List<SaleEntity>> listSales() async {
@@ -56,6 +54,19 @@ class SalesApi {
       );
 
       return StatisticsEntity.fromMap(response);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+  }
+
+  Future<void> deleteSaleByFolio(String folio) async {
+    try {
+      await apiClient.delete(
+        _deleteSaleByFolio(folio),
+        authRequired: true
+      );
     } on AppException {
       rethrow;
     } catch (e) {
