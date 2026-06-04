@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/commons/sales_dispatch_home_switch_fab.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
@@ -7,7 +8,6 @@ import 'package:frontend_garzas/core/services/regex_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
-import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -26,6 +26,10 @@ class OpenCashRegisterCutView extends StatelessWidget {
     ColorScheme colorScheme = theme.colorScheme;
 
     return Scaffold(
+      floatingActionButton: const SalesDispatchHomeSwitchFab(
+        target: SalesDispatchHomeTarget.dispatch,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       body: Row(
         children: [
           Expanded(
@@ -45,7 +49,7 @@ class OpenCashRegisterCutView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Image.asset(AppAssets.cashRegister, width: 200, height: 200,)
+                  Image.asset(AppAssets.cashRegister, width: 200, height: 200),
                 ],
               ),
             ),
@@ -69,8 +73,11 @@ class OpenCashRegisterCutView extends StatelessWidget {
                             controller: quantity,
                             hintText: "Cantidad inicial",
                             height: 60,
-                            inputFormatters: [RegexService.positiveNumberFormatter],
-                            validator: (value) => RegexService.positiveNumberValidator(value),
+                            inputFormatters: [
+                              RegexService.positiveNumberFormatter,
+                            ],
+                            validator: (value) =>
+                                RegexService.positiveNumberValidator(value),
                           ),
                           IsselButton(
                             text: "Abrir corte",
@@ -84,7 +91,6 @@ class OpenCashRegisterCutView extends StatelessWidget {
               ),
             ),
           ),
-
         ],
       ),
     );
@@ -98,7 +104,9 @@ class OpenCashRegisterCutView extends StatelessWidget {
     context.loaderOverlay.show();
     CashRegisterController cashRegisterController = context.read();
 
-    CtrlResponse response = await cashRegisterController.openCut(double.parse(quantity.text));
+    CtrlResponse response = await cashRegisterController.openCut(
+      double.parse(quantity.text),
+    );
     if (!context.mounted) {
       return;
     }
@@ -113,7 +121,7 @@ class OpenCashRegisterCutView extends StatelessWidget {
       titleBarController.notifyListeners();
     }
     if (!response.success) {
-      toastService.error(response.message ?? "No fue posible iniciar sesi\u00f3n",);
+      toastService.error(response.message ?? "No fue posible iniciar sesión");
     }
   }
 }

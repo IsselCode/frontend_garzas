@@ -19,7 +19,6 @@ class CreateUserPage extends StatefulWidget {
 }
 
 class _CreateUserPageState extends State<CreateUserPage> {
-
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
@@ -51,7 +50,8 @@ class _CreateUserPageState extends State<CreateUserPage> {
                     prefixIcon: Icons.person_outline,
                     fillColor: theme.scaffoldBackgroundColor,
                     validator: (value) {
-                      if (value == null || value.isEmpty) return "Campo requerido";
+                      if (value == null || value.isEmpty)
+                        return "Campo requerido";
                     },
                   ),
                   IsselTextFormField(
@@ -60,7 +60,8 @@ class _CreateUserPageState extends State<CreateUserPage> {
                     prefixIcon: Icons.person_outline,
                     fillColor: theme.scaffoldBackgroundColor,
                     validator: (value) {
-                      if (value == null || value.isEmpty) return "Campo requerido";
+                      if (value == null || value.isEmpty)
+                        return "Campo requerido";
                     },
                   ),
                   IsselTextFormField(
@@ -69,47 +70,58 @@ class _CreateUserPageState extends State<CreateUserPage> {
                     prefixIcon: Icons.password_outlined,
                     fillColor: theme.scaffoldBackgroundColor,
                     validator: (value) {
-                      if (value == null || value.isEmpty) return "Campo requerido";
+                      if (value == null || value.isEmpty)
+                        return "Campo requerido";
                     },
-                  )
+                  ),
                 ],
               ),
             ),
             //* Roles
             Row(
-              spacing: 20,
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 16,
               children: [
                 IsselRadioCard(
                   value: AppRole.admin,
                   groupValue: selectedRole,
                   label: "Administrador",
                   asset: AppAssets.admin,
+                  size: 115,
                   surfaceColor: theme.scaffoldBackgroundColor,
-                  onChanged: (v) => setState(() => selectedRole = v)
+                  onChanged: (v) => setState(() => selectedRole = v),
                 ),
                 IsselRadioCard(
                   value: AppRole.dispatch,
                   groupValue: selectedRole,
                   label: "Despachador",
                   asset: AppAssets.waterTank,
+                  size: 115,
                   surfaceColor: theme.scaffoldBackgroundColor,
-                  onChanged: (v) => setState(() => selectedRole = v)
+                  onChanged: (v) => setState(() => selectedRole = v),
                 ),
                 IsselRadioCard(
                   value: AppRole.seller,
                   groupValue: selectedRole,
                   label: "Vendedor",
                   asset: AppAssets.cashRegister,
+                  size: 115,
                   surfaceColor: theme.scaffoldBackgroundColor,
-                  onChanged: (v) => setState(() => selectedRole = v)
-                )
+                  onChanged: (v) => setState(() => selectedRole = v),
+                ),
+                IsselRadioCard(
+                  value: AppRole.salesDispatch,
+                  groupValue: selectedRole,
+                  label: "Venta/Despacho",
+                  asset: AppAssets.cashRegister,
+                  size: 115,
+                  surfaceColor: theme.scaffoldBackgroundColor,
+                  onChanged: (v) => setState(() => selectedRole = v),
+                ),
               ],
             ),
             //* Botón de registrar
-            IsselButton(
-              text: "Registrar",
-              onTap: () => cta(),
-            )
+            IsselButton(text: "Registrar", onTap: () => cta()),
           ],
         ),
       ),
@@ -117,15 +129,18 @@ class _CreateUserPageState extends State<CreateUserPage> {
   }
 
   void cta() async {
-
-    if (!formKey.currentState!.validate()){
-      return ;
+    if (!formKey.currentState!.validate()) {
+      return;
     }
-
 
     context.loaderOverlay.show();
     UsersController usersController = context.read();
-    CtrlResponse response = await usersController.insertNormalUser(username.text, displayName.text, password.text, selectedRole);
+    CtrlResponse response = await usersController.insertNormalUser(
+      username.text,
+      displayName.text,
+      password.text,
+      selectedRole,
+    );
     context.loaderOverlay.hide();
 
     ToastService toastService = locator();
@@ -141,7 +156,5 @@ class _CreateUserPageState extends State<CreateUserPage> {
     } else {
       toastService.error(response.message!);
     }
-
   }
-
 }

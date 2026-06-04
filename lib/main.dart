@@ -114,7 +114,7 @@ class MyApp extends StatelessWidget {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     dispatchController.syncRuntimeStream(
                       shouldRun:
-                          authController.session?.role == AppRole.dispatch,
+                          authController.session?.role.canDispatch == true,
                     );
                   });
 
@@ -184,7 +184,9 @@ class MyApp extends StatelessWidget {
                                     ),
                                   ),
                                   actions: [
-                                    if (authController.session != null && authController.session!.role != AppRole.dispatch)
+                                    if (authController.session != null &&
+                                        authController.session!.role !=
+                                            AppRole.dispatch)
                                       IsselWindowCaptionAction(
                                         icon: Icon(Icons.print_outlined),
                                         onPressed: () {
@@ -200,15 +202,14 @@ class MyApp extends StatelessWidget {
                                           );
                                         },
                                       ),
-                                    if (authController.session != null && authController.session!.role == AppRole.seller)
+                                    if (authController.session != null &&
+                                        authController.session!.role.canSell)
                                       IsselWindowCaptionAction(
                                         icon: Icon(
                                           Icons.payment,
                                           color: Colors.blue,
                                         ),
                                         onPressed: () {
-                                          authController.session!.role ==
-                                              AppRole.seller;
                                           final dialogContext =
                                               navigationService
                                                   .navigatorKey
@@ -224,7 +225,9 @@ class MyApp extends StatelessWidget {
                                         },
                                       ),
                                     // Corte
-                                    if (authController.session != null && authController.session!.role == AppRole.seller && cashRegisterController.openCash)
+                                    if (authController.session != null &&
+                                        authController.session!.role.canSell &&
+                                        cashRegisterController.openCash)
                                       IsselWindowCaptionAction(
                                         icon: FaIcon(
                                           FontAwesomeIcons.cashRegister,
@@ -232,9 +235,10 @@ class MyApp extends StatelessWidget {
                                           size: 16,
                                         ),
                                         onPressed: () {
-                                          authController.session!.role ==
-                                              AppRole.seller;
-                                          final dialogContext = navigationService.navigatorKey.currentContext;
+                                          final dialogContext =
+                                              navigationService
+                                                  .navigatorKey
+                                                  .currentContext;
                                           if (dialogContext == null) return;
                                           showDialog(
                                             context: dialogContext,

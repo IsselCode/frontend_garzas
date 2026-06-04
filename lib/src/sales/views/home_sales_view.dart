@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend_garzas/commons/sales_dispatch_home_switch_fab.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/src/sales/views/start_order_view.dart';
-import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../inject_container.dart';
 
 class HomeSalesView extends StatefulWidget {
-  const HomeSalesView({super.key,});
+  const HomeSalesView({super.key});
 
   @override
   State<HomeSalesView> createState() => _HomeSalesViewState();
@@ -30,7 +30,6 @@ class _HomeSalesViewState extends State<HomeSalesView> {
   }
 
   void _handleUserInteraction() {
-
     if (_isNavigating) return;
 
     _isNavigating = true;
@@ -62,6 +61,10 @@ class _HomeSalesViewState extends State<HomeSalesView> {
     final textTheme = theme.textTheme;
 
     return Scaffold(
+      floatingActionButton: const SalesDispatchHomeSwitchFab(
+        target: SalesDispatchHomeTarget.dispatch,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       body: Focus(
         focusNode: _focusNode,
         autofocus: true,
@@ -69,28 +72,43 @@ class _HomeSalesViewState extends State<HomeSalesView> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _handleUserInteraction,
-          child: SizedBox.expand(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Ventas', style: textTheme.displayLarge),
-                  Text(
-                    'Haz clic o presiona cualquier tecla para comenzar una venta',
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.outline,
-                    ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scaleFactor = (constraints.maxWidth / 1366).clamp(
+                1.0,
+                1.28,
+              );
+
+              return SizedBox.expand(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Ventas',
+                        style: textTheme.displayLarge?.copyWith(
+                          fontSize: 44 * scaleFactor,
+                        ),
+                      ),
+                      Text(
+                        'Haz clic o presiona cualquier tecla para comenzar una venta',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.outline,
+                          fontSize: 18 * scaleFactor,
+                        ),
+                      ),
+                      SizedBox(height: 20 * scaleFactor),
+                      Lottie.asset(
+                        AppLotties.glass_water,
+                        width: 350 * scaleFactor,
+                        height: 350 * scaleFactor,
+                        fit: BoxFit.fill,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Lottie.asset(
-                    AppLotties.glass_water,
-                    width: 350,
-                    height: 350,
-                    fit: BoxFit.fill,
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),

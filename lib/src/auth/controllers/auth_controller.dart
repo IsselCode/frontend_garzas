@@ -73,14 +73,15 @@ class AuthController extends ChangeNotifier {
 
       await _setSession(session, persist: true);
 
-      return CtrlResponse(success: true, message: 'Inicio de sesion exitoso', element: session);
+      return CtrlResponse(
+        success: true,
+        message: 'Inicio de sesion exitoso',
+        element: session,
+      );
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     } catch (e) {
-      return CtrlResponse(
-        success: false,
-        message: e.toString(),
-      );
+      return CtrlResponse(success: false, message: e.toString());
     } finally {
       _initialized = true;
       _setLoading(false);
@@ -222,7 +223,7 @@ class AuthController extends ChangeNotifier {
     });
   }
 
-   Future<void> _navigateToHome() async {
+  Future<void> _navigateToHome() async {
     final currentSession = _session;
 
     if (currentSession == null) {
@@ -241,6 +242,7 @@ class AuthController extends ChangeNotifier {
         navigationService.pushAndRemoveUntil(const HomeDispatchView());
         return;
       case AppRole.seller:
+      case AppRole.salesDispatch:
         await navigateToOpenCashRegisterCut();
         titleBarController.notifyListeners();
         return;
@@ -258,9 +260,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> navigateToOpenCashRegisterCut() async {
-
     try {
-
       bool response = await cashRegisterController.active();
 
       if (response) {
@@ -268,11 +268,8 @@ class AuthController extends ChangeNotifier {
       } else {
         navigationService.pushAndRemoveUntil(OpenCashRegisterCutView());
       }
-
-    } on AppException catch(e) {
+    } on AppException catch (e) {
       // TODO: IMPLEMENTAR ERROR
     }
-
   }
-
 }

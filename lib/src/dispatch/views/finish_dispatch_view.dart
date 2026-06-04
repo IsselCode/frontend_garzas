@@ -45,82 +45,113 @@ class FinishDispatchView extends StatelessWidget {
       body: Stack(
         children: [
           // Body
-          Row(
-            children: [
-              //* Left
-              Expanded(
-                child: Center(
-                  child: SizedBox(
-                    width: 320,
-                    child: Column(
-                      spacing: 20,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Tipo de Agua", style: textTheme.titleMedium),
-                        IsselTextFormField(
-                          hintText: "Nombre del cliente",
-                          controller: TextEditingController(text: wt.dp),
-                          readOnly: true,
-                        ),
-                        Text(
-                          "Cantidad en ${unit == UnitOfMeasurement.liters ? "Litros" : "Galones"}",
-                          style: textTheme.titleMedium,
-                        ),
-                        IsselTextFormField(
-                          hintText: "Nombre del cliente",
-                          controller: TextEditingController(
-                            text:
-                                "${_formatQuantity(dispatchedQuantity)}/${_formatQuantity(purchasedQuantity)}",
-                          ),
-                          readOnly: true,
-                        ),
-                        Text("Garza", style: textTheme.titleMedium),
-                        IsselTextFormField(
-                          hintText: "Garza",
-                          controller: TextEditingController(
-                            text: dispatchController.selectedGarza!.title,
-                          ),
-                          readOnly: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final scaleFactor = (constraints.maxWidth / 1366).clamp(
+                1.0,
+                1.28,
+              );
+              final leftPanelWidth = 320 * scaleFactor;
+              final rightPanelWidth = 360 * scaleFactor;
+              final leftSpacing = 20 * scaleFactor;
+              final rightSpacing = 30 * scaleFactor;
+              final controlHeight = 60 * scaleFactor;
 
-              //* Right
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: AppGradients.primaryToSecondary,
-                  ),
-                  child: Center(
-                    child: SizedBox(
-                      width: 360,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 30,
-                        children: [
-                          Text(
-                            "Continuar despacho",
-                            textAlign: TextAlign.center,
-                            style: textTheme.displaySmall?.copyWith(
-                              color: colorScheme.onPrimary,
+              return Row(
+                children: [
+                  //* Left
+                  Expanded(
+                    child: Center(
+                      child: SizedBox(
+                        width: leftPanelWidth,
+                        child: Column(
+                          spacing: leftSpacing,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Tipo de Agua",
+                              style: textTheme.titleMedium?.copyWith(
+                                fontSize: 20 * scaleFactor,
+                              ),
                             ),
-                          ),
-
-                          IsselButton(
-                            text: "Continuar",
-                            focusNode: buttonFocus,
-                            onTap: () => dispatchWater(context),
-                          ),
-                        ],
+                            IsselTextFormField(
+                              height: controlHeight,
+                              hintText: "Nombre del cliente",
+                              controller: TextEditingController(text: wt.dp),
+                              readOnly: true,
+                            ),
+                            Text(
+                              "Cantidad en ${unit == UnitOfMeasurement.liters ? "Litros" : "Galones"}",
+                              style: textTheme.titleMedium?.copyWith(
+                                fontSize: 20 * scaleFactor,
+                              ),
+                            ),
+                            IsselTextFormField(
+                              height: controlHeight,
+                              hintText: "Nombre del cliente",
+                              controller: TextEditingController(
+                                text:
+                                    "${_formatQuantity(dispatchedQuantity)}/${_formatQuantity(purchasedQuantity)}",
+                              ),
+                              readOnly: true,
+                            ),
+                            Text(
+                              "Garza",
+                              style: textTheme.titleMedium?.copyWith(
+                                fontSize: 20 * scaleFactor,
+                              ),
+                            ),
+                            IsselTextFormField(
+                              height: controlHeight,
+                              hintText: "Garza",
+                              controller: TextEditingController(
+                                text: dispatchController.selectedGarza!.title,
+                              ),
+                              readOnly: true,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ],
+
+                  //* Right
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: AppGradients.primaryToSecondary,
+                      ),
+                      child: Center(
+                        child: SizedBox(
+                          width: rightPanelWidth,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: rightSpacing,
+                            children: [
+                              Text(
+                                "Continuar despacho",
+                                textAlign: TextAlign.center,
+                                style: textTheme.displaySmall?.copyWith(
+                                  color: colorScheme.onPrimary,
+                                  fontSize: 38 * scaleFactor,
+                                ),
+                              ),
+
+                              IsselButton(
+                                height: controlHeight,
+                                text: "Continuar",
+                                focusNode: buttonFocus,
+                                onTap: () => dispatchWater(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           // AppBar
           Positioned(

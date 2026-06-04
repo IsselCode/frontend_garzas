@@ -14,7 +14,6 @@ import '../../../auth/controllers/auth_controller.dart';
 import '../../clean/enums/enums.dart';
 
 class UpdateClientPage extends StatefulWidget {
-
   UpdateClientPage({super.key});
 
   @override
@@ -22,7 +21,6 @@ class UpdateClientPage extends StatefulWidget {
 }
 
 class _UpdateUserPageState extends State<UpdateClientPage> {
-
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController displayName = TextEditingController();
   TextEditingController username = TextEditingController();
@@ -51,24 +49,26 @@ class _UpdateUserPageState extends State<UpdateClientPage> {
                 controller: pageController,
                 children: [
                   _UserList(
-                    onChanged: (userEntity) => setState(() {selectedUser = userEntity;}),
+                    onChanged: (userEntity) => setState(() {
+                      selectedUser = userEntity;
+                    }),
                     selectedUser: selectedUser,
                   ),
                   if (selectedUser != null)
-                  Form(
-                    key: formKey,
-                    child: _UserUpdate(
-                      displayName: displayName,
-                      selectedRole: selectedRole,
-                      username: username,
-                      password: password,
-                      userEntity: selectedUser!,
-                      onChanged: (role) {
-                        selectedRole = role;
-                        setState(() {});
-                      },
+                    Form(
+                      key: formKey,
+                      child: _UserUpdate(
+                        displayName: displayName,
+                        selectedRole: selectedRole,
+                        username: username,
+                        password: password,
+                        userEntity: selectedUser!,
+                        onChanged: (role) {
+                          selectedRole = role;
+                          setState(() {});
+                        },
+                      ),
                     ),
-                  )
                 ],
               ),
             ),
@@ -81,44 +81,44 @@ class _UpdateUserPageState extends State<UpdateClientPage> {
               spacing: 10,
               children: [
                 if (indexPage == 1)
-                Expanded(
-                  child: IsselButton(
-                    text: "Eliminar",
-                    color: Colors.red,
-                    onTap: deleteUser,
+                  Expanded(
+                    child: IsselButton(
+                      text: "Eliminar",
+                      color: Colors.red,
+                      onTap: deleteUser,
+                    ),
                   ),
-                ),
                 Expanded(
                   child: IsselButton(
                     text: indexPage == 1 ? "Actualizar" : "Siguiente",
                     onTap: indexPage == 1 ? updateUser : selectUser,
                   ),
-                )
+                ),
               ],
             ),
           ),
 
           //* Botón para retroceder
           if (indexPage == 1)
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: IsselButton(
-              text: "Atras",
-              textColor: AppColors.grey,
-              color: Colors.transparent,
-              onTap: backToList,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: IsselButton(
+                text: "Atras",
+                textColor: AppColors.grey,
+                color: Colors.transparent,
+                onTap: backToList,
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 
   void deleteUser() async {
-
     bool? dialogResponse = await showDialog(
       context: context,
-      builder: (context) => ConfirmDeleteUserDialog(username: selectedUser!.username),
+      builder: (context) =>
+          ConfirmDeleteUserDialog(username: selectedUser!.username),
     );
 
     if (dialogResponse == null || dialogResponse == false) {
@@ -129,7 +129,9 @@ class _UpdateUserPageState extends State<UpdateClientPage> {
     ToastService toastService = locator();
 
     context.loaderOverlay.show();
-    CtrlResponse response = await usersController.deleteUserById(selectedUser!.uid);
+    CtrlResponse response = await usersController.deleteUserById(
+      selectedUser!.uid,
+    );
     context.loaderOverlay.hide();
 
     if (response.success) {
@@ -142,13 +144,11 @@ class _UpdateUserPageState extends State<UpdateClientPage> {
     } else {
       toastService.error(response.message!);
     }
-
   }
 
   void updateUser() async {
-
-    if (!formKey.currentState!.validate()){
-      return ;
+    if (!formKey.currentState!.validate()) {
+      return;
     }
 
     UsersController usersController = context.read();
@@ -160,7 +160,7 @@ class _UpdateUserPageState extends State<UpdateClientPage> {
       username.text,
       displayName.text,
       password.text,
-      selectedRole
+      selectedRole,
     );
     context.loaderOverlay.hide();
 
@@ -194,20 +194,17 @@ class _UpdateUserPageState extends State<UpdateClientPage> {
       toastService.error("Selecciona un usuario");
     }
   }
-
 }
-
 
 //* Lista de usuarios
 class _UserList extends StatefulWidget {
-
   final UserEntity? selectedUser;
   final void Function(UserEntity? userEntity) onChanged;
 
   const _UserList({
     super.key,
     required this.selectedUser,
-    required this.onChanged
+    required this.onChanged,
   });
 
   @override
@@ -215,7 +212,6 @@ class _UserList extends StatefulWidget {
 }
 
 class _UserListState extends State<_UserList> {
-
   late Future<CtrlResponse> _future;
 
   @override
@@ -238,7 +234,6 @@ class _UserListState extends State<_UserList> {
       child: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return SizedBox(
               height: 50,
@@ -250,35 +245,46 @@ class _UserListState extends State<_UserList> {
           }
 
           if (!snapshot.hasData) {
-            return Center(child: Text("No se encontraron usuarios"),);
+            return Center(child: Text("No se encontraron usuarios"));
           }
 
           if (snapshot.data != null && snapshot.data!.message != null) {
-            return Center(child: Text(snapshot.data!.message!),);
+            return Center(child: Text(snapshot.data!.message!));
           }
 
           List<UserEntity> users = usersController.showedUsers;
 
           return ListView.separated(
             itemCount: users.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 10,),
+            separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               UserEntity user = users[index];
 
               bool selected = user == widget.selectedUser;
 
               return ListTile(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 tileColor: theme.scaffoldBackgroundColor,
                 selectedTileColor: colorScheme.primary,
-                title: Text(user.displayName, style: textTheme.bodyMedium?.copyWith(color: selected ? colorScheme.onPrimary : AppColors.grey),),
-                trailing: Text(user.role.label, style: textTheme.labelSmall?.copyWith(color: selected ? colorScheme.onPrimary : AppColors.grey),),
+                title: Text(
+                  user.displayName,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: selected ? colorScheme.onPrimary : AppColors.grey,
+                  ),
+                ),
+                trailing: Text(
+                  user.role.label,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: selected ? colorScheme.onPrimary : AppColors.grey,
+                  ),
+                ),
                 selected: selected,
                 onTap: () => widget.onChanged(user),
               );
             },
           );
-
         },
       ),
     );
@@ -287,7 +293,6 @@ class _UserListState extends State<_UserList> {
 
 //* Actualización
 class _UserUpdate extends StatefulWidget {
-
   final UserEntity userEntity;
   final Function(AppRole role) onChanged;
   final TextEditingController displayName;
@@ -302,7 +307,7 @@ class _UserUpdate extends StatefulWidget {
     required this.displayName,
     required this.username,
     required this.password,
-    required this.selectedRole
+    required this.selectedRole,
   });
 
   @override
@@ -310,7 +315,6 @@ class _UserUpdate extends StatefulWidget {
 }
 
 class _UserUpdateState extends State<_UserUpdate> {
-
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
@@ -345,12 +349,13 @@ class _UserUpdateState extends State<_UserUpdate> {
                   hintText: "Contraseña",
                   prefixIcon: Icons.password_outlined,
                   fillColor: theme.scaffoldBackgroundColor,
-                )
+                ),
               ],
             ),
             //* Roles
-            Row(
+            Wrap(
               spacing: 20,
+              runSpacing: 20,
               children: [
                 IsselRadioCard(
                   value: AppRole.admin,
@@ -360,7 +365,7 @@ class _UserUpdateState extends State<_UserUpdate> {
                   surfaceColor: theme.scaffoldBackgroundColor,
                   onChanged: (v) {
                     widget.onChanged(v);
-                  }
+                  },
                 ),
                 IsselRadioCard(
                   value: AppRole.dispatch,
@@ -370,7 +375,7 @@ class _UserUpdateState extends State<_UserUpdate> {
                   surfaceColor: theme.scaffoldBackgroundColor,
                   onChanged: (v) {
                     widget.onChanged(v);
-                  }
+                  },
                 ),
                 IsselRadioCard(
                   value: AppRole.seller,
@@ -380,8 +385,18 @@ class _UserUpdateState extends State<_UserUpdate> {
                   surfaceColor: theme.scaffoldBackgroundColor,
                   onChanged: (v) {
                     widget.onChanged(v);
-                  }
-                )
+                  },
+                ),
+                IsselRadioCard(
+                  value: AppRole.salesDispatch,
+                  groupValue: widget.selectedRole,
+                  label: "Venta/Despacho",
+                  asset: AppAssets.cashRegister,
+                  surfaceColor: theme.scaffoldBackgroundColor,
+                  onChanged: (v) {
+                    widget.onChanged(v);
+                  },
+                ),
               ],
             ),
           ],
@@ -389,5 +404,4 @@ class _UserUpdateState extends State<_UserUpdate> {
       ),
     );
   }
-
 }

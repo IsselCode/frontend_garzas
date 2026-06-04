@@ -24,9 +24,13 @@ class AuthSession extends Equatable {
   });
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
-  bool get shouldRefreshSoon => DateTime.now().isAfter(expiresAt.subtract(const Duration(minutes: 5)));
+  bool get shouldRefreshSoon =>
+      DateTime.now().isAfter(expiresAt.subtract(const Duration(minutes: 5)));
 
-  factory AuthSession.fromTokens({required String accessToken, required String refreshToken}) {
+  factory AuthSession.fromTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) {
     final claims = _decodeJwtPayload(accessToken);
     final exp = claims['exp'];
 
@@ -64,7 +68,7 @@ class AuthSession extends Equatable {
       'uid': uid,
       'username': username,
       'display_name': displayName,
-      'role': role.name,
+      'role': role.wireName,
       'expires_at': expiresAt.toIso8601String(),
     };
   }

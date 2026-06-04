@@ -13,51 +13,57 @@ class UsersApi {
   final String _updateUserByIdPath = "/users";
 
   Future<List<UserEntity>> listUsers(String? queryUsers) async {
+    List response =
+        await apiClient.get(
+              _getUsersPath,
+              authRequired: true,
+              queryParams: queryUsers == null || queryUsers.trim().isEmpty
+                  ? null
+                  : {'name': queryUsers.trim()},
+            )
+            as List;
 
-    List response = await apiClient.get(
-      _getUsersPath,
-      authRequired: true,
-      queryParams: queryUsers == null || queryUsers.trim().isEmpty ? null : {'name': queryUsers.trim()},
-    ) as List;
-
-    return response.map((e) => UserEntity.fromMap(e),).toList();
-
+    return response.map((e) => UserEntity.fromMap(e)).toList();
   }
 
-  Future<UserEntity> createUser(String username, String displayName, String password, AppRole role) async {
-
+  Future<UserEntity> createUser(
+    String username,
+    String displayName,
+    String password,
+    AppRole role,
+  ) async {
     Map<String, dynamic> body = {
       "username": username,
       "display_name": displayName,
       "password": password,
-      "role": role.name
+      "role": role.wireName,
     };
 
     Map<String, dynamic> response = await apiClient.post(
       _createUserPath,
       authRequired: true,
-      body: body
+      body: body,
     );
 
     return UserEntity.fromMap(response);
   }
 
   Future<void> deleteUserById(String uid) async {
-
-    await apiClient.delete(
-      "$_deleteUserByIdPath/$uid",
-      authRequired: true
-    );
-
+    await apiClient.delete("$_deleteUserByIdPath/$uid", authRequired: true);
   }
 
-  Future<UserEntity> updateUserById(String uid, String? username, String? displayName, String? password, AppRole newRole) async {
-
+  Future<UserEntity> updateUserById(
+    String uid,
+    String? username,
+    String? displayName,
+    String? password,
+    AppRole newRole,
+  ) async {
     final data = {
       "username": username,
       "display_name": displayName,
       "password": password,
-      "role": newRole.name,
+      "role": newRole.wireName,
     };
 
     data.removeWhere((key, value) => value == null || value.isEmpty);
@@ -69,8 +75,5 @@ class UsersApi {
     );
 
     return UserEntity.fromMap(response);
-
   }
-
-
 }

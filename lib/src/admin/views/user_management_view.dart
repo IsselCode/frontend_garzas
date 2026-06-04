@@ -15,7 +15,6 @@ class UserManagementView extends StatefulWidget {
 }
 
 class _UserManagementViewState extends State<UserManagementView> {
-
   PageController pageController = PageController();
   TabSwitcherAlignStates state = TabSwitcherAlignStates.left;
 
@@ -33,18 +32,17 @@ class _UserManagementViewState extends State<UserManagementView> {
             //* Body
             Center(
               child: Container(
-                width: 455,
+                width: 548,
                 height: 651,
                 padding: EdgeInsets.symmetric(vertical: 20),
                 decoration: BoxDecoration(
                   color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(24)
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   spacing: 30,
                   children: [
-
                     // Cabecera
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -52,7 +50,11 @@ class _UserManagementViewState extends State<UserManagementView> {
                         spacing: 30,
                         direction: Axis.vertical,
                         children: [
-                          IsselAssetContainer(asset: AppAssets.logo, width: 64, height: 64,),
+                          IsselAssetContainer(
+                            asset: AppAssets.logo,
+                            width: 64,
+                            height: 64,
+                          ),
                           IsselTabSwitcher(
                             state: state,
                             leftText: "Crear",
@@ -69,12 +71,9 @@ class _UserManagementViewState extends State<UserManagementView> {
                       child: PageView(
                         physics: NeverScrollableScrollPhysics(),
                         controller: pageController,
-                        children: [
-                          CreateUserPage(),
-                          UpdateUserPage()
-                        ],
+                        children: [CreateUserPage(), UpdateUserPage()],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -84,9 +83,8 @@ class _UserManagementViewState extends State<UserManagementView> {
             Positioned(
               top: kWindowCaptionHeight + 10,
               left: 10,
-              child: TextBackButton()
+              child: TextBackButton(),
             ),
-
           ],
         ),
       ),
@@ -94,7 +92,6 @@ class _UserManagementViewState extends State<UserManagementView> {
   }
 
   void changePage(TabSwitcherAlignStates value) {
-
     Duration duration = Duration(milliseconds: 350);
     Curve curve = Curves.linearToEaseOut;
 
@@ -107,7 +104,5 @@ class _UserManagementViewState extends State<UserManagementView> {
 
     state = value;
     setState(() {});
-
   }
-
 }

@@ -62,31 +62,43 @@ class _StartOrderViewState extends State<StartOrderView> {
           // Body
           LayoutBuilder(
             builder: (context, constraints) {
+              final scaleFactor = (constraints.maxWidth / 1366).clamp(
+                1.0,
+                1.28,
+              );
+              final formWidth = 350 * scaleFactor;
+              final contentSpacing = 30 * scaleFactor;
+              final sectionSpacing = 10 * scaleFactor;
+              final controlHeight = 50 * scaleFactor;
+
               return SingleChildScrollView(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Center(
                     child: SizedBox(
-                      width: 350,
+                      width: formWidth,
                       child: Form(
                         key: formKey,
                         child: Column(
-                          spacing: 30,
+                          spacing: contentSpacing,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               "Comenzar Orden",
-                              style: textTheme.displayLarge,
+                              style: textTheme.displayLarge?.copyWith(
+                                fontSize: 44 * scaleFactor,
+                              ),
                             ),
 
                             //* Seleccionar Usuario
                             Column(
-                              spacing: 10,
+                              spacing: sectionSpacing,
                               children: [
                                 Text(
                                   "Selecciona al cliente",
                                   style: textTheme.bodyLarge?.copyWith(
                                     color: colorScheme.outline,
+                                    fontSize: 18 * scaleFactor,
                                   ),
                                 ),
                                 FutureBuilder(
@@ -96,11 +108,12 @@ class _StartOrderViewState extends State<StartOrderView> {
                                         ConnectionState.waiting) {
                                       return IsselShimmer(
                                         width: double.infinity,
-                                        height: 50,
+                                        height: controlHeight,
                                       );
                                     }
 
                                     return IsselSearchDropdown<ClientEntity>(
+                                      height: controlHeight,
                                       maxItemsToShow: 10,
                                       items: orderController.showedClients.map((
                                         e,
@@ -129,15 +142,17 @@ class _StartOrderViewState extends State<StartOrderView> {
 
                             //* Seleccionar tipo de agua
                             Column(
-                              spacing: 10,
+                              spacing: sectionSpacing,
                               children: [
                                 Text(
                                   "Selecciona el tipo de agua",
                                   style: textTheme.bodyLarge?.copyWith(
                                     color: colorScheme.outline,
+                                    fontSize: 18 * scaleFactor,
                                   ),
                                 ),
                                 IsselTabSwitcher(
+                                  height: controlHeight,
                                   state: orderController.state,
                                   leftText: "Potable",
                                   rightText: "Pozo",
@@ -149,15 +164,17 @@ class _StartOrderViewState extends State<StartOrderView> {
 
                             //* Seleccionar La unidad de medida
                             Column(
-                              spacing: 10,
+                              spacing: sectionSpacing,
                               children: [
                                 Text(
                                   "Selecciona la unidad",
                                   style: textTheme.bodyLarge?.copyWith(
                                     color: colorScheme.outline,
+                                    fontSize: 18 * scaleFactor,
                                   ),
                                 ),
                                 IsselTabSwitcher(
+                                  height: controlHeight,
                                   state: orderController.stateUnit,
                                   leftText: "Litros",
                                   rightText: "Galones",
@@ -169,21 +186,24 @@ class _StartOrderViewState extends State<StartOrderView> {
 
                             //* Cantidad de Litros
                             Column(
-                              spacing: 10,
+                              spacing: sectionSpacing,
                               children: [
                                 Text(
                                   "Ingresa la cantidad a vender en ${orderController.stateUnit == TabSwitcherAlignStates.left ? "litros" : "galones"} ",
                                   style: textTheme.bodyLarge?.copyWith(
                                     color: colorScheme.outline,
+                                    fontSize: 18 * scaleFactor,
                                   ),
                                 ),
                                 IsselTextFormField(
                                   hintText: "5",
+                                  height: controlHeight,
                                   controller:
                                       orderController.quantityController,
                                   textAlign: TextAlign.center,
                                   style: textTheme.titleLarge?.copyWith(
                                     color: colorScheme.primary,
+                                    fontSize: 28 * scaleFactor,
                                   ),
                                   inputFormatters: [
                                     RegexService.positiveNumberFormatter,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/sales_dispatch_home_switch_fab.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
@@ -102,108 +103,131 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _requestScannerFocus,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Despacho', style: textTheme.displayLarge),
-                    Text(
-                      'Escanea un nuevo ticket para comenzar',
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.outline,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final scaleFactor = (constraints.maxWidth / 1366).clamp(1.0, 1.28);
+            final edgeSpacing = 20 * scaleFactor;
+            final runtimePanelBottom = 92 * scaleFactor;
+            final animationSize = 350 * scaleFactor;
+
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Despacho',
+                          style: textTheme.displayLarge?.copyWith(
+                            fontSize: 64 * scaleFactor,
+                          ),
+                        ),
+                        Text(
+                          'Escanea un nuevo ticket para comenzar',
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.outline,
+                            fontSize: 16 * scaleFactor,
+                          ),
+                        ),
+                        SizedBox(height: 20 * scaleFactor),
+                        Lottie.asset(
+                          AppLotties.scan,
+                          width: animationSize,
+                          height: animationSize,
+                          fit: BoxFit.fill,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: SizedBox(
+                    width: 1,
+                    height: 1,
+                    child: TextField(
+                      controller: _scannerController,
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      enableInteractiveSelection: false,
+                      textInputAction: TextInputAction.done,
+                      decoration: const InputDecoration(
+                        isCollapsed: true,
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      style: const TextStyle(
+                        color: Colors.transparent,
+                        fontSize: 1,
+                      ),
+                      cursorColor: Colors.transparent,
+                      onTapOutside: (_) => _requestScannerFocus(),
+                      onSubmitted: _handleScannerSubmit,
+                    ),
+                  ),
+                ),
+                if (_showRuntimePanel)
+                  Positioned(
+                    right: edgeSpacing,
+                    bottom: runtimePanelBottom,
+                    child: _GarzasRuntimePanel(
+                      scaleFactor: scaleFactor,
+                      busyGarzas: dispatchController.busyGarzas,
+                      alarmGarzas: dispatchController.alarmGarzas,
+                      runtimeMessage: dispatchController.runtimeMessage,
+                      onTap: _openRuntimeGarza,
+                    ),
+                  ),
+                Positioned(
+                  left: edgeSpacing,
+                  bottom: edgeSpacing,
+                  child: const SalesDispatchHomeSwitchFab(
+                    target: SalesDispatchHomeTarget.sales,
+                  ),
+                ),
+                Positioned(
+                  right: edgeSpacing,
+                  bottom: edgeSpacing,
+                  child: Badge(
+                    isLabelVisible:
+                        dispatchController.hasRuntimeWarning ||
+                        dispatchController.runtimePanelGarzasCount > 0,
+                    label: Text(
+                      dispatchController.hasRuntimeWarning
+                          ? '!'
+                          : '${dispatchController.runtimePanelGarzasCount}',
+                    ),
+                    backgroundColor: colorScheme.error,
+                    child: FloatingActionButton(
+                      backgroundColor: dispatchController.hasRuntimeWarning
+                          ? colorScheme.error
+                          : null,
+                      foregroundColor: dispatchController.hasRuntimeWarning
+                          ? colorScheme.onError
+                          : null,
+                      onPressed: () {
+                        setState(() {
+                          _showRuntimePanel = !_showRuntimePanel;
+                        });
+                        _requestScannerFocus();
+                      },
+                      child: Icon(
+                        _showRuntimePanel
+                            ? Icons.close
+                            : dispatchController.hasRuntimeWarning
+                            ? Icons.warning_amber_rounded
+                            : Icons.local_drink_outlined,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Lottie.asset(
-                      AppLotties.scan,
-                      width: 350,
-                      height: 350,
-                      fit: BoxFit.fill,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              top: 0,
-              child: SizedBox(
-                width: 1,
-                height: 1,
-                child: TextField(
-                  controller: _scannerController,
-                  focusNode: _focusNode,
-                  autofocus: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  enableInteractiveSelection: false,
-                  textInputAction: TextInputAction.done,
-                  decoration: const InputDecoration(
-                    isCollapsed: true,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  style: const TextStyle(
-                    color: Colors.transparent,
-                    fontSize: 1,
-                  ),
-                  cursorColor: Colors.transparent,
-                  onTapOutside: (_) => _requestScannerFocus(),
-                  onSubmitted: _handleScannerSubmit,
-                ),
-              ),
-            ),
-            if (_showRuntimePanel)
-              Positioned(
-                right: 20,
-                bottom: 92,
-                child: _GarzasRuntimePanel(
-                  busyGarzas: dispatchController.busyGarzas,
-                  alarmGarzas: dispatchController.alarmGarzas,
-                  runtimeMessage: dispatchController.runtimeMessage,
-                  onTap: _openRuntimeGarza,
-                ),
-              ),
-            Positioned(
-              right: 20,
-              bottom: 20,
-              child: Badge(
-                isLabelVisible:
-                    dispatchController.hasRuntimeWarning ||
-                    dispatchController.runtimePanelGarzasCount > 0,
-                label: Text(
-                  dispatchController.hasRuntimeWarning
-                      ? '!'
-                      : '${dispatchController.runtimePanelGarzasCount}',
-                ),
-                backgroundColor: colorScheme.error,
-                child: FloatingActionButton(
-                  backgroundColor: dispatchController.hasRuntimeWarning
-                      ? colorScheme.error
-                      : null,
-                  foregroundColor: dispatchController.hasRuntimeWarning
-                      ? colorScheme.onError
-                      : null,
-                  onPressed: () {
-                    setState(() {
-                      _showRuntimePanel = !_showRuntimePanel;
-                    });
-                    _requestScannerFocus();
-                  },
-                  child: Icon(
-                    _showRuntimePanel
-                        ? Icons.close
-                        : dispatchController.hasRuntimeWarning
-                        ? Icons.warning_amber_rounded
-                        : Icons.local_drink_outlined,
                   ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -227,12 +251,14 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
 }
 
 class _GarzasRuntimePanel extends StatelessWidget {
+  final double scaleFactor;
   final List<GarzaRuntimeEntity> busyGarzas;
   final List<GarzaRuntimeEntity> alarmGarzas;
   final String? runtimeMessage;
   final void Function(GarzaRuntimeEntity garza) onTap;
 
   const _GarzasRuntimePanel({
+    required this.scaleFactor,
     required this.busyGarzas,
     required this.alarmGarzas,
     required this.runtimeMessage,
@@ -250,17 +276,17 @@ class _GarzasRuntimePanel extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: 360,
-        constraints: const BoxConstraints(maxHeight: 420),
-        padding: const EdgeInsets.all(12),
+        width: 500 * scaleFactor,
+        constraints: BoxConstraints(maxHeight: 580 * scaleFactor),
+        padding: EdgeInsets.all(18 * scaleFactor),
         decoration: BoxDecoration(
           color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12 * scaleFactor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.18),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              blurRadius: 18 * scaleFactor,
+              offset: Offset(0, 8 * scaleFactor),
             ),
           ],
         ),
@@ -269,21 +295,33 @@ class _GarzasRuntimePanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              child: Text('Garzas en atención', style: textTheme.titleMedium),
+              padding: EdgeInsets.symmetric(
+                horizontal: 4 * scaleFactor,
+                vertical: 8 * scaleFactor,
+              ),
+              child: Text(
+                'Garzas en atención',
+                style: textTheme.titleMedium?.copyWith(
+                  fontSize: 22 * scaleFactor,
+                ),
+              ),
             ),
             if (hasRuntimeWarning)
               Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: _RuntimeWarning(message: warningMessage!),
+                padding: EdgeInsets.only(bottom: 10 * scaleFactor),
+                child: _RuntimeWarning(
+                  message: warningMessage!,
+                  scaleFactor: scaleFactor,
+                ),
               ),
             if (busyGarzas.isEmpty && alarmGarzas.isEmpty)
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(20 * scaleFactor),
                 child: Text(
                   'No hay garzas ocupadas ni con alarmas',
                   style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.outline,
+                    fontSize: 17 * scaleFactor,
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
                   ),
                 ),
               )
@@ -293,11 +331,15 @@ class _GarzasRuntimePanel extends StatelessWidget {
                   shrinkWrap: true,
                   children: [
                     if (busyGarzas.isNotEmpty)
-                      _RuntimeSectionTitle(text: 'Ocupadas'),
+                      _RuntimeSectionTitle(
+                        text: 'Ocupadas',
+                        scaleFactor: scaleFactor,
+                      ),
                     ...busyGarzas.map(
                       (garza) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: EdgeInsets.only(bottom: 10 * scaleFactor),
                         child: _GarzaRuntimeTile(
+                          scaleFactor: scaleFactor,
                           garza: garza,
                           statusText: 'Ocupada',
                           onTap: () => onTap(garza),
@@ -305,11 +347,15 @@ class _GarzasRuntimePanel extends StatelessWidget {
                       ),
                     ),
                     if (alarmGarzas.isNotEmpty)
-                      _RuntimeSectionTitle(text: 'Con alarma'),
+                      _RuntimeSectionTitle(
+                        text: 'Con alarma',
+                        scaleFactor: scaleFactor,
+                      ),
                     ...alarmGarzas.map(
                       (garza) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: EdgeInsets.only(bottom: 10 * scaleFactor),
                         child: _GarzaRuntimeTile(
+                          scaleFactor: scaleFactor,
                           garza: garza,
                           statusText: 'Liberada con alarma',
                         ),
@@ -327,8 +373,9 @@ class _GarzasRuntimePanel extends StatelessWidget {
 
 class _RuntimeWarning extends StatelessWidget {
   final String message;
+  final double scaleFactor;
 
-  const _RuntimeWarning({required this.message});
+  const _RuntimeWarning({required this.message, required this.scaleFactor});
 
   @override
   Widget build(BuildContext context) {
@@ -338,10 +385,10 @@ class _RuntimeWarning extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12 * scaleFactor),
       decoration: BoxDecoration(
         color: colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8 * scaleFactor),
         border: Border.all(color: colorScheme.error),
       ),
       child: Row(
@@ -350,14 +397,15 @@ class _RuntimeWarning extends StatelessWidget {
           Icon(
             Icons.warning_amber_rounded,
             color: colorScheme.onErrorContainer,
-            size: 22,
+            size: 22 * scaleFactor,
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10 * scaleFactor),
           Expanded(
             child: Text(
               message,
               style: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onErrorContainer,
+                fontSize: 14 * scaleFactor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -370,8 +418,9 @@ class _RuntimeWarning extends StatelessWidget {
 
 class _RuntimeSectionTitle extends StatelessWidget {
   final String text;
+  final double scaleFactor;
 
-  const _RuntimeSectionTitle({required this.text});
+  const _RuntimeSectionTitle({required this.text, required this.scaleFactor});
 
   @override
   Widget build(BuildContext context) {
@@ -379,21 +428,31 @@ class _RuntimeSectionTitle extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 8, bottom: 6),
+      padding: EdgeInsets.only(
+        left: 4 * scaleFactor,
+        top: 10 * scaleFactor,
+        bottom: 8 * scaleFactor,
+      ),
       child: Text(
         text,
-        style: textTheme.labelLarge?.copyWith(color: colorScheme.outline),
+        style: textTheme.labelLarge?.copyWith(
+          fontSize: 15 * scaleFactor,
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
 }
 
 class _GarzaRuntimeTile extends StatelessWidget {
+  final double scaleFactor;
   final GarzaRuntimeEntity garza;
   final String statusText;
   final VoidCallback? onTap;
 
   const _GarzaRuntimeTile({
+    required this.scaleFactor,
     required this.garza,
     required this.statusText,
     this.onTap,
@@ -409,16 +468,16 @@ class _GarzaRuntimeTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8 * scaleFactor),
       child: Ink(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(14 * scaleFactor),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8 * scaleFactor),
           border: Border.all(
             color: garza.hasActiveAlarms
                 ? colorScheme.error
-                : colorScheme.outlineVariant,
+                : colorScheme.primary.withValues(alpha: 0.32),
           ),
         ),
         child: Row(
@@ -426,36 +485,45 @@ class _GarzaRuntimeTile extends StatelessWidget {
             Badge(
               isLabelVisible: garza.hasActiveAlarms,
               backgroundColor: colorScheme.error,
-              child: Image.asset(AppAssets.waterTank, width: 42, height: 42),
+              child: Image.asset(
+                AppAssets.waterTank,
+                width: 52 * scaleFactor,
+                height: 52 * scaleFactor,
+              ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12 * scaleFactor),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Garza ${garza.garzaNumber}',
-                    style: textTheme.titleSmall,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontSize: 19 * scaleFactor,
+                    ),
                   ),
                   Text(
                     statusText,
                     style: textTheme.bodySmall?.copyWith(
+                      fontSize: 13 * scaleFactor,
                       color: garza.hasActiveAlarms
                           ? colorScheme.error
-                          : colorScheme.outline,
+                          : colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     '$state  ${garza.dispensedVolume.toStringAsFixed(1)} / ${garza.authorizedVolume.toStringAsFixed(1)} ${garza.unitOfMeasurement.abbr}',
                     style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.outline,
+                      fontSize: 13 * scaleFactor,
+                      color: colorScheme.primary,
                     ),
                   ),
                   if (alarms.isNotEmpty)
                     Text(
                       alarms,
                       style: textTheme.bodySmall?.copyWith(
+                        fontSize: 13 * scaleFactor,
                         color: colorScheme.error,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -463,14 +531,20 @@ class _GarzaRuntimeTile extends StatelessWidget {
                   if (garza.saleFolio != null)
                     Text(
                       garza.saleFolio!,
-                      style: textTheme.bodySmall,
+                      style: textTheme.bodySmall?.copyWith(
+                        fontSize: 13 * scaleFactor,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                 ],
               ),
             ),
             if (onTap != null)
-              Icon(Icons.chevron_right, color: colorScheme.outline),
+              Icon(
+                Icons.chevron_right,
+                color: colorScheme.primary,
+                size: 24 * scaleFactor,
+              ),
           ],
         ),
       ),
