@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/commons/scaled_text_style.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
@@ -49,7 +50,7 @@ class FinishOrderView extends StatelessWidget {
             builder: (context, constraints) {
               final scaleFactor = (constraints.maxWidth / 1366).clamp(
                 1.0,
-                1.28,
+                1.7,
               );
               final panelWidth = 320 * scaleFactor;
               final leftSpacing = 20 * scaleFactor;
@@ -71,8 +72,9 @@ class FinishOrderView extends StatelessWidget {
                           children: [
                             Text(
                               "Cliente",
-                              style: textTheme.titleMedium?.copyWith(
-                                fontSize: 20 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.titleMedium,
+                                scaleFactor,
                               ),
                             ),
                             IsselTextFormField(
@@ -87,8 +89,9 @@ class FinishOrderView extends StatelessWidget {
                             ),
                             Text(
                               "Tipo de agua",
-                              style: textTheme.titleMedium?.copyWith(
-                                fontSize: 20 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.titleMedium,
+                                scaleFactor,
                               ),
                             ),
                             IsselTextFormField(
@@ -103,8 +106,9 @@ class FinishOrderView extends StatelessWidget {
                             ),
                             Text(
                               "${orderController.stateUnit == TabSwitcherAlignStates.left ? "Litros" : "Galones"} a vender",
-                              style: textTheme.titleMedium?.copyWith(
-                                fontSize: 20 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.titleMedium,
+                                scaleFactor,
                               ),
                             ),
                             IsselTextFormField(
@@ -115,8 +119,9 @@ class FinishOrderView extends StatelessWidget {
                             ),
                             Text(
                               "Cantidad a cobrar",
-                              style: textTheme.titleMedium?.copyWith(
-                                fontSize: 20 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.titleMedium,
+                                scaleFactor,
                               ),
                             ),
                             _TotalText(
@@ -144,9 +149,10 @@ class FinishOrderView extends StatelessWidget {
                             children: [
                               Text(
                                 "Termina tu venta",
-                                style: textTheme.displaySmall?.copyWith(
+                                style: scaledTextStyle(
+                                  textTheme.displaySmall,
+                                  scaleFactor,
                                   color: colorScheme.onPrimary,
-                                  fontSize: 38 * scaleFactor,
                                 ),
                               ),
 
@@ -193,9 +199,10 @@ class FinishOrderView extends StatelessWidget {
                                   children: [
                                     Text(
                                       "Cliente paga con:",
-                                      style: textTheme.titleSmall?.copyWith(
+                                      style: scaledTextStyle(
+                                        textTheme.titleSmall,
+                                        scaleFactor,
                                         color: colorScheme.onPrimary,
-                                        fontSize: 18 * scaleFactor,
                                       ),
                                     ),
                                     IsselTextFormField(
@@ -214,15 +221,21 @@ class FinishOrderView extends StatelessWidget {
                                     ),
                                     Text(
                                       "Cantidad a devolver",
-                                      style: textTheme.titleSmall?.copyWith(
+                                      style: scaledTextStyle(
+                                        textTheme.titleSmall,
+                                        scaleFactor,
                                         color: colorScheme.onPrimary,
-                                        fontSize: 18 * scaleFactor,
                                       ),
                                     ),
                                     IsselPill(
-                                      text:
-                                          "\$${orderController.totalRemaining ?? 0.0}",
-                                      textColor: colorScheme.primary,
+                                      widget: Text(
+                                        "\$${orderController.totalRemaining ?? 0.0}",
+                                        textAlign: TextAlign.center,
+                                        style: textTheme.titleLarge?.copyWith(
+                                          color: colorScheme.primary,
+                                          fontWeight: FontWeight.bold
+                                        )
+                                      ),
                                       height: controlHeight,
                                     ),
                                   ],
@@ -325,9 +338,10 @@ class _TotalTextState extends State<_TotalText> {
         return IsselTextFormField(
           height: widget.height,
           hintText: "Total",
-          style: textTheme.titleLarge?.copyWith(
+          style: scaledTextStyle(
+            textTheme.titleLarge,
+            widget.scaleFactor,
             color: colorScheme.primary,
-            fontSize: 28 * widget.scaleFactor,
           ),
           textAlign: TextAlign.center,
           readOnly: true,

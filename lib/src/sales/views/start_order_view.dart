@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/commons/scaled_text_style.dart';
 import 'package:frontend_garzas/commons/text_back_button.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/regex_service.dart';
@@ -64,7 +65,7 @@ class _StartOrderViewState extends State<StartOrderView> {
             builder: (context, constraints) {
               final scaleFactor = (constraints.maxWidth / 1366).clamp(
                 1.0,
-                1.28,
+                1.7,
               );
               final formWidth = 350 * scaleFactor;
               final contentSpacing = 30 * scaleFactor;
@@ -85,8 +86,9 @@ class _StartOrderViewState extends State<StartOrderView> {
                           children: [
                             Text(
                               "Comenzar Orden",
-                              style: textTheme.displayLarge?.copyWith(
-                                fontSize: 44 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.displayLarge,
+                                scaleFactor,
                               ),
                             ),
 
@@ -96,9 +98,10 @@ class _StartOrderViewState extends State<StartOrderView> {
                               children: [
                                 Text(
                                   "Selecciona al cliente",
-                                  style: textTheme.bodyLarge?.copyWith(
+                                  style: scaledTextStyle(
+                                    textTheme.bodyLarge,
+                                    scaleFactor,
                                     color: colorScheme.outline,
-                                    fontSize: 18 * scaleFactor,
                                   ),
                                 ),
                                 FutureBuilder(
@@ -146,9 +149,10 @@ class _StartOrderViewState extends State<StartOrderView> {
                               children: [
                                 Text(
                                   "Selecciona el tipo de agua",
-                                  style: textTheme.bodyLarge?.copyWith(
+                                  style: scaledTextStyle(
+                                    textTheme.bodyLarge,
+                                    scaleFactor,
                                     color: colorScheme.outline,
-                                    fontSize: 18 * scaleFactor,
                                   ),
                                 ),
                                 IsselTabSwitcher(
@@ -168,9 +172,10 @@ class _StartOrderViewState extends State<StartOrderView> {
                               children: [
                                 Text(
                                   "Selecciona la unidad",
-                                  style: textTheme.bodyLarge?.copyWith(
+                                  style: scaledTextStyle(
+                                    textTheme.bodyLarge,
+                                    scaleFactor,
                                     color: colorScheme.outline,
-                                    fontSize: 18 * scaleFactor,
                                   ),
                                 ),
                                 IsselTabSwitcher(
@@ -190,10 +195,12 @@ class _StartOrderViewState extends State<StartOrderView> {
                               children: [
                                 Text(
                                   "Ingresa la cantidad a vender en ${orderController.stateUnit == TabSwitcherAlignStates.left ? "litros" : "galones"} ",
-                                  style: textTheme.bodyLarge?.copyWith(
+                                  style: scaledTextStyle(
+                                    textTheme.bodyLarge,
+                                    scaleFactor,
                                     color: colorScheme.outline,
-                                    fontSize: 18 * scaleFactor,
                                   ),
+                                  textAlign: TextAlign.center,
                                 ),
                                 IsselTextFormField(
                                   hintText: "5",
@@ -201,9 +208,10 @@ class _StartOrderViewState extends State<StartOrderView> {
                                   controller:
                                       orderController.quantityController,
                                   textAlign: TextAlign.center,
-                                  style: textTheme.titleLarge?.copyWith(
+                                  style: scaledTextStyle(
+                                    textTheme.titleLarge,
+                                    scaleFactor,
                                     color: colorScheme.primary,
-                                    fontSize: 28 * scaleFactor,
                                   ),
                                   inputFormatters: [
                                     RegexService.positiveNumberFormatter,

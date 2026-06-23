@@ -100,13 +100,13 @@ ThemeData lightTheme = ThemeData(
       headlineMedium: GoogleFonts.roboto(fontSize: 32, fontWeight: FontWeight.bold),
       headlineSmall: GoogleFonts.roboto(fontSize: 30, fontWeight: FontWeight.bold),
       titleLarge: GoogleFonts.roboto(fontSize: 28, fontWeight: FontWeight.bold),
-      titleMedium: GoogleFonts.roboto(fontSize: 20, fontWeight: FontWeight.bold),
-      titleSmall: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),
-      bodyLarge: GoogleFonts.roboto(fontSize: 18),
-      bodyMedium: GoogleFonts.roboto(fontSize: 16),
-      labelLarge: GoogleFonts.roboto(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.grey),
-      labelMedium: GoogleFonts.roboto(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.grey),
-      labelSmall: GoogleFonts.roboto(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.grey),
+      titleMedium: GoogleFonts.roboto(fontSize: 26, fontWeight: FontWeight.bold),
+      titleSmall: GoogleFonts.roboto(fontSize: 25, fontWeight: FontWeight.bold),
+      bodyLarge: GoogleFonts.roboto(fontSize: 25),
+      bodyMedium: GoogleFonts.roboto(fontSize: 22),
+      labelLarge: GoogleFonts.roboto(fontSize: 17, fontWeight: FontWeight.w500, color: AppColors.grey),
+      labelMedium: GoogleFonts.roboto(fontSize: 16, fontWeight: FontWeight.w500, color: AppColors.grey),
+      labelSmall: GoogleFonts.roboto(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.grey),
     )
 
 );

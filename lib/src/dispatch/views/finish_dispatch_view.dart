@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/scaled_text_style.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
@@ -49,7 +50,7 @@ class FinishDispatchView extends StatelessWidget {
             builder: (context, constraints) {
               final scaleFactor = (constraints.maxWidth / 1366).clamp(
                 1.0,
-                1.28,
+                1.7,
               );
               final leftPanelWidth = 320 * scaleFactor;
               final rightPanelWidth = 360 * scaleFactor;
@@ -70,8 +71,9 @@ class FinishDispatchView extends StatelessWidget {
                           children: [
                             Text(
                               "Tipo de Agua",
-                              style: textTheme.titleMedium?.copyWith(
-                                fontSize: 20 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.titleMedium,
+                                scaleFactor,
                               ),
                             ),
                             IsselTextFormField(
@@ -82,8 +84,9 @@ class FinishDispatchView extends StatelessWidget {
                             ),
                             Text(
                               "Cantidad en ${unit == UnitOfMeasurement.liters ? "Litros" : "Galones"}",
-                              style: textTheme.titleMedium?.copyWith(
-                                fontSize: 20 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.titleMedium,
+                                scaleFactor,
                               ),
                             ),
                             IsselTextFormField(
@@ -97,8 +100,9 @@ class FinishDispatchView extends StatelessWidget {
                             ),
                             Text(
                               "Garza",
-                              style: textTheme.titleMedium?.copyWith(
-                                fontSize: 20 * scaleFactor,
+                              style: scaledTextStyle(
+                                textTheme.titleMedium,
+                                scaleFactor,
                               ),
                             ),
                             IsselTextFormField(
@@ -131,9 +135,10 @@ class FinishDispatchView extends StatelessWidget {
                               Text(
                                 "Continuar despacho",
                                 textAlign: TextAlign.center,
-                                style: textTheme.displaySmall?.copyWith(
+                                style: scaledTextStyle(
+                                  textTheme.displaySmall,
+                                  scaleFactor,
                                   color: colorScheme.onPrimary,
-                                  fontSize: 38 * scaleFactor,
                                 ),
                               ),
 

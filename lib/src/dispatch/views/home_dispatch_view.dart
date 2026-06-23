@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/sales_dispatch_home_switch_fab.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/commons/scaled_text_style.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
@@ -105,7 +106,7 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
         onTap: _requestScannerFocus,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final scaleFactor = (constraints.maxWidth / 1366).clamp(1.0, 1.28);
+            final scaleFactor = (constraints.maxWidth / 1366).clamp(1.0, 1.7);
             final edgeSpacing = 20 * scaleFactor;
             final runtimePanelBottom = 92 * scaleFactor;
             final animationSize = 350 * scaleFactor;
@@ -119,15 +120,17 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
                       children: [
                         Text(
                           'Despacho',
-                          style: textTheme.displayLarge?.copyWith(
-                            fontSize: 64 * scaleFactor,
+                          style: scaledTextStyle(
+                            textTheme.displayLarge,
+                            scaleFactor,
                           ),
                         ),
                         Text(
                           'Escanea un nuevo ticket para comenzar',
-                          style: textTheme.bodyLarge?.copyWith(
+                          style: scaledTextStyle(
+                            textTheme.bodyLarge,
+                            scaleFactor,
                             color: colorScheme.outline,
-                            fontSize: 16 * scaleFactor,
                           ),
                         ),
                         SizedBox(height: 20 * scaleFactor),
@@ -301,8 +304,9 @@ class _GarzasRuntimePanel extends StatelessWidget {
               ),
               child: Text(
                 'Garzas en atención',
-                style: textTheme.titleMedium?.copyWith(
-                  fontSize: 22 * scaleFactor,
+                style: scaledTextStyle(
+                  textTheme.titleMedium,
+                  scaleFactor,
                 ),
               ),
             ),
@@ -319,8 +323,9 @@ class _GarzasRuntimePanel extends StatelessWidget {
                 padding: EdgeInsets.all(20 * scaleFactor),
                 child: Text(
                   'No hay garzas ocupadas ni con alarmas',
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontSize: 17 * scaleFactor,
+                  style: scaledTextStyle(
+                    textTheme.bodyMedium,
+                    scaleFactor,
                     color: colorScheme.onSurface.withValues(alpha: 0.72),
                   ),
                 ),
@@ -403,9 +408,10 @@ class _RuntimeWarning extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: textTheme.bodyMedium?.copyWith(
+              style: scaledTextStyle(
+                textTheme.bodyMedium,
+                scaleFactor,
                 color: colorScheme.onErrorContainer,
-                fontSize: 14 * scaleFactor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -435,8 +441,9 @@ class _RuntimeSectionTitle extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: textTheme.labelLarge?.copyWith(
-          fontSize: 15 * scaleFactor,
+        style: scaledTextStyle(
+          textTheme.labelLarge,
+          scaleFactor,
           color: colorScheme.primary,
           fontWeight: FontWeight.w700,
         ),
@@ -498,14 +505,16 @@ class _GarzaRuntimeTile extends StatelessWidget {
                 children: [
                   Text(
                     'Garza ${garza.garzaNumber}',
-                    style: textTheme.titleSmall?.copyWith(
-                      fontSize: 19 * scaleFactor,
+                    style: scaledTextStyle(
+                      textTheme.titleSmall,
+                      scaleFactor,
                     ),
                   ),
                   Text(
                     statusText,
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 13 * scaleFactor,
+                    style: scaledTextStyle(
+                      textTheme.bodySmall,
+                      scaleFactor,
                       color: garza.hasActiveAlarms
                           ? colorScheme.error
                           : colorScheme.onSurface,
@@ -514,16 +523,18 @@ class _GarzaRuntimeTile extends StatelessWidget {
                   ),
                   Text(
                     '$state  ${garza.dispensedVolume.toStringAsFixed(1)} / ${garza.authorizedVolume.toStringAsFixed(1)} ${garza.unitOfMeasurement.abbr}',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontSize: 13 * scaleFactor,
+                    style: scaledTextStyle(
+                      textTheme.bodySmall,
+                      scaleFactor,
                       color: colorScheme.primary,
                     ),
                   ),
                   if (alarms.isNotEmpty)
                     Text(
                       alarms,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontSize: 13 * scaleFactor,
+                      style: scaledTextStyle(
+                        textTheme.bodySmall,
+                        scaleFactor,
                         color: colorScheme.error,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -531,8 +542,9 @@ class _GarzaRuntimeTile extends StatelessWidget {
                   if (garza.saleFolio != null)
                     Text(
                       garza.saleFolio!,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontSize: 13 * scaleFactor,
+                      style: scaledTextStyle(
+                        textTheme.bodySmall,
+                        scaleFactor,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),

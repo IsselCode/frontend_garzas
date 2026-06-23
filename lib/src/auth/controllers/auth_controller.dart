@@ -6,11 +6,9 @@ import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
-import 'package:frontend_garzas/src/admin/data/cash_register_api.dart';
 import 'package:frontend_garzas/src/admin/views/home_admin_view.dart';
 import 'package:frontend_garzas/src/auth/data/auth_api.dart';
 import 'package:frontend_garzas/src/auth/data/auth_storage.dart';
@@ -19,6 +17,12 @@ import 'package:frontend_garzas/src/auth/views/open_cash_register_cut_view.dart'
 import 'package:frontend_garzas/src/auth/views/sign_in_view.dart';
 import 'package:frontend_garzas/src/dispatch/views/home_dispatch_view.dart';
 import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
+
+// Bootstrap temporal para desarrollo. Cambia el rol aquí y bórralo después.
+const _bootstrapAuthEnabled = true;
+const _bootstrapAuthRole = AppRole.seller;
+const _bootstrapAuthUsername = 'bootstrap';
+const _bootstrapAuthDisplayName = 'Bootstrap';
 
 class AuthController extends ChangeNotifier {
   final AuthApi authApi;
@@ -45,6 +49,8 @@ class AuthController extends ChangeNotifier {
         return response.success;
       },
     );
+
+    _initBootstrapSession();
   }
 
   AuthSession? _session;
@@ -92,6 +98,12 @@ class AuthController extends ChangeNotifier {
     _setLoading(true);
 
     try {
+      if (_bootstrapAuthEnabled) {
+        _initialized = true;
+        await _navigateToHome();
+        return CtrlResponse(success: true, element: _session);
+      }
+
       final storedSession = authStorage.readSession();
       _initialized = true;
 
@@ -190,6 +202,23 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _initBootstrapSession() {
+    if (!_bootstrapAuthEnabled) return;
+
+    _session = AuthSession(
+      accessToken: 'bootstrap-access-token',
+      refreshToken: 'bootstrap-refresh-token',
+      uid: 'bootstrap-user',
+      username: _bootstrapAuthUsername,
+      displayName: _bootstrapAuthDisplayName,
+      role: _bootstrapAuthRole,
+      expiresAt: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    titleBarController.setTitle(_session!.displayName);
+    _scheduleRefresh();
+  }
+
   Future<void> _clearSession({bool persist = true}) async {
     _refreshTimer?.cancel();
     _refreshTimer = null;
@@ -268,7 +297,7 @@ class AuthController extends ChangeNotifier {
       } else {
         navigationService.pushAndRemoveUntil(OpenCashRegisterCutView());
       }
-    } on AppException catch (e) {
+    } on AppException {
       // TODO: IMPLEMENTAR ERROR
     }
   }

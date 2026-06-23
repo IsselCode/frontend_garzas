@@ -118,7 +118,7 @@ class _IsselSnapLayoutsCaptionState extends State<IsselSnapLayoutsCaption>
               ? Padding(
                   padding: const EdgeInsets.only(right: 2),
                   child: Row(
-                    spacing: 2,
+                    spacing: 10,
                     children: widget.actions,
                   ),
                 )

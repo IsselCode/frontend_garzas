@@ -120,15 +120,9 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                               spacing: 10,
                               children: [
                                 Expanded(
-                                  child: IsselPill(
-                                    widget: Row(
-                                      spacing: 10,
-                                      children: [
-                                        Image.asset(AppAssets.cash, width: 24, height: 24,),
-                                        Text(cut.openingAmount.toStringAsFixed(2))
-                                      ],
-                                    ),
-                                    color: colorScheme.surfaceContainer,
+                                  child: _CutAmountPill(
+                                    asset: AppAssets.cash,
+                                    amount: cut.openingAmount,
                                   ),
                                 ),
                                 Spacer(),
@@ -156,27 +150,17 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                               spacing: 10,
                               children: [
                                 Expanded(
-                                  child: IsselPill(
-                                    widget: Row(
-                                      spacing: 10,
-                                      children: [
-                                        Image.asset(AppAssets.cash, width: 24, height: 24,),
-                                        Text(cut.expectedCashTotal.toStringAsFixed(2))
-                                      ],
-                                    ),
-                                    color: colorScheme.surfaceContainer,
+                                  child: _CutAmountPill(
+                                    asset: AppAssets.cash,
+                                    amount: cut.expectedCashTotal,
+                                    highlight: true,
                                   ),
                                 ),
                                 Expanded(
-                                  child: IsselPill(
-                                    widget: Row(
-                                      spacing: 10,
-                                      children: [
-                                        Image.asset(AppAssets.card, width: 24, height: 24,),
-                                        Text(cut.cardTotal.toStringAsFixed(2))
-                                      ],
-                                    ),
-                                    color: colorScheme.surfaceContainer,
+                                  child: _CutAmountPill(
+                                    asset: AppAssets.card,
+                                    amount: cut.cardTotal,
+                                    highlight: true,
                                   ),
                                 ),
                               ],
@@ -280,6 +264,52 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CutAmountPill extends StatelessWidget {
+  const _CutAmountPill({
+    required this.asset,
+    required this.amount,
+    this.highlight = false,
+  });
+
+  final String asset;
+  final double amount;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return IsselPill(
+      color: highlight
+          ? colorScheme.primary.withValues(alpha: 0.12)
+          : colorScheme.surfaceContainer,
+      widget: Row(
+        spacing: 10,
+        children: [
+          Image.asset(asset, width: 24, height: 24),
+          Expanded(
+            child: Text(
+              '\$${amount.toStringAsFixed(2)}',
+              textAlign: TextAlign.right,
+              style: (highlight
+                      ? textTheme.titleMedium
+                      : textTheme.titleSmall)
+                  ?.copyWith(
+                    color: highlight
+                        ? colorScheme.primary
+                        : colorScheme.onSurface,
+                    fontWeight: FontWeight.w900,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

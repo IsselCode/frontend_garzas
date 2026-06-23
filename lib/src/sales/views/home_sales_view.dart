@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/scaled_text_style.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend_garzas/commons/sales_dispatch_home_switch_fab.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
@@ -76,7 +77,7 @@ class _HomeSalesViewState extends State<HomeSalesView> {
             builder: (context, constraints) {
               final scaleFactor = (constraints.maxWidth / 1366).clamp(
                 1.0,
-                1.28,
+                1.7,
               );
 
               return SizedBox.expand(
@@ -86,15 +87,17 @@ class _HomeSalesViewState extends State<HomeSalesView> {
                     children: [
                       Text(
                         'Ventas',
-                        style: textTheme.displayLarge?.copyWith(
-                          fontSize: 44 * scaleFactor,
+                        style: scaledTextStyle(
+                          textTheme.displayLarge,
+                          scaleFactor,
                         ),
                       ),
                       Text(
                         'Haz clic o presiona cualquier tecla para comenzar una venta',
-                        style: textTheme.bodyLarge?.copyWith(
+                        style: scaledTextStyle(
+                          textTheme.bodyLarge,
+                          scaleFactor,
                           color: colorScheme.outline,
-                          fontSize: 18 * scaleFactor,
                         ),
                       ),
                       SizedBox(height: 20 * scaleFactor),
