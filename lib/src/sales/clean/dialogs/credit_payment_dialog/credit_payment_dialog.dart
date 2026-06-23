@@ -44,10 +44,10 @@ class _ConfigPrinterDialogState extends State<CreditPaymentDialog> {
     return Dialog(
       child: Container(
         width: controller.pageController.positions.isEmpty
-            ? 350
+            ? 450
             : controller.pageController.page != 1
-            ? 350
-            : 900,
+            ? 450
+            : 1065,
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainer,
@@ -82,7 +82,7 @@ class _ConfigPrinterDialogState extends State<CreditPaymentDialog> {
                 height: controller.indexPage == 0
                     ? 260
                     : controller.indexPage == 2
-                    ? 165
+                    ? 175
                     : 400,
                 child: PageView(
                   controller: controller.pageController,
