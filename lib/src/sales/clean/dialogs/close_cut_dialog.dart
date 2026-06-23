@@ -50,7 +50,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
 
     return Dialog(
       child: Container(
-        width: 500,
+        width: 650,
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(24)),
         child: SingleChildScrollView(
@@ -122,10 +122,9 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                 Expanded(
                                   child: _CutAmountPill(
                                     asset: AppAssets.cash,
-                                    amount: cut.openingAmount,
+                                    amount: 12988.58,
                                   ),
                                 ),
-                                Spacer(),
                                 Spacer(),
                               ],
                             ),

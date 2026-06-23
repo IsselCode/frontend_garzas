@@ -217,12 +217,10 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                       ),
                                       IsselToggleField(
                                         title: "Usuario modificado",
-                                        value: generalConfigController
-                                            .generalConfigEntity!
-                                            .userModified,
+                                        value: generalConfigController.generalConfigEntity!.userModified,
                                         backColor: colorScheme.surfaceContainer,
                                         onChanged: (value) => updateLogs(
-                                          GeneralConfigLogField.userDeleted,
+                                          GeneralConfigLogField.userModified,
                                           value,
                                         ),
                                       ),
@@ -500,6 +498,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                         IsselStepperField(
                                           title: "Impresiones",
                                           initValue: printQnty.toDouble(),
+                                          height: 60,
                                           minValue: 0,
                                           maxValue: 10,
                                           onChanged: (value) =>

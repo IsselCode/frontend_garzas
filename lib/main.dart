@@ -14,6 +14,7 @@ import 'package:frontend_garzas/src/admin/controllers/general_config_controller.
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
+import 'package:frontend_garzas/src/auth/views/splash_view.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 import 'package:loader_overlay/loader_overlay.dart';
@@ -140,7 +141,7 @@ class MyApp extends StatelessWidget {
                             ],
                           );
                         },
-                        home: HomeSalesView(),
+                        home: SplashView(),
                       ),
                     ),
                   );

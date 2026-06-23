@@ -19,7 +19,7 @@ import 'package:frontend_garzas/src/dispatch/views/home_dispatch_view.dart';
 import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 
 // Bootstrap temporal para desarrollo. Cambia el rol aquí y bórralo después.
-const _bootstrapAuthEnabled = true;
+const _bootstrapAuthEnabled = false;
 const _bootstrapAuthRole = AppRole.seller;
 const _bootstrapAuthUsername = 'bootstrap';
 const _bootstrapAuthDisplayName = 'Bootstrap';
