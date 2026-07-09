@@ -217,7 +217,9 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                       ),
                                       IsselToggleField(
                                         title: "Usuario modificado",
-                                        value: generalConfigController.generalConfigEntity!.userModified,
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .userModified,
                                         backColor: colorScheme.surfaceContainer,
                                         onChanged: (value) => updateLogs(
                                           GeneralConfigLogField.userModified,
@@ -315,6 +317,18 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                         ),
                                       ),
                                       IsselToggleField(
+                                        title: "Crédito rechazado por límite",
+                                        value: generalConfigController
+                                            .generalConfigEntity!
+                                            .saleCreditLimitRejected,
+                                        backColor: colorScheme.surfaceContainer,
+                                        onChanged: (value) => updateLogs(
+                                          GeneralConfigLogField
+                                              .saleCreditLimitRejected,
+                                          value,
+                                        ),
+                                      ),
+                                      IsselToggleField(
                                         title: "Despacho completo",
                                         value: generalConfigController
                                             .generalConfigEntity!
@@ -338,97 +352,102 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                   color: colorScheme.surface,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Column(
-                                  spacing: 10,
-                                  children: [
-                                    Text(
-                                      "Precios",
-                                      style: textTheme.titleMedium,
-                                    ),
-                                    IsselTabSwitcher(
-                                      state: state,
-                                      leftText: "Potable",
-                                      rightText: "Pozo",
-                                      onChanged: onChangeWaterType,
-                                      color: colorScheme.surfaceContainer,
-                                    ),
-                                    SizedBox(
-                                      height: 110,
-                                      child: PageView(
-                                        controller: pageController,
-                                        children: [
-                                          Column(
-                                            spacing: 10,
-                                            children: [
-                                              IsselStepperField(
-                                                height: 50,
-                                                title: "Litro",
-                                                onChanged: (value) =>
-                                                    potableLiterPricing = value,
-                                                maxValue: 10000,
-                                                minValue: 0,
-                                                initValue: potableLiterPricing,
-                                                backColor: colorScheme
-                                                    .surfaceContainer,
-                                                counterColor:
-                                                    colorScheme.surface,
-                                              ),
-                                              IsselStepperField(
-                                                height: 50,
-                                                title: "Galón",
-                                                onChanged: (value) =>
-                                                    potableGallonPricing =
-                                                        value,
-                                                maxValue: 10000,
-                                                minValue: 0,
-                                                initValue: potableGallonPricing,
-                                                backColor: colorScheme
-                                                    .surfaceContainer,
-                                                counterColor:
-                                                    colorScheme.surface,
-                                              ),
-                                            ],
-                                          ),
-                                          Column(
-                                            spacing: 10,
-                                            children: [
-                                              IsselStepperField(
-                                                height: 50,
-                                                title: "Litro",
-                                                onChanged: (value) =>
-                                                    pozoLiterPricing = value,
-                                                maxValue: 10000,
-                                                minValue: 0,
-                                                initValue: pozoLiterPricing,
-                                                backColor: colorScheme
-                                                    .surfaceContainer,
-                                                counterColor:
-                                                    colorScheme.surface,
-                                              ),
-                                              IsselStepperField(
-                                                height: 50,
-                                                title: "Galón",
-                                                onChanged: (value) =>
-                                                    pozoGallonPricing = value,
-                                                maxValue: 10000,
-                                                minValue: 0,
-                                                initValue: pozoGallonPricing,
-                                                backColor: colorScheme
-                                                    .surfaceContainer,
-                                                counterColor:
-                                                    colorScheme.surface,
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    spacing: 10,
+                                    children: [
+                                      Text(
+                                        "Precios",
+                                        style: textTheme.titleMedium,
                                       ),
-                                    ),
-                                    IsselButton(
-                                      height: 50,
-                                      text: "Actualizar",
-                                      onTap: () => updatePrices(),
-                                    ),
-                                  ],
+                                      IsselTabSwitcher(
+                                        state: state,
+                                        leftText: "Potable",
+                                        rightText: "Pozo",
+                                        onChanged: onChangeWaterType,
+                                        color: colorScheme.surfaceContainer,
+                                      ),
+                                      SizedBox(
+                                        height: 110,
+                                        child: PageView(
+                                          controller: pageController,
+                                          children: [
+                                            Column(
+                                              spacing: 10,
+                                              children: [
+                                                IsselStepperField(
+                                                  height: 50,
+                                                  title: "Litro",
+                                                  onChanged: (value) =>
+                                                      potableLiterPricing =
+                                                          value,
+                                                  maxValue: 10000,
+                                                  minValue: 0,
+                                                  initValue:
+                                                      potableLiterPricing,
+                                                  backColor: colorScheme
+                                                      .surfaceContainer,
+                                                  counterColor:
+                                                      colorScheme.surface,
+                                                ),
+                                                IsselStepperField(
+                                                  height: 50,
+                                                  title: "Galón",
+                                                  onChanged: (value) =>
+                                                      potableGallonPricing =
+                                                          value,
+                                                  maxValue: 10000,
+                                                  minValue: 0,
+                                                  initValue:
+                                                      potableGallonPricing,
+                                                  backColor: colorScheme
+                                                      .surfaceContainer,
+                                                  counterColor:
+                                                      colorScheme.surface,
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              spacing: 10,
+                                              children: [
+                                                IsselStepperField(
+                                                  height: 50,
+                                                  title: "Litro",
+                                                  onChanged: (value) =>
+                                                      pozoLiterPricing = value,
+                                                  maxValue: 10000,
+                                                  minValue: 0,
+                                                  initValue: pozoLiterPricing,
+                                                  backColor: colorScheme
+                                                      .surfaceContainer,
+                                                  counterColor:
+                                                      colorScheme.surface,
+                                                ),
+                                                IsselStepperField(
+                                                  height: 50,
+                                                  title: "Galón",
+                                                  onChanged: (value) =>
+                                                      pozoGallonPricing = value,
+                                                  maxValue: 10000,
+                                                  minValue: 0,
+                                                  initValue: pozoGallonPricing,
+                                                  backColor: colorScheme
+                                                      .surfaceContainer,
+                                                  counterColor:
+                                                      colorScheme.surface,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      IsselButton(
+                                        height: 50,
+                                        text: "Actualizar",
+                                        onTap: () => updatePrices(),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

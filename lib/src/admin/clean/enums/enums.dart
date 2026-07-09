@@ -81,5 +81,6 @@ enum GeneralConfigLogField {
   cashRegisterOpening,
   cashRegisterClosing,
   saleCreated,
+  saleCreditLimitRejected,
   dispatchCompleted,
 }

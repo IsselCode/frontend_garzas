@@ -135,11 +135,11 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             color: colorScheme.surfaceContainer,
-                            height: 60,
+                            height: 70,
                             alignment: Alignment.centerLeft,
                           ),
                           IsselPill(
-                            height: 60,
+                            height: 70,
                             widget: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +160,7 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                             alignment: Alignment.centerLeft,
                           ),
                           IsselPill(
-                            height: 60,
+                            height: 70,
                             widget: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,7 +181,7 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                             alignment: Alignment.centerLeft,
                           ),
                           IsselPill(
-                            height: 60,
+                            height: 70,
                             widget: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               spacing: 5,

@@ -8,6 +8,7 @@ import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/date_range_dialog.dart';
+import 'package:frontend_garzas/src/admin/clean/dialogs/sale_details_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/monthly_garza_total_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/statistic_garza_container.dart';
@@ -816,100 +817,12 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
   }
 
   Future<void> _showSaleDetails(SaleEntity sale) async {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final commercialName = sale.commercialName?.trim().isNotEmpty == true
-        ? sale.commercialName!
-        : "Público general";
-
     await showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: colorScheme.surface,
-        title: Text("Detalle de venta", style: textTheme.titleLarge),
-        content: SizedBox(
-          width: 650,
-          child: SingleChildScrollView(
-            child: Column(
-              spacing: 12,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(child: Text("Ticket", style: textTheme.titleMedium)),
-                _saleDetailRow(
-                  "Folio",
-                  sale.folio,
-                  "Fecha",
-                  DateFormat("dd/MM/yy hh:mm a").format(sale.createdAt),
-                ),
-                _saleDetailRow(
-                  "Código",
-                  sale.dispatchCode,
-                  "Empleado",
-                  sale.sellerUsername,
-                ),
-                Center(
-                  child: Text(
-                    "Cliente y producto",
-                    style: textTheme.titleMedium,
-                  ),
-                ),
-                _saleDetailRow(
-                  "Cliente",
-                  commercialName,
-                  "ID cliente",
-                  sale.clientId?.toString() ?? "N/A",
-                ),
-                _saleDetailRow(
-                  "Tipo de agua",
-                  sale.waterType.dp,
-                  "Cantidad",
-                  "${sale.quantity.toStringAsFixed(2)} ${sale.unitOfMeasurement.abbr}",
-                ),
-                Center(child: Text("Cobro", style: textTheme.titleMedium)),
-                _saleDetailRow(
-                  "Método",
-                  sale.paymentMethod.label,
-                  "Precio unitario",
-                  "\$${sale.unitPrice.toStringAsFixed(2)}",
-                ),
-                _saleDetailRow(
-                  "Total",
-                  "\$${sale.total.toStringAsFixed(2)}",
-                  "Pago",
-                  "\$${sale.amountPaid.toStringAsFixed(2)}",
-                ),
-                _saleDetailRow(
-                  "Cambio",
-                  "\$${sale.changeAmount.toStringAsFixed(2)}",
-                  "Estado",
-                  sale.isDispatched ? "Despachada" : "Pendiente",
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          if (!sale.isDispatched)
-            IsselButton(
-              width: 170,
-              height: 50,
-              text: "Eliminar venta",
-              color: Colors.red,
-              onTap: () => _requestSaleDeletion(dialogContext, sale),
-            ),
-          IsselButton(
-            text: "Cerrar",
-            width: 120,
-            height: 50,
-            onTap: () => Navigator.of(dialogContext).pop(),
-          ),
-          IsselButton(
-            width: 210,
-            height: 50,
-            text: "Reimprimir ticket",
-            onTap: () => _reprintTicket(sale),
-          ),
-        ],
+      builder: (dialogContext) => SaleDetailsDialog(
+        sale: sale,
+        onDeleteSale: _requestSaleDeletion,
+        onReprintTicket: _reprintTicket,
       ),
     );
   }
@@ -958,38 +871,6 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
     if (saleDetailsNavigator.canPop()) {
       saleDetailsNavigator.pop();
     }
-  }
-
-  Widget _saleDetailRow(
-    String firstTitle,
-    String firstValue,
-    String secondTitle,
-    String secondValue,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Row(
-      spacing: 10,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: IsselInfoField(
-            title: firstTitle,
-            value: firstValue,
-            backColor: colorScheme.surfaceContainer,
-            valueBackColor: colorScheme.surface,
-          ),
-        ),
-        Expanded(
-          child: IsselInfoField(
-            title: secondTitle,
-            value: secondValue,
-            backColor: colorScheme.surfaceContainer,
-            valueBackColor: colorScheme.surface,
-          ),
-        ),
-      ],
-    );
   }
 
   Future<void> _reprintTicket(SaleEntity sale) async {

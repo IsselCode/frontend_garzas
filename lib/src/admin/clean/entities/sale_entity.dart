@@ -28,6 +28,7 @@ class SaleEntity extends Equatable {
   final double totalLiters;
   final double dispatchedLiters;
   final double remainingLiters;
+  final int dispatchDurationMS;
 
   const SaleEntity({
     required this.folio,
@@ -55,6 +56,7 @@ class SaleEntity extends Equatable {
     required this.totalLiters,
     required this.dispatchedLiters,
     required this.remainingLiters,
+    required this.dispatchDurationMS
   });
 
   factory SaleEntity.fromMap(Map<String, dynamic> data) {
@@ -67,9 +69,7 @@ class SaleEntity extends Equatable {
       clientId: data["client_id"],
       commercialName: data["commercial_name"],
       waterType: WaterType.fromString(data["water_type"]),
-      unitOfMeasurement: UnitOfMeasurement.fromString(
-        data["unit_of_measurement"],
-      ),
+      unitOfMeasurement: UnitOfMeasurement.fromString(data["unit_of_measurement"],),
       quantity: data["quantity"],
       unitPrice: data["unit_price"],
       total: data["total"],
@@ -86,6 +86,7 @@ class SaleEntity extends Equatable {
       totalLiters: data["total_liters"],
       dispatchedLiters: data["dispatched_liters"],
       remainingLiters: data["remaining_liters"],
+      dispatchDurationMS: data["dispatch_duration_ms"],
     );
   }
 
@@ -116,6 +117,7 @@ class SaleEntity extends Equatable {
       "total_liters": totalLiters,
       "dispatched_liters": dispatchedLiters,
       "remaining_liters": remainingLiters,
+      "dispatch_duration_ms": dispatchDurationMS
     };
   }
 

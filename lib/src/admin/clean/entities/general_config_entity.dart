@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class GeneralConfigEntity extends Equatable {
-
   bool waterSupply;
   bool userCreated;
   bool userDeleted;
@@ -14,6 +13,7 @@ class GeneralConfigEntity extends Equatable {
   bool cashRegisterOpening;
   bool cashRegisterClosing;
   bool saleCreated;
+  bool saleCreditLimitRejected;
   bool dispatchCompleted;
   String businessName;
   String businessAddress;
@@ -39,6 +39,7 @@ class GeneralConfigEntity extends Equatable {
     required this.cashRegisterOpening,
     required this.cashRegisterClosing,
     required this.saleCreated,
+    required this.saleCreditLimitRejected,
     required this.dispatchCompleted,
     required this.businessName,
     required this.businessAddress,
@@ -66,6 +67,7 @@ class GeneralConfigEntity extends Equatable {
       cashRegisterOpening: map['cash_register_opening'],
       cashRegisterClosing: map['cash_register_closing'],
       saleCreated: map['sale_created'],
+      saleCreditLimitRejected: map['sale_credit_limit_rejected'],
       dispatchCompleted: map['dispatch_completed'],
       businessName: map['business_name'],
       businessAddress: map['business_address'],
@@ -76,7 +78,7 @@ class GeneralConfigEntity extends Equatable {
       pozoLiterPricing: map["pozo_liter_pricing"],
       pozoGalPricing: map["pozo_gal_pricing"],
       plcEndpoint: map["plc_endpoint"],
-      printQnty: map["print_qnty"]
+      printQnty: map["print_qnty"],
     );
   }
 
@@ -93,6 +95,7 @@ class GeneralConfigEntity extends Equatable {
     bool? cashRegisterOpening,
     bool? cashRegisterClosing,
     bool? saleCreated,
+    bool? saleCreditLimitRejected,
     bool? dispatchCompleted,
     String? businessName,
     String? businessAddress,
@@ -118,6 +121,8 @@ class GeneralConfigEntity extends Equatable {
       cashRegisterOpening: cashRegisterOpening ?? this.cashRegisterOpening,
       cashRegisterClosing: cashRegisterClosing ?? this.cashRegisterClosing,
       saleCreated: saleCreated ?? this.saleCreated,
+      saleCreditLimitRejected:
+          saleCreditLimitRejected ?? this.saleCreditLimitRejected,
       dispatchCompleted: dispatchCompleted ?? this.dispatchCompleted,
       businessName: businessName ?? this.businessName,
       businessAddress: businessAddress ?? this.businessAddress,
@@ -146,6 +151,7 @@ class GeneralConfigEntity extends Equatable {
       'cash_register_opening': cashRegisterOpening,
       'cash_register_closing': cashRegisterClosing,
       'sale_created': saleCreated,
+      'sale_credit_limit_rejected': saleCreditLimitRejected,
       'dispatch_completed': dispatchCompleted,
       'business_name': businessName,
       'business_address': businessAddress,
@@ -174,6 +180,7 @@ class GeneralConfigEntity extends Equatable {
     cashRegisterOpening,
     cashRegisterClosing,
     saleCreated,
+    saleCreditLimitRejected,
     dispatchCompleted,
     businessName,
     businessAddress,
@@ -186,6 +193,4 @@ class GeneralConfigEntity extends Equatable {
     plcEndpoint,
     printQnty,
   ];
-
-
 }
