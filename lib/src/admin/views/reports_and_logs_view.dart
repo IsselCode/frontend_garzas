@@ -899,6 +899,8 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
 
       final config = configController.generalConfigEntity!;
       final ticket = SellTicketEntity(
+        ticketNumber: sale.id,
+        copyNumber: 1,
         folio: sale.folio,
         commercialName: sale.commercialName,
         waterType: sale.waterType,

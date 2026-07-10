@@ -3,6 +3,8 @@ import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 
 class SaleEntity extends Equatable {
+
+  final int id;
   final String folio;
   final String dispatchCode;
   final int cashCutId;
@@ -31,6 +33,7 @@ class SaleEntity extends Equatable {
   final int dispatchDurationMS;
 
   const SaleEntity({
+    required this.id,
     required this.folio,
     required this.dispatchCode,
     required this.cashCutId,
@@ -61,6 +64,7 @@ class SaleEntity extends Equatable {
 
   factory SaleEntity.fromMap(Map<String, dynamic> data) {
     return SaleEntity(
+      id: data["id"],
       folio: data["folio"],
       dispatchCode: data["dispatch_code"],
       cashCutId: data["cash_cut_id"],
@@ -92,6 +96,7 @@ class SaleEntity extends Equatable {
 
   Map<String, dynamic> toMap() {
     return {
+      "id": id,
       "folio": folio,
       "dispatch_code": dispatchCode,
       "cash_cut_id": cashCutId,
@@ -123,6 +128,7 @@ class SaleEntity extends Equatable {
 
   @override
   List<Object?> get props => [
+    id,
     folio,
     dispatchCode,
     sellerUid,

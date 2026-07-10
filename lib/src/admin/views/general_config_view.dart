@@ -644,6 +644,8 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                             .generalConfigEntity!,
                                       );
                                       final ticket = SellTicketEntity(
+                                        ticketNumber: 1,
+                                        copyNumber: 1,
                                         folio: "1839174451",
                                         dispatchCode: "16383917445163345",
                                         commercialName: "ACME S.A.",
@@ -653,7 +655,7 @@ class _GeneralConfigViewState extends State<GeneralConfigView> {
                                         changeAmount: 100,
                                         waterType: WaterType.potable,
                                         unitOfMeasurement:
-                                            UnitOfMeasurement.gallons,
+                                        UnitOfMeasurement.gallons,
                                         quantity: 125,
                                         createdAt: DateTime.now(),
                                         sellerName: "Prueba",

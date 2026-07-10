@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/tickets/sell_ticket.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
@@ -214,26 +212,29 @@ class OrderController extends ChangeNotifier {
     }
 
     final config = generalConfigController.generalConfigEntity!;
-    final ticket = SellTicketEntity(
-      folio: _saleEntity!.folio,
-      commercialName: _saleEntity!.commercialName,
-      waterType: _saleEntity!.waterType,
-      unitOfMeasurement: _saleEntity!.unitOfMeasurement,
-      quantity: _saleEntity!.quantity,
-      total: total,
-      paymentMethod: _saleEntity!.paymentMethod,
-      amountPaid: _saleEntity!.amountPaid,
-      changeAmount: _saleEntity!.changeAmount,
-      dispatchCode: _saleEntity!.dispatchCode,
-      createdAt: _saleEntity!.createdAt,
-      sellerName: authController.session!.displayName,
-    );
 
     //TODO: Para probar o guardar ticket en PC
-    Uint8List bytes = await sellTicketPdf(config, ticket);
-    await Printing.sharePdf(bytes: bytes, filename: "CUALQUIER NOMBRE");
+    // Uint8List bytes = await sellTicketPdf(config, ticket);
+    // await Printing.sharePdf(bytes: bytes, filename: "CUALQUIER NOMBRE");
 
     for (int copy = 0; copy < config.printQnty; copy++) {
+      final ticket = SellTicketEntity(
+        ticketNumber: _saleEntity!.id,
+        copyNumber: copy + 1,
+        folio: _saleEntity!.folio,
+        commercialName: _saleEntity!.commercialName,
+        waterType: _saleEntity!.waterType,
+        unitOfMeasurement: _saleEntity!.unitOfMeasurement,
+        quantity: _saleEntity!.quantity,
+        total: total,
+        paymentMethod: _saleEntity!.paymentMethod,
+        amountPaid: _saleEntity!.amountPaid,
+        changeAmount: _saleEntity!.changeAmount,
+        dispatchCode: _saleEntity!.dispatchCode,
+        createdAt: _saleEntity!.createdAt,
+        sellerName: authController.session!.displayName,
+      );
+
       await Printing.directPrintPdf(
         printer: printer,
         format: sellTicketPageFormat,

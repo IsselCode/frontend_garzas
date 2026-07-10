@@ -18,6 +18,8 @@ const PdfPageFormat sellTicketPageFormat = PdfPageFormat(
 );
 
 class SellTicketEntity {
+  int ticketNumber;
+  int copyNumber;
   String folio;
   String? commercialName;
   WaterType waterType;
@@ -32,6 +34,8 @@ class SellTicketEntity {
   DateTime createdAt;
 
   SellTicketEntity({
+    required this.ticketNumber,
+    required this.copyNumber,
     required this.folio,
     required this.commercialName,
     required this.waterType,
@@ -133,6 +137,12 @@ Future<Uint8List> sellTicketPdf(
             ),
             pw.SizedBox(height: 2),
             pw.Text(
+              'Ticket No. ${sellTicketEntity.ticketNumber}',
+              style: pw.TextStyle(font: fontText, fontSize: 8),
+              textAlign: pw.TextAlign.center,
+            ),
+            pw.SizedBox(height: 2),
+            pw.Text(
               'Folio ${sellTicketEntity.folio}',
               style: pw.TextStyle(font: fontText, fontSize: 8),
               textAlign: pw.TextAlign.center,
@@ -198,6 +208,12 @@ Future<Uint8List> sellTicketPdf(
                 textAlign: pw.TextAlign.center,
               ),
             ],
+            pw.SizedBox(height: 4),
+            pw.Text(
+              'Copia ${sellTicketEntity.copyNumber}',
+              style: pw.TextStyle(font: fontText, fontSize: 6),
+              textAlign: pw.TextAlign.center,
+            ),
           ],
         );
       },
