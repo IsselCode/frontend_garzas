@@ -37,6 +37,8 @@ class ClientsApi {
     double potableLiterPricing,
     double pozoGalPricing,
     double pozoLiterPricing,
+    double creditLimit,
+    bool creditEnabled,
   ) async {
     Map<String, dynamic> body = {
       "commercial_name": commercialName,
@@ -44,6 +46,9 @@ class ClientsApi {
       "potable_liter_pricing": potableLiterPricing,
       "pozo_gal_pricing": pozoGalPricing,
       "pozo_liter_pricing": pozoLiterPricing,
+      "credit_limit": creditLimit,
+      "credit_enabled": creditEnabled,
+      "credit_used": 0,
     };
 
     Map<String, dynamic> response = await apiClient.post(
@@ -66,6 +71,8 @@ class ClientsApi {
     double potableLiterPricing,
     double pozoGalPricing,
     double pozoLiterPricing,
+    double creditLimit,
+    bool creditEnabled,
   ) async {
     Map<String, dynamic> body = {
       "commercial_name": commercialName,
@@ -73,6 +80,8 @@ class ClientsApi {
       "potable_liter_pricing": potableLiterPricing,
       "pozo_gal_pricing": pozoGalPricing,
       "pozo_liter_pricing": pozoLiterPricing,
+      "credit_limit": creditLimit,
+      "credit_enabled": creditEnabled,
     };
 
     body.removeWhere(

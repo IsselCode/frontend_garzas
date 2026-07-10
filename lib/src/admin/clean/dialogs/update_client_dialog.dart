@@ -27,6 +27,9 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
   double potableGallonPricing = 1;
   double pozoLiterPricing = 1;
   double pozoGallonPricing = 1;
+  double creditLimit = 1;
+  double creditUsed = 0;
+  bool creditEnabled = false;
   PageController pageController = PageController();
 
   @override
@@ -37,6 +40,9 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
     potableLiterPricing = widget.clientEntity.potableLiterPricing;
     pozoGallonPricing = widget.clientEntity.pozoGalPricing;
     pozoLiterPricing = widget.clientEntity.pozoLiterPricing;
+    creditLimit = widget.clientEntity.creditLimit;
+    creditEnabled = widget.clientEntity.creditEnabled;
+    creditUsed = widget.clientEntity.creditUsed;
   }
 
   @override
@@ -90,6 +96,22 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
                 ],
               ),
             ),
+            IsselToggleField(
+              title: "Credito",
+              value: creditEnabled,
+              onChanged: (value) => setState(() {creditEnabled = value;}),
+              backColor: colorScheme.surfaceContainer,
+            ),
+              IsselStepperField(
+                height: 50,
+                title: "Limite de credito",
+                onChanged: (value) => creditLimit = value,
+                maxValue: 1000000,
+                minValue: 1,
+                initValue: creditLimit,
+                backColor: colorScheme.surfaceContainer,
+                counterColor: colorScheme.surface,
+              ),
             //* Prices
             IsselTabSwitcher(
               state: state,
@@ -179,6 +201,8 @@ class _CreateUserPageState extends State<UpdateClientDialog> {
       potableGallonPricing,
       pozoLiterPricing,
       pozoGallonPricing,
+      creditLimit,
+      creditEnabled,
     );
     if (!mounted) return;
     context.loaderOverlay.hide();

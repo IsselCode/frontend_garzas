@@ -7,6 +7,9 @@ class ClientEntity extends Equatable {
   final double potableLiterPricing;
   final double pozoGalPricing;
   final double pozoLiterPricing;
+  final double creditLimit;
+  final bool creditEnabled;
+  final double creditUsed;
   final DateTime createdAt;
 
   const ClientEntity({
@@ -16,6 +19,9 @@ class ClientEntity extends Equatable {
     required this.potableLiterPricing,
     required this.pozoGalPricing,
     required this.pozoLiterPricing,
+    required this.creditLimit,
+    required this.creditEnabled,
+    required this.creditUsed,
     required this.createdAt,
   });
 
@@ -27,10 +33,13 @@ class ClientEntity extends Equatable {
       potableLiterPricing: map["potable_liter_pricing"],
       pozoGalPricing: map["pozo_gal_pricing"],
       pozoLiterPricing: map["pozo_liter_pricing"],
+      creditLimit: map["credit_limit"],
+      creditEnabled: map["credit_enabled"],
+      creditUsed: map["credit_used"],
       createdAt: DateTime.parse(map["created_at"]).toLocal(),
     );
   }
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [id, commercialName];
 }

@@ -46,6 +46,8 @@ class ClientsController extends ChangeNotifier {
     double potableGallonPricing,
     double pozoLiterPricing,
     double pozoGallonPricing,
+    double creditLimit,
+    bool creditEnabled
   ) async {
     try {
       ClientEntity tempClient = await clientsApi.createClient(
@@ -54,6 +56,8 @@ class ClientsController extends ChangeNotifier {
         potableLiterPricing,
         pozoGallonPricing,
         pozoLiterPricing,
+        creditLimit,
+        creditEnabled,
       );
       allClients.insert(0, tempClient);
       showedClients = allClients;
@@ -71,6 +75,8 @@ class ClientsController extends ChangeNotifier {
     double potableGallonPricing,
     double pozoLiterPricing,
     double pozoGallonPricing,
+    double creditLimit,
+    bool creditEnabled,
   ) async {
     try {
       ClientEntity tempClient = await clientsApi.updateClientById(
@@ -80,6 +86,8 @@ class ClientsController extends ChangeNotifier {
         potableLiterPricing,
         pozoGallonPricing,
         pozoLiterPricing,
+        creditLimit,
+        creditEnabled,
       );
       int tempIndexClient = allClients.indexWhere(
         (element) => element.id == clientId,
