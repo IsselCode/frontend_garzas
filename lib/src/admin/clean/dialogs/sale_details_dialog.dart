@@ -90,11 +90,15 @@ class SaleDetailsDialog extends StatelessWidget {
                 ],
               ),
               _SaleDetailSection(
-                title: "Tiempo",
+                title: "Tiempo y empleado del cliente",
                 fields: [
                   _SaleDetailItem(
                     "Segundos",
                     "${(sale.dispatchDurationMS / 1000).toStringAsFixed(3)} s",
+                  ),
+                  _SaleDetailItem(
+                    "Empleado",
+                    sale.customerEmployeeName ?? "",
                   ),
                 ],
               ),

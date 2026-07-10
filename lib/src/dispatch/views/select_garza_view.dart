@@ -32,6 +32,12 @@ class _SelectGarzaViewState extends State<SelectGarzaView> {
     super.initState();
     DispatchController dispatchController = context.read();
     _getAvailableGarzas = dispatchController.getAvailableGarzas();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (dispatchController.dispatchHasClient) {
+        _openCustomerEmployeeDialog();
+      }
+    });
   }
 
   @override
@@ -162,9 +168,32 @@ class _SelectGarzaViewState extends State<SelectGarzaView> {
             left: 10,
             child: TextBackButton(),
           ),
+          if (dispatchController.dispatchHasClient)
+            Positioned(
+              bottom: 25,
+              right: 25,
+              child: _CustomerEmployeeAction(
+                employeeName: dispatchController.customerEmployeeName,
+                showEmployeeText: dispatchController.hasCustomerEmployeeName,
+                onTap: _openCustomerEmployeeDialog,
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  Future<void> _openCustomerEmployeeDialog() async {
+    final dispatchController = context.read<DispatchController>();
+    final employeeName = await showDialog<String>(
+      context: context,
+      builder: (context) => CustomerEmployeeDialog(
+        initialValue: dispatchController.customerEmployeeName,
+      ),
+    );
+
+    if (!mounted || employeeName == null) return;
+    dispatchController.setCustomerEmployeeName(employeeName);
   }
 
   void selectGarza(ConfigGarzaEntity garza) async {
@@ -189,5 +218,134 @@ class _SelectGarzaViewState extends State<SelectGarzaView> {
     NavigationService navigationService = locator();
     dispatchController.selectedGarza = garza;
     navigationService.navigateTo(FinishDispatchView());
+  }
+}
+
+class _CustomerEmployeeAction extends StatelessWidget {
+  final String? employeeName;
+  final bool showEmployeeText;
+  final VoidCallback onTap;
+
+  const _CustomerEmployeeAction({
+    required this.employeeName,
+    required this.showEmployeeText,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 10,
+      children: [
+        if (showEmployeeText && employeeName != null)
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 220),
+            child: Text(
+              employeeName!,
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.72),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        FloatingActionButton(
+          heroTag: 'customerEmployeeButton',
+          tooltip: 'Empleado del cliente',
+          onPressed: onTap,
+          child: const Icon(Icons.badge_outlined),
+        ),
+      ],
+    );
+  }
+}
+
+class CustomerEmployeeDialog extends StatefulWidget {
+  final String? initialValue;
+
+  const CustomerEmployeeDialog({super.key, this.initialValue});
+
+  @override
+  State<CustomerEmployeeDialog> createState() => _CustomerEmployeeDialogState();
+}
+
+class _CustomerEmployeeDialogState extends State<CustomerEmployeeDialog> {
+  final TextEditingController controller = TextEditingController();
+  final FocusNode focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.text = widget.initialValue ?? '';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      focusNode.requestFocus();
+      controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.text.length,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return Dialog(
+      child: Container(
+        width: 430,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: [
+            Text(
+              'Empleado del cliente',
+              style: textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            IsselTextFormField(
+              controller: controller,
+              focusNode: focusNode,
+              hintText: 'Nombre o gafete',
+              prefixIcon: Icons.badge_outlined,
+              fillColor: theme.scaffoldBackgroundColor,
+              onSubmitted: (_) => _submit(),
+            ),
+            IsselButton(text: 'Continuar', height: 50, onTap: _submit),
+            IsselButton(
+              text: 'Cerrar',
+              height: 50,
+              color: Colors.transparent,
+              textColor: colorScheme.onSurface,
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _submit() {
+    Navigator.pop(context, controller.text.trim());
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    focusNode.dispose();
+    super.dispose();
   }
 }

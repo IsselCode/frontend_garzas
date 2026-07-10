@@ -17,12 +17,17 @@ class DispatchSessionsApi {
   Future<DispatchSessionEntity> createSession({
     required String dispatchCode,
     required int garzaNumber,
+    String? customerEmployeeName,
   }) async {
     try {
       final response = await apiClient.post(
         _sessionsPath,
         authRequired: true,
-        body: {'dispatch_code': dispatchCode, 'garza_number': garzaNumber},
+        body: {
+          'dispatch_code': dispatchCode,
+          'garza_number': garzaNumber,
+          'customer_employee_name': customerEmployeeName,
+        },
       );
 
       return DispatchSessionEntity.fromMap(response);
@@ -102,7 +107,6 @@ class DispatchSessionsApi {
 
           final decoded = jsonDecode(data);
           if (decoded is Map<String, dynamic>) {
-            print(GarzaRuntimeResponseEntity.fromMap(decoded));
             yield GarzaRuntimeResponseEntity.fromMap(decoded);
           }
         }

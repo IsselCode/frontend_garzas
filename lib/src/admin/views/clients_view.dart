@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/entities/client_entity.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
+import 'package:frontend_garzas/src/admin/clean/dialogs/client_employee_barcode_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/confirm_delete_client_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/update_client_dialog.dart';
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
@@ -64,6 +65,14 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                       direction: Axis.horizontal,
                       spacing: 10,
                       children: [
+                        SizedBox(
+                          width: 150,
+                          child: IsselButton(
+                            text: "Código",
+                            height: 50,
+                            onTap: createEmployeeBarcode,
+                          ),
+                        ),
                         SizedBox(
                           width: 250,
                           child: IsselTextFormField(
@@ -239,6 +248,13 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
     await showDialog(
       context: context,
       builder: (context) => UpdateClientDialog(clientEntity: client),
+    );
+  }
+
+  void createEmployeeBarcode() async {
+    await showDialog(
+      context: context,
+      builder: (context) => const ClientEmployeeBarcodeDialog(),
     );
   }
 

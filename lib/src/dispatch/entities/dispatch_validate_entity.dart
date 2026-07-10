@@ -12,6 +12,7 @@ class DispatchValidateEntity extends Equatable {
   final double totalLiters;
   final double dispatchedLiters;
   final double remainingLiters;
+  final String? commercialName;
 
   const DispatchValidateEntity({
     required this.dispatchCode,
@@ -24,6 +25,7 @@ class DispatchValidateEntity extends Equatable {
     required this.totalLiters,
     required this.dispatchedLiters,
     required this.remainingLiters,
+    required this.commercialName,
   });
 
   factory DispatchValidateEntity.fromMap(Map<String, dynamic> map) {
@@ -32,14 +34,15 @@ class DispatchValidateEntity extends Equatable {
       folio: map["folio"],
       isDispatched: map["is_dispatched"],
       canDispatched: map["can_dispatch"],
-      quantity: map["quantity"],
+      quantity: (map["quantity"] as num).toDouble(),
       waterType: WaterType.fromString(map["water_type"]),
       unitOfMeasurement: UnitOfMeasurement.fromString(
         map["unit_of_measurement"],
       ),
-      totalLiters: map["total_liters"],
-      dispatchedLiters: map["dispatched_liters"],
-      remainingLiters: map["remaining_liters"],
+      totalLiters: (map["total_liters"] as num).toDouble(),
+      dispatchedLiters: (map["dispatched_liters"] as num).toDouble(),
+      remainingLiters: (map["remaining_liters"] as num).toDouble(),
+      commercialName: map["commercial_name"],
     );
   }
 
@@ -55,5 +58,6 @@ class DispatchValidateEntity extends Equatable {
     totalLiters,
     dispatchedLiters,
     remainingLiters,
+    commercialName,
   ];
 }

@@ -29,6 +29,7 @@ class DispatchController extends ChangeNotifier {
   DispatchValidateEntity? dispatchValidate;
   List<ConfigGarzaEntity> availableGarzas = [];
   ConfigGarzaEntity? selectedGarza;
+  String? customerEmployeeName;
 
   DispatchSessionEntity? activeSession;
   GarzaRuntimeEntity? selectedRuntimeGarza;
@@ -58,6 +59,22 @@ class DispatchController extends ChangeNotifier {
   int get runtimePanelGarzasCount => busyGarzasCount + alarmGarzas.length;
 
   bool get hasRuntimeWarning => runtimeMessage?.trim().isNotEmpty ?? false;
+
+  bool get dispatchHasClient {
+    final commercialName = dispatchValidate?.commercialName?.trim();
+    return commercialName != null && commercialName.isNotEmpty;
+  }
+
+  bool get hasCustomerEmployeeName {
+    final name = customerEmployeeName?.trim();
+    return name != null && name.isNotEmpty;
+  }
+
+  void setCustomerEmployeeName(String? value) {
+    final name = value?.trim();
+    customerEmployeeName = name == null || name.isEmpty ? null : name;
+    notifyListeners();
+  }
 
   bool isGarzaOccupied(int garzaNumber) {
     final runtimeGarza = getRuntimeGarza(garzaNumber);
@@ -110,6 +127,7 @@ class DispatchController extends ChangeNotifier {
       final session = await dispatchSessionsApi.createSession(
         dispatchCode: dispatchValidate!.dispatchCode,
         garzaNumber: selectedGarza!.number,
+        customerEmployeeName: customerEmployeeName,
       );
 
       selectedRuntimeGarza = null;
@@ -354,6 +372,8 @@ class DispatchController extends ChangeNotifier {
         barcode,
       );
       dispatchValidate = validate;
+      selectedGarza = null;
+      customerEmployeeName = null;
       return CtrlResponse(success: true);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
