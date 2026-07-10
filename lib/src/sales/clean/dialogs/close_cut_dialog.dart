@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
+import 'package:frontend_garzas/commons/tickets/cash_cut_ticket.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
-import 'package:frontend_garzas/src/auth/data/auth_api.dart';
+import 'package:frontend_garzas/src/sales/clean/entities/closed_cut_summary_entity.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:printing/printing.dart';
@@ -17,16 +17,13 @@ import '../../../../inject_container.dart';
 import '../entities/active_cut_summary_entity.dart';
 
 class CloseCutDialog extends StatefulWidget {
-
-
-  CloseCutDialog({super.key});
+  const CloseCutDialog({super.key});
 
   @override
   State<CloseCutDialog> createState() => _ConfigPrinterDialogState();
 }
 
 class _ConfigPrinterDialogState extends State<CloseCutDialog> {
-
   late Future<CtrlResponse<ActiveCutSummaryEntity>> _getActiveCutSummary;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController cashCtrl = TextEditingController();
@@ -37,6 +34,13 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
     super.initState();
     CashRegisterController cashRegisterController = context.read();
     _getActiveCutSummary = cashRegisterController.getActiveCutSummary();
+  }
+
+  @override
+  void dispose() {
+    cashCtrl.dispose();
+    cardCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,7 +56,10 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
       child: Container(
         width: 650,
         padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(24)),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
+        ),
         child: SingleChildScrollView(
           child: Column(
             spacing: 15,
@@ -81,23 +88,19 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
               FutureBuilder(
                 future: _getActiveCutSummary,
                 builder: (context, snapshot) {
-
-                  if (snapshot.connectionState == ConnectionState.waiting){
-                    return IsselShimmer(
-                      width: double.infinity,
-                      height: 250
-                    );
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return IsselShimmer(width: double.infinity, height: 250);
                   }
-                  
+
                   if (!snapshot.data!.success) {
                     return SizedBox(
                       height: 250,
                       width: double.infinity,
-                      child: Center(child: Text(snapshot.data!.message!),),
+                      child: Center(child: Text(snapshot.data!.message!)),
                     );
                   }
-                  
-                  ActiveCutSummaryEntity cut = snapshot.data!.element!; 
+
+                  ActiveCutSummaryEntity cut = snapshot.data!.element!;
 
                   return Flex(
                     direction: Axis.vertical,
@@ -122,7 +125,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                 Expanded(
                                   child: _CutAmountPill(
                                     asset: AppAssets.cash,
-                                    amount: 12988.58,
+                                    amount: cut.openingAmount,
                                   ),
                                 ),
                                 Spacer(),
@@ -192,8 +195,13 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                       fillColor: colorScheme.surfaceContainer,
                                       hintText: "Efectivo",
                                       height: 50,
-                                      inputFormatters: [RegexService.positiveNumberFormatter],
-                                      validator: (value) => RegexService.positiveNumberValidator(value),
+                                      inputFormatters: [
+                                        RegexService.positiveNumberFormatter,
+                                      ],
+                                      validator: (value) =>
+                                          RegexService.positiveNumberValidator(
+                                            value,
+                                          ),
                                     ),
                                   ),
                                   Expanded(
@@ -202,8 +210,13 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                       controller: cardCtrl,
                                       hintText: "Tarjeta",
                                       height: 50,
-                                      inputFormatters: [RegexService.positiveNumberFormatter],
-                                      validator: (value) => RegexService.positiveNumberValidator(value),
+                                      inputFormatters: [
+                                        RegexService.positiveNumberFormatter,
+                                      ],
+                                      validator: (value) =>
+                                          RegexService.positiveNumberValidator(
+                                            value,
+                                          ),
                                     ),
                                   ),
                                 ],
@@ -214,12 +227,11 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                       ),
                     ],
                   );
-
                 },
               ),
 
               // Divisor
-              Divider(color: colorScheme.outline,),
+              Divider(color: colorScheme.outline),
 
               //* Realizar corte
               IsselButton(
@@ -227,27 +239,62 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                 textColor: colorScheme.onPrimary,
                 color: colorScheme.primary,
                 onTap: () async {
-
-                  if (!_formKey.currentState!.validate()){
+                  if (!_formKey.currentState!.validate()) {
                     return;
                   }
 
-                  context.loaderOverlay.show();
+                  final toastService = locator<ToastService>();
+                  final printerService = locator<PrinterService>();
+                  final loaderOverlay = context.loaderOverlay;
+                  final printer = await printerService.getSelectedPrinter();
 
-                  CtrlResponse response = await cashRegisterController.closeCut(
-                    double.parse(cashCtrl.text),
-                    double.parse(cardCtrl.text)
-                  );
-
-                  context.loaderOverlay.hide();
-
-                  if (response.success) {
-                    authController.logout();
-                  } else {
-                    ToastService toastService = locator();
-                    toastService.error(response.message!);
+                  if (printer == null) {
+                    toastService.error("No hay ninguna impresora seleccionada");
+                    return;
                   }
 
+                  final declaredCashTotal = double.parse(cashCtrl.text);
+                  final declaredCardTotal = double.parse(cardCtrl.text);
+
+                  loaderOverlay.show();
+
+                  CtrlResponse<ClosedCutSummaryEntity> response =
+                      await cashRegisterController.closeCut(
+                        declaredCashTotal,
+                        declaredCardTotal,
+                      );
+
+                  loaderOverlay.hide();
+
+                  if (response.success) {
+                    try {
+                      final ticket = CashCutTicketEntity(
+                        summary: response.element!,
+                        user: authController.session!,
+                        declaredCashTotal: declaredCashTotal,
+                        declaredCardTotal: declaredCardTotal,
+                        closedAt: DateTime.now(),
+                      );
+
+                      await Printing.directPrintPdf(
+                        printer: printer,
+                        format: cashCutTicketPageFormat,
+                        dynamicLayout: false,
+                        usePrinterSettings: true,
+                        onLayout: (format) =>
+                            cashCutTicketPdf(ticket, pageFormat: format),
+                      );
+
+                      await authController.logout();
+                    } catch (_) {
+                      toastService.error(
+                        "El corte se realizo, pero no se pudo imprimir el ticket",
+                      );
+                      await authController.logout();
+                    }
+                  } else {
+                    toastService.error(response.message!);
+                  }
                 },
               ),
 
@@ -297,9 +344,7 @@ class _CutAmountPill extends StatelessWidget {
             child: Text(
               '\$${amount.toStringAsFixed(2)}',
               textAlign: TextAlign.right,
-              style: (highlight
-                      ? textTheme.titleMedium
-                      : textTheme.titleSmall)
+              style: (highlight ? textTheme.titleMedium : textTheme.titleSmall)
                   ?.copyWith(
                     color: highlight
                         ? colorScheme.primary

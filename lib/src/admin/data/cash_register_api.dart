@@ -3,6 +3,7 @@ import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/summary_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/active_cut_summary_entity.dart';
+import 'package:frontend_garzas/src/sales/clean/entities/closed_cut_summary_entity.dart';
 
 class CashRegisterApi {
   final ApiClient apiClient;
@@ -18,25 +19,24 @@ class CashRegisterApi {
   final String _cashRegisterClosePath = "/cash-register/close";
 
   Future<List<CashRegisterEntity>> listCashRegisterCuts() async {
-
     try {
-
       List response = await apiClient.get(
         _cashRegisterPath,
         authRequired: true,
       );
 
-      return response.map((e) => CashRegisterEntity.fromMap(e),).toList();
+      return response.map((e) => CashRegisterEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
-  Future<List<CashRegisterEntity>> listByDateRange(DateTime startDate, DateTime endDate) async {
-
+  Future<List<CashRegisterEntity>> listByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     String start = startDate.toIso8601String().split("T").first;
     String end = endDate.toIso8601String().split("T").first;
 
@@ -44,27 +44,25 @@ class CashRegisterApi {
       List response = await apiClient.get(
         _cashRegisterByDateRangePath,
         authRequired: true,
-        queryParams: {"start_date": start, "end_date": end}
+        queryParams: {"start_date": start, "end_date": end},
       );
 
-      return response.map((e) => CashRegisterEntity.fromMap(e),).toList();
+      return response.map((e) => CashRegisterEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
   Future<List<SummaryEntity>> getSummaryByCutId(int id) async {
     try {
-
       List response = await apiClient.get(
         _cashRegisterSummaryById(id),
         authRequired: true,
       );
 
-      return response.map((e) => SummaryEntity.fromMap(e),).toList();
+      return response.map((e) => SummaryEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {
@@ -73,17 +71,13 @@ class CashRegisterApi {
   }
 
   Future<CashRegisterEntity> openCut(double openingAmount) async {
-
     try {
-
-      Map<String, dynamic> body = {
-        "opening_amount": openingAmount,
-      };
+      Map<String, dynamic> body = {"opening_amount": openingAmount};
 
       Map<String, dynamic> response = await apiClient.post(
         _cashRegisterOpenPath,
         authRequired: true,
-        body: body
+        body: body,
       );
 
       return CashRegisterEntity.fromMap(response);
@@ -92,12 +86,10 @@ class CashRegisterApi {
     } catch (e) {
       throw AppException(message: e.toString());
     }
-
   }
 
   Future<CashRegisterEntity?> active() async {
     try {
-
       Map<String, dynamic> response = await apiClient.get(
         _activeCashRegisterPath,
         authRequired: true,
@@ -115,7 +107,6 @@ class CashRegisterApi {
 
   Future<ActiveCutSummaryEntity> activeCutSummary() async {
     try {
-
       Map<String, dynamic> response = await apiClient.get(
         _activeCashRegisterSummaryPath,
         authRequired: true,
@@ -129,20 +120,20 @@ class CashRegisterApi {
     }
   }
 
-  Future<void> closeCut(double cash, double card) async {
+  Future<ClosedCutSummaryEntity> closeCut(double cash, double card) async {
     try {
-
       Map<String, dynamic> body = {
         "declared_cash_total": cash,
         "declared_card_total": card,
       };
 
-      await apiClient.post(
+      Map<String, dynamic> response = await apiClient.post(
         _cashRegisterClosePath,
         authRequired: true,
-        body: body
+        body: body,
       );
 
+      return ClosedCutSummaryEntity.fromMap(response);
     } on AppException {
       rethrow;
     } catch (e) {
@@ -154,5 +145,4 @@ class CashRegisterApi {
   // Future<List<SummaryEntity>> getSummaries() async {
   //   throw AppException(message: "Sin implementación");
   // }
-
 }
