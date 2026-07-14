@@ -85,7 +85,8 @@ class SaleDetailsDialog extends StatelessWidget {
                   ),
                   _SaleDetailItem(
                     "Estado",
-                    sale.isDispatched ? "Despachada" : "Pendiente",
+                    // sale.isDispatched ? "Despachada" : "Pendiente",
+                    sale.dispatchStatus.label
                   ),
                 ],
               ),
@@ -111,7 +112,7 @@ class SaleDetailsDialog extends StatelessWidget {
           IsselButton(
             width: 170,
             height: 50,
-            text: "Eliminar venta",
+            text: "Eliminar",
             color: Colors.red,
             onTap: () => onDeleteSale(context, sale),
           ),

@@ -32,6 +32,8 @@ class SaleEntity extends Equatable {
   final double remainingLiters;
   final int dispatchDurationMS;
   final String? customerEmployeeName;
+  final DispatchStatus dispatchStatus;
+
 
   const SaleEntity({
     required this.id,
@@ -61,7 +63,8 @@ class SaleEntity extends Equatable {
     required this.dispatchedLiters,
     required this.remainingLiters,
     required this.dispatchDurationMS,
-    required this.customerEmployeeName
+    required this.customerEmployeeName,
+    required this.dispatchStatus,
   });
 
   factory SaleEntity.fromMap(Map<String, dynamic> data) {
@@ -93,7 +96,8 @@ class SaleEntity extends Equatable {
       dispatchedLiters: data["dispatched_liters"],
       remainingLiters: data["remaining_liters"],
       dispatchDurationMS: data["dispatch_duration_ms"],
-      customerEmployeeName: data["customer_employee_name"]
+      customerEmployeeName: data["customer_employee_name"],
+      dispatchStatus: DispatchStatus.fromString(data["dispatch_status"])
     );
   }
 
@@ -126,7 +130,8 @@ class SaleEntity extends Equatable {
       "dispatched_liters": dispatchedLiters,
       "remaining_liters": remainingLiters,
       "dispatch_duration_ms": dispatchDurationMS,
-      "customer_employee_name": customerEmployeeName
+      "customer_employee_name": customerEmployeeName,
+      "dispatch_status": dispatchStatus
     };
   }
 

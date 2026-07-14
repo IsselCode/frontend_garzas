@@ -68,6 +68,28 @@ enum CashRegisterStatus {
   }
 }
 
+enum DispatchStatus {
+  pending(label: "Pendiente"),
+  partial(label: "Parcial"),
+  completed(label: "Completado");
+
+  final String label;
+  const DispatchStatus({required this.label});
+
+  static DispatchStatus fromString(String role) {
+    switch (role) {
+      case "pending":
+        return DispatchStatus.pending;
+      case "partial":
+        return DispatchStatus.partial;
+      case "completed":
+        return DispatchStatus.completed;
+      default:
+        throw AppException(message: "Estado no identificado");
+    }
+  }
+}
+
 enum GeneralConfigLogField {
   waterSupply,
   userCreated,
