@@ -28,6 +28,13 @@ class FinishOrderView extends StatelessWidget {
     );
   }
 
+  static Widget initWithController(OrderController controller) {
+    return ChangeNotifierProvider.value(
+      value: controller,
+      child: FinishOrderView._(),
+    );
+  }
+
   final FocusNode buttonFocus = FocusNode();
   final FocusNode clientMoneyFocus = FocusNode();
 
@@ -41,6 +48,18 @@ class FinishOrderView extends StatelessWidget {
 
     // Controllers
     OrderController orderController = context.watch();
+    final pendingDispatch = orderController.pendingDispatchToSettle;
+    final waterType =
+        pendingDispatch?.waterType ??
+        WaterType.fromTabSwitcher(orderController.state);
+    final unitOfMeasurement =
+        pendingDispatch?.unitOfMeasurement ??
+        UnitOfMeasurement.fromTabSwitcher(orderController.stateUnit);
+    final quantityText = pendingDispatch == null
+        ? orderController.quantityController.text
+        : _formatQuantity(
+            pendingDispatch.quantity ?? pendingDispatch.dispensedVolume,
+          );
 
     return Scaffold(
       body: Stack(
@@ -48,10 +67,7 @@ class FinishOrderView extends StatelessWidget {
           // Body
           LayoutBuilder(
             builder: (context, constraints) {
-              final scaleFactor = (constraints.maxWidth / 1366).clamp(
-                1.0,
-                1.7,
-              );
+              final scaleFactor = (constraints.maxWidth / 1366).clamp(1.0, 1.7);
               final panelWidth = 320 * scaleFactor;
               final leftSpacing = 20 * scaleFactor;
               final rightSpacing = 30 * scaleFactor;
@@ -98,14 +114,12 @@ class FinishOrderView extends StatelessWidget {
                               height: controlHeight,
                               hintText: "Tipo de agua",
                               controller: TextEditingController(
-                                text: WaterType.fromTabSwitcher(
-                                  orderController.state,
-                                ).dp,
+                                text: waterType.dp,
                               ),
                               readOnly: true,
                             ),
                             Text(
-                              "${orderController.stateUnit == TabSwitcherAlignStates.left ? "Litros" : "Galones"} a vender",
+                              "${unitOfMeasurement == UnitOfMeasurement.liters ? "Litros" : "Galones"} a vender",
                               style: scaledTextStyle(
                                 textTheme.titleMedium,
                                 scaleFactor,
@@ -114,9 +128,28 @@ class FinishOrderView extends StatelessWidget {
                             IsselTextFormField(
                               height: controlHeight,
                               hintText: "Tipo de agua",
-                              controller: orderController.quantityController,
+                              controller: TextEditingController(
+                                text: quantityText,
+                              ),
                               readOnly: true,
                             ),
+                            if (pendingDispatch != null) ...[
+                              Text(
+                                "Referencia",
+                                style: scaledTextStyle(
+                                  textTheme.titleMedium,
+                                  scaleFactor,
+                                ),
+                              ),
+                              IsselTextFormField(
+                                height: controlHeight,
+                                hintText: "Referencia",
+                                controller: TextEditingController(
+                                  text: pendingDispatch.plateOrUnitReference,
+                                ),
+                                readOnly: true,
+                              ),
+                            ],
                             Text(
                               "Cantidad a cobrar",
                               style: scaledTextStyle(
@@ -233,8 +266,8 @@ class FinishOrderView extends StatelessWidget {
                                         textAlign: TextAlign.center,
                                         style: textTheme.titleLarge?.copyWith(
                                           color: colorScheme.primary,
-                                          fontWeight: FontWeight.bold
-                                        )
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                       height: controlHeight,
                                     ),
@@ -242,7 +275,9 @@ class FinishOrderView extends StatelessWidget {
                                 ),
                               IsselButton(
                                 height: controlHeight,
-                                text: "Generar Venta",
+                                text: orderController.isPendingDispatchPayment
+                                    ? "Cobrar despacho"
+                                    : "Generar Venta",
                                 focusNode: buttonFocus,
                                 onTap: () => createSell(context),
                               ),
@@ -293,6 +328,11 @@ class FinishOrderView extends StatelessWidget {
       toastService.error(response.message!);
     }
   }
+}
+
+String _formatQuantity(double value) {
+  final fixed = value.toStringAsFixed(2);
+  return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
 }
 
 class _TotalText extends StatefulWidget {

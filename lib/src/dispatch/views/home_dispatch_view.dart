@@ -8,6 +8,7 @@ import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/dispatch/entities/garza_runtime_entity.dart';
 import 'package:frontend_garzas/src/dispatch/views/dispatch_session_view.dart';
+import 'package:frontend_garzas/src/dispatch/views/pending_dispatches_view.dart';
 import 'package:frontend_garzas/src/dispatch/views/select_garza_view.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:lottie/lottie.dart';
@@ -193,6 +194,25 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
                   ),
                 ),
                 Positioned(
+                  right: 92 * scaleFactor,
+                  bottom: edgeSpacing,
+                  child: FloatingActionButton(
+                    heroTag: 'pendingDispatchesButton',
+                    tooltip: 'Despachos pendientes',
+                    onPressed: () {
+                      _isNavigating = true;
+                      locator<NavigationService>()
+                          .navigateTo(const PendingDispatchesView())
+                          .whenComplete(() {
+                            if (!mounted) return;
+                            _isNavigating = false;
+                            _requestScannerFocus();
+                          });
+                    },
+                    child: const Icon(Icons.assignment_outlined),
+                  ),
+                ),
+                Positioned(
                   right: edgeSpacing,
                   bottom: edgeSpacing,
                   child: Badge(
@@ -304,10 +324,7 @@ class _GarzasRuntimePanel extends StatelessWidget {
               ),
               child: Text(
                 'Garzas en atención',
-                style: scaledTextStyle(
-                  textTheme.titleMedium,
-                  scaleFactor,
-                ),
+                style: scaledTextStyle(textTheme.titleMedium, scaleFactor),
               ),
             ),
             if (hasRuntimeWarning)
@@ -505,10 +522,7 @@ class _GarzaRuntimeTile extends StatelessWidget {
                 children: [
                   Text(
                     'Garza ${garza.garzaNumber}',
-                    style: scaledTextStyle(
-                      textTheme.titleSmall,
-                      scaleFactor,
-                    ),
+                    style: scaledTextStyle(textTheme.titleSmall, scaleFactor),
                   ),
                   Text(
                     statusText,
@@ -542,10 +556,7 @@ class _GarzaRuntimeTile extends StatelessWidget {
                   if (garza.saleFolio != null)
                     Text(
                       garza.saleFolio!,
-                      style: scaledTextStyle(
-                        textTheme.bodySmall,
-                        scaleFactor,
-                      ),
+                      style: scaledTextStyle(textTheme.bodySmall, scaleFactor),
                       overflow: TextOverflow.ellipsis,
                     ),
                 ],

@@ -3,14 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
+import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/config_garza_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/data/garzas_api.dart';
 import 'package:frontend_garzas/src/admin/data/sales_api.dart';
 import 'package:frontend_garzas/src/dispatch/data/dispatch_sessions_api.dart';
+import 'package:frontend_garzas/src/dispatch/data/pending_dispatches_api.dart';
 import 'package:frontend_garzas/src/dispatch/entities/dispatch_session_entity.dart';
 import 'package:frontend_garzas/src/dispatch/entities/dispatch_validate_entity.dart';
 import 'package:frontend_garzas/src/dispatch/entities/garza_runtime_entity.dart';
+import 'package:frontend_garzas/src/dispatch/entities/pending_dispatch_entity.dart';
 
 import '../../../core/services/toast_service.dart';
 import '../../../inject_container.dart';
@@ -19,17 +22,24 @@ class DispatchController extends ChangeNotifier {
   SalesApi salesApi;
   GarzasApi garzasApi;
   DispatchSessionsApi dispatchSessionsApi;
+  PendingDispatchesApi pendingDispatchesApi;
 
   DispatchController({
     required this.salesApi,
     required this.garzasApi,
     required this.dispatchSessionsApi,
+    required this.pendingDispatchesApi,
   });
 
   DispatchValidateEntity? dispatchValidate;
+  PendingDispatchEntity? selectedPendingDispatch;
   List<ConfigGarzaEntity> availableGarzas = [];
   ConfigGarzaEntity? selectedGarza;
   String? customerEmployeeName;
+  String? pendingPlateOrUnitReference;
+  WaterType? pendingWaterType;
+  UnitOfMeasurement? pendingUnitOfMeasurement;
+  double? pendingQuantity;
 
   DispatchSessionEntity? activeSession;
   GarzaRuntimeEntity? selectedRuntimeGarza;
@@ -70,10 +80,159 @@ class DispatchController extends ChangeNotifier {
     return name != null && name.isNotEmpty;
   }
 
+  bool get isPendingDispatchFlow =>
+      selectedPendingDispatch != null || pendingWaterType != null;
+
+  WaterType? get activeWaterType =>
+      selectedPendingDispatch?.waterType ??
+      pendingWaterType ??
+      dispatchValidate?.waterType;
+
+  UnitOfMeasurement? get activeUnitOfMeasurement =>
+      selectedPendingDispatch?.unitOfMeasurement ??
+      pendingUnitOfMeasurement ??
+      dispatchValidate?.unitOfMeasurement;
+
+  double get activeQuantity =>
+      selectedPendingDispatch?.quantity ??
+      pendingQuantity ??
+      dispatchValidate?.quantity ??
+      0;
+
+  double get activeDispensedQuantity {
+    final pendingDispatch = selectedPendingDispatch;
+    if (pendingDispatch != null) {
+      return pendingDispatch.dispensedVolume;
+    }
+
+    final unit = dispatchValidate!.unitOfMeasurement;
+    return _litersToUnit(dispatchValidate!.dispatchedLiters, unit);
+  }
+
+  String get activeGarzaTitle {
+    final pendingDispatch = selectedPendingDispatch;
+    if (pendingDispatch != null) {
+      return 'Garza ${pendingDispatch.garzaNumber}';
+    }
+
+    return selectedGarza?.title ?? '-';
+  }
+
+  int? get activeGarzaNumber =>
+      selectedPendingDispatch?.garzaNumber ?? selectedGarza?.number;
+
   void setCustomerEmployeeName(String? value) {
     final name = value?.trim();
     customerEmployeeName = name == null || name.isEmpty ? null : name;
     notifyListeners();
+  }
+
+  void preparePendingDispatch({
+    required String customerEmployeeName,
+    required String plateOrUnitReference,
+    required WaterType waterType,
+    required UnitOfMeasurement unitOfMeasurement,
+  }) {
+    dispatchValidate = null;
+    selectedPendingDispatch = null;
+    selectedGarza = null;
+    this.customerEmployeeName = customerEmployeeName.trim();
+    pendingPlateOrUnitReference = plateOrUnitReference.trim();
+    pendingWaterType = waterType;
+    pendingUnitOfMeasurement = unitOfMeasurement;
+    pendingQuantity = null;
+    notifyListeners();
+  }
+
+  void setPendingDispatchLimitQuantity(double? quantity) {
+    pendingQuantity = quantity;
+    notifyListeners();
+  }
+
+  void clearPendingDispatchFlow() {
+    selectedPendingDispatch = null;
+    pendingPlateOrUnitReference = null;
+    pendingWaterType = null;
+    pendingUnitOfMeasurement = null;
+    pendingQuantity = null;
+  }
+
+  void selectPendingDispatch(PendingDispatchEntity pendingDispatch) {
+    dispatchValidate = null;
+    selectedPendingDispatch = pendingDispatch;
+    selectedGarza = null;
+    customerEmployeeName = pendingDispatch.customerEmployeeName;
+    pendingPlateOrUnitReference = pendingDispatch.plateOrUnitReference;
+    pendingWaterType = pendingDispatch.waterType;
+    pendingUnitOfMeasurement = pendingDispatch.unitOfMeasurement;
+    pendingQuantity = pendingDispatch.quantity;
+    notifyListeners();
+  }
+
+  Future<CtrlResponse<List<PendingDispatchEntity>>>
+  listPendingDispatches() async {
+    try {
+      final pendingDispatches = await pendingDispatchesApi
+          .listPendingDispatches(status: 'pending_dispatch');
+      return CtrlResponse(success: true, element: pendingDispatches);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+  Future<CtrlResponse<PendingDispatchEntity>> cancelPendingDispatch(
+    int id,
+  ) async {
+    try {
+      final pendingDispatch = await pendingDispatchesApi.cancelPendingDispatch(
+        id,
+      );
+      return CtrlResponse(success: true, element: pendingDispatch);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+  Future<CtrlResponse<PendingDispatchEntity>>
+  createSelectedPendingDispatch() async {
+    final existingPendingDispatch = selectedPendingDispatch;
+    if (existingPendingDispatch != null) {
+      return CtrlResponse(success: true, element: existingPendingDispatch);
+    }
+
+    final garza = selectedGarza;
+    final plateOrUnitReference = pendingPlateOrUnitReference;
+    final unitOfMeasurement = pendingUnitOfMeasurement;
+    final quantity = pendingQuantity;
+    final employeeName = customerEmployeeName;
+
+    if (garza == null ||
+        plateOrUnitReference == null ||
+        unitOfMeasurement == null ||
+        employeeName == null) {
+      return CtrlResponse(
+        success: false,
+        message: 'Faltan datos para crear el despacho pendiente',
+      );
+    }
+
+    try {
+      selectedPendingDispatch = await pendingDispatchesApi
+          .createPendingDispatch(
+            plateOrUnitReference: plateOrUnitReference,
+            garzaNumber: garza.number,
+            unitOfMeasurement: unitOfMeasurement,
+            quantity: quantity,
+            customerEmployeeName: employeeName,
+          );
+      pendingWaterType = selectedPendingDispatch!.waterType;
+      pendingUnitOfMeasurement = selectedPendingDispatch!.unitOfMeasurement;
+      pendingQuantity = selectedPendingDispatch!.quantity;
+      notifyListeners();
+      return CtrlResponse(success: true, element: selectedPendingDispatch);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
   }
 
   bool isGarzaOccupied(int garzaNumber) {
@@ -124,11 +283,17 @@ class DispatchController extends ChangeNotifier {
 
   Future<CtrlResponse<DispatchSessionEntity>> createDispatchSession() async {
     try {
-      final session = await dispatchSessionsApi.createSession(
-        dispatchCode: dispatchValidate!.dispatchCode,
-        garzaNumber: selectedGarza!.number,
-        customerEmployeeName: customerEmployeeName,
-      );
+      final pendingDispatch = selectedPendingDispatch;
+      final session = pendingDispatch == null
+          ? await dispatchSessionsApi.createSession(
+              dispatchCode: dispatchValidate!.dispatchCode,
+              garzaNumber: selectedGarza!.number,
+              customerEmployeeName: customerEmployeeName,
+            )
+          : await dispatchSessionsApi.createSession(
+              pendingDispatchId: pendingDispatch.id,
+              garzaNumber: pendingDispatch.garzaNumber,
+            );
 
       selectedRuntimeGarza = null;
       _selectedRuntimeGarzaStartedOccupied = false;
@@ -371,6 +536,7 @@ class DispatchController extends ChangeNotifier {
       DispatchValidateEntity validate = await salesApi.validateDispatch(
         barcode,
       );
+      clearPendingDispatchFlow();
       dispatchValidate = validate;
       selectedGarza = null;
       customerEmployeeName = null;
@@ -383,7 +549,7 @@ class DispatchController extends ChangeNotifier {
   Future<CtrlResponse> getAvailableGarzas() async {
     try {
       List<ConfigGarzaEntity> tempGarzas = await garzasApi.listGarzas(
-        waterType: dispatchValidate!.waterType,
+        waterType: activeWaterType!,
       );
       availableGarzas = tempGarzas;
       notifyListeners();
@@ -403,6 +569,15 @@ class DispatchController extends ChangeNotifier {
       return CtrlResponse(success: true, element: sale);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+  double _litersToUnit(double liters, UnitOfMeasurement unit) {
+    switch (unit) {
+      case UnitOfMeasurement.liters:
+        return liters / 1000;
+      case UnitOfMeasurement.gallons:
+        return liters / 3.785411784;
     }
   }
 

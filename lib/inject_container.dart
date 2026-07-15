@@ -23,6 +23,7 @@ import 'package:frontend_garzas/src/auth/data/auth_api.dart';
 import 'package:frontend_garzas/src/auth/data/auth_storage.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/dispatch/data/dispatch_sessions_api.dart';
+import 'package:frontend_garzas/src/dispatch/data/pending_dispatches_api.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,6 +59,9 @@ Future<void> injectContainer() async {
   locator.registerLazySingleton(
     () => DispatchSessionsApi(apiClient: locator()),
   );
+  locator.registerLazySingleton(
+    () => PendingDispatchesApi(apiClient: locator()),
+  );
 
   // controllers
   locator.registerLazySingleton(
@@ -85,6 +89,7 @@ Future<void> injectContainer() async {
       salesApi: locator(),
       garzasApi: locator(),
       dispatchSessionsApi: locator(),
+      pendingDispatchesApi: locator(),
     ),
   );
 

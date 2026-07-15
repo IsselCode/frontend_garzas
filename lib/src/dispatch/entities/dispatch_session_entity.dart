@@ -54,8 +54,8 @@ enum DispatchMode {
 
 class DispatchSessionEntity extends Equatable {
   final int id;
-  final String saleFolio;
-  final String dispatchCode;
+  final String? saleFolio;
+  final String? dispatchCode;
   final int garzaNumber;
   final String? operatorUid;
   final String? operatorUsername;
@@ -109,7 +109,8 @@ class DispatchSessionEntity extends Equatable {
       ),
       authorizedVolume: (map['authorized_volume'] as num).toDouble(),
       dispensedVolume: (map['dispensed_volume'] as num).toDouble(),
-      state: DispatchState.fromString(map['state']) ?? DispatchState.interrupted,
+      state:
+          DispatchState.fromString(map['state']) ?? DispatchState.interrupted,
       closeReason: map['close_reason'],
       lastPlcSnapshotJson: map['last_plc_snapshot_json'],
       startedAt: map['started_at'],

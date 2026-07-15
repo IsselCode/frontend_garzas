@@ -4,6 +4,7 @@ import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/dispatch/views/dispatch_session_view.dart';
+import 'package:frontend_garzas/src/dispatch/views/home_dispatch_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -33,14 +34,15 @@ class FinishDispatchView extends StatelessWidget {
     DispatchController dispatchController = context.read();
 
     // Data
-    WaterType wt = dispatchController.dispatchValidate!.waterType;
-    UnitOfMeasurement unit =
-        dispatchController.dispatchValidate!.unitOfMeasurement;
-    final dispatchedQuantity = _litersToUnit(
-      dispatchController.dispatchValidate!.dispatchedLiters,
-      unit,
-    );
-    final purchasedQuantity = dispatchController.dispatchValidate!.quantity;
+    WaterType wt = dispatchController.activeWaterType!;
+    UnitOfMeasurement unit = dispatchController.activeUnitOfMeasurement!;
+    final dispatchedQuantity = dispatchController.activeDispensedQuantity;
+    final purchasedQuantity = dispatchController.activeQuantity;
+    final pendingDispatch = dispatchController.selectedPendingDispatch;
+    final quantityText =
+        pendingDispatch != null && pendingDispatch.quantity == null
+        ? 'Manual'
+        : "${_formatQuantity(dispatchedQuantity)}/${_formatQuantity(purchasedQuantity)}";
 
     return Scaffold(
       body: Stack(
@@ -48,10 +50,7 @@ class FinishDispatchView extends StatelessWidget {
           // Body
           LayoutBuilder(
             builder: (context, constraints) {
-              final scaleFactor = (constraints.maxWidth / 1366).clamp(
-                1.0,
-                1.7,
-              );
+              final scaleFactor = (constraints.maxWidth / 1366).clamp(1.0, 1.7);
               final leftPanelWidth = 320 * scaleFactor;
               final rightPanelWidth = 360 * scaleFactor;
               final leftSpacing = 20 * scaleFactor;
@@ -82,6 +81,23 @@ class FinishDispatchView extends StatelessWidget {
                               controller: TextEditingController(text: wt.dp),
                               readOnly: true,
                             ),
+                            if (pendingDispatch != null) ...[
+                              Text(
+                                "Referencia",
+                                style: scaledTextStyle(
+                                  textTheme.titleMedium,
+                                  scaleFactor,
+                                ),
+                              ),
+                              IsselTextFormField(
+                                height: controlHeight,
+                                hintText: "Referencia",
+                                controller: TextEditingController(
+                                  text: pendingDispatch.plateOrUnitReference,
+                                ),
+                                readOnly: true,
+                              ),
+                            ],
                             Text(
                               "Cantidad en ${unit == UnitOfMeasurement.liters ? "Litros" : "Galones"}",
                               style: scaledTextStyle(
@@ -93,8 +109,7 @@ class FinishDispatchView extends StatelessWidget {
                               height: controlHeight,
                               hintText: "Nombre del cliente",
                               controller: TextEditingController(
-                                text:
-                                    "${_formatQuantity(dispatchedQuantity)}/${_formatQuantity(purchasedQuantity)}",
+                                text: quantityText,
                               ),
                               readOnly: true,
                             ),
@@ -109,7 +124,7 @@ class FinishDispatchView extends StatelessWidget {
                               height: controlHeight,
                               hintText: "Garza",
                               controller: TextEditingController(
-                                text: dispatchController.selectedGarza!.title,
+                                text: dispatchController.activeGarzaTitle,
                               ),
                               readOnly: true,
                             ),
@@ -162,7 +177,9 @@ class FinishDispatchView extends StatelessWidget {
           Positioned(
             top: kWindowCaptionHeight + 10,
             left: 10,
-            child: TextBackButton(),
+            child: TextBackButton(
+              onTap: pendingDispatch == null ? null : _goToDispatchHome,
+            ),
           ),
         ],
       ),
@@ -183,13 +200,8 @@ class FinishDispatchView extends StatelessWidget {
     }
   }
 
-  double _litersToUnit(double liters, UnitOfMeasurement unit) {
-    switch (unit) {
-      case UnitOfMeasurement.liters:
-        return liters / 1000;
-      case UnitOfMeasurement.gallons:
-        return liters / 3.785411784;
-    }
+  void _goToDispatchHome() {
+    locator<NavigationService>().pushAndRemoveUntil(const HomeDispatchView());
   }
 
   String _formatQuantity(double value) {

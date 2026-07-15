@@ -32,6 +32,7 @@ class SellTicketEntity {
   String dispatchCode;
   String sellerName;
   DateTime createdAt;
+  bool alreadyDispatched;
 
   SellTicketEntity({
     required this.ticketNumber,
@@ -48,6 +49,7 @@ class SellTicketEntity {
     required this.dispatchCode,
     required this.createdAt,
     required this.sellerName,
+    this.alreadyDispatched = false,
   });
 }
 
@@ -154,6 +156,14 @@ Future<Uint8List> sellTicketPdf(
               style: pw.TextStyle(font: fontTitle, fontSize: 9),
               textAlign: pw.TextAlign.center,
             ),
+            if (sellTicketEntity.alreadyDispatched) ...[
+              pw.SizedBox(height: 4),
+              pw.Text(
+                'DESPACHO REALIZADO',
+                style: pw.TextStyle(font: fontTitle, fontSize: 8),
+                textAlign: pw.TextAlign.center,
+              ),
+            ],
             pw.SizedBox(height: 6),
             dataRow(
               'Cliente',

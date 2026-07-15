@@ -9,6 +9,8 @@ import 'package:frontend_garzas/src/admin/controllers/general_config_controller.
 import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 import 'package:frontend_garzas/src/admin/data/sales_api.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
+import 'package:frontend_garzas/src/dispatch/data/pending_dispatches_api.dart';
+import 'package:frontend_garzas/src/dispatch/entities/pending_dispatch_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -25,6 +27,7 @@ class OrderController extends ChangeNotifier {
   PrinterService printerService;
   GeneralConfigController generalConfigController;
   AuthController authController;
+  PendingDispatchesApi pendingDispatchesApi;
 
   OrderController({
     required this.clientsApi,
@@ -32,6 +35,7 @@ class OrderController extends ChangeNotifier {
     required this.printerService,
     required this.generalConfigController,
     required this.authController,
+    required this.pendingDispatchesApi,
   });
 
   TabSwitcherAlignStates _state = TabSwitcherAlignStates.left;
@@ -61,6 +65,25 @@ class OrderController extends ChangeNotifier {
   }
 
   SaleEntity? _saleEntity;
+  PendingDispatchEntity? pendingDispatchToSettle;
+
+  bool get isPendingDispatchPayment => pendingDispatchToSettle != null;
+
+  void preparePendingDispatchPayment({
+    required PendingDispatchEntity pendingDispatch,
+    ClientEntity? client,
+  }) {
+    pendingDispatchToSettle = pendingDispatch;
+    _selectedClient = client;
+    quantityController.text = _formatQuantity(_pendingDispatchQuantity());
+    state = pendingDispatch.waterType == WaterType.potable
+        ? TabSwitcherAlignStates.left
+        : TabSwitcherAlignStates.right;
+    stateUnit = pendingDispatch.unitOfMeasurement == UnitOfMeasurement.liters
+        ? TabSwitcherAlignStates.left
+        : TabSwitcherAlignStates.right;
+    notifyListeners();
+  }
 
   ClientEntity? _selectedClient;
   ClientEntity? get selectedClient => _selectedClient;
@@ -138,11 +161,15 @@ class OrderController extends ChangeNotifier {
 
   Future<CtrlResponse<double>> calculateTotal() async {
     try {
-      WaterType waterType = WaterType.fromTabSwitcher(state);
-      UnitOfMeasurement unitOfMeasurement = UnitOfMeasurement.fromTabSwitcher(
-        stateUnit,
-      );
-      double quantity = double.parse(quantityController.text);
+      final pendingDispatch = pendingDispatchToSettle;
+      WaterType waterType =
+          pendingDispatch?.waterType ?? WaterType.fromTabSwitcher(state);
+      UnitOfMeasurement unitOfMeasurement =
+          pendingDispatch?.unitOfMeasurement ??
+          UnitOfMeasurement.fromTabSwitcher(stateUnit);
+      double quantity = pendingDispatch == null
+          ? double.parse(quantityController.text)
+          : _pendingDispatchQuantity();
       int? clientId = selectedClient?.id;
 
       double response = await salesApi.quotSale(
@@ -168,6 +195,16 @@ class OrderController extends ChangeNotifier {
         );
       }
 
+      if (paymentMethod == PaymentMethod.cash) {
+        final remainingResponse = calculateTotalRemaining();
+        if (!remainingResponse.success) {
+          return CtrlResponse(
+            success: false,
+            message: remainingResponse.message,
+          );
+        }
+      }
+
       Printer? printer = await printerService.getSelectedPrinter();
       if (printer == null) {
         return CtrlResponse(
@@ -176,17 +213,31 @@ class OrderController extends ChangeNotifier {
         );
       }
 
-      SaleInfoDto dto = SaleInfoDto(
-        clientId: selectedClient?.id,
-        waterType: WaterType.fromTabSwitcher(state),
-        unitOfMeasurement: UnitOfMeasurement.fromTabSwitcher(stateUnit),
-        quantity: double.tryParse(quantityController.text),
-        paymentMethod: paymentMethod,
-        amountPaid: double.tryParse(clientMoneyCtrl.text),
-        changeAmount: totalRemaining,
-      );
+      if (isPendingDispatchPayment) {
+        _saleEntity = await pendingDispatchesApi.settlePendingDispatch(
+          id: pendingDispatchToSettle!.id,
+          clientId: selectedClient?.id,
+          paymentMethod: paymentMethod,
+          amountPaid: paymentMethod == PaymentMethod.cash
+              ? double.tryParse(clientMoneyCtrl.text) ?? 0
+              : 0,
+          changeAmount: paymentMethod == PaymentMethod.cash
+              ? totalRemaining ?? 0
+              : 0,
+        );
+      } else {
+        SaleInfoDto dto = SaleInfoDto(
+          clientId: selectedClient?.id,
+          waterType: WaterType.fromTabSwitcher(state),
+          unitOfMeasurement: UnitOfMeasurement.fromTabSwitcher(stateUnit),
+          quantity: double.tryParse(quantityController.text),
+          paymentMethod: paymentMethod,
+          amountPaid: double.tryParse(clientMoneyCtrl.text),
+          changeAmount: totalRemaining,
+        );
 
-      _saleEntity = await salesApi.createSale(dto);
+        _saleEntity = await salesApi.createSale(dto);
+      }
 
       return CtrlResponse(success: true);
     } on AppException catch (e) {
@@ -233,6 +284,7 @@ class OrderController extends ChangeNotifier {
         dispatchCode: _saleEntity!.dispatchCode,
         createdAt: _saleEntity!.createdAt,
         sellerName: authController.session!.displayName,
+        alreadyDispatched: isPendingDispatchPayment,
       );
 
       await Printing.directPrintPdf(
@@ -264,5 +316,16 @@ class OrderController extends ChangeNotifier {
     quantityController.dispose();
     clientMoneyCtrl.dispose();
     super.dispose();
+  }
+
+  double _pendingDispatchQuantity() {
+    final pendingDispatch = pendingDispatchToSettle;
+    if (pendingDispatch == null) return 0;
+    return pendingDispatch.quantity ?? pendingDispatch.dispensedVolume;
+  }
+
+  String _formatQuantity(double value) {
+    final fixed = value.toStringAsFixed(2);
+    return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
   }
 }

@@ -21,10 +21,12 @@ class SaleDetailsDialog extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final dialogWidth = (screenWidth - 96).clamp(650.0, 900.0);
+    final dialogWidth = (screenWidth - 96).clamp(720.0, 980.0);
     final commercialName = sale.commercialName?.trim().isNotEmpty == true
         ? sale.commercialName!
-        : "Publico general";
+        : "Público general";
+    final paidAt = _formatNullableDate(sale.paidAt);
+    final dispatchDurationSeconds = sale.dispatchDurationMS / 1000;
 
     return AlertDialog(
       backgroundColor: colorScheme.surface,
@@ -37,36 +39,55 @@ class SaleDetailsDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _SaleDetailSection(
-                title: "Ticket",
+                title: "Identificación",
                 fields: [
+                  _SaleDetailItem("ID de venta", sale.id.toString()),
                   _SaleDetailItem("Folio", sale.folio),
+                  _SaleDetailItem("Código", sale.dispatchCode),
                   _SaleDetailItem(
-                    "Fecha",
-                    DateFormat("dd/MM/yy hh:mm a").format(sale.createdAt),
+                    "Creada",
+                    DateFormat("dd/MM/yyyy hh:mm a").format(sale.createdAt),
                   ),
-                  _SaleDetailItem("Codigo", sale.dispatchCode),
-                  _SaleDetailItem("Empleado", sale.sellerUsername),
                 ],
               ),
               _SaleDetailSection(
-                title: "Cliente y producto",
+                title: "Vendedor y cliente",
                 fields: [
+                  _SaleDetailItem("Vendedor", sale.sellerUsername),
                   _SaleDetailItem("Cliente", commercialName),
                   _SaleDetailItem(
-                    "ID cliente",
-                    sale.clientId?.toString() ?? "N/A",
+                    "Empleado del cliente",
+                    _emptyAsNotAvailable(sale.customerEmployeeName),
                   ),
+                ],
+              ),
+              _SaleDetailSection(
+                title: "Producto",
+                fields: [
                   _SaleDetailItem("Tipo de agua", sale.waterType.dp),
+                  _SaleDetailItem("Unidad", sale.unitOfMeasurement.dp),
                   _SaleDetailItem(
                     "Cantidad",
                     "${sale.quantity.toStringAsFixed(2)} ${sale.unitOfMeasurement.abbr}",
+                  ),
+                  _SaleDetailItem(
+                    "Litros totales",
+                    "${sale.totalLiters.toStringAsFixed(2)} L",
+                  ),
+                  _SaleDetailItem(
+                    "Litros despachados",
+                    "${sale.dispatchedLiters.toStringAsFixed(2)} L",
+                  ),
+                  _SaleDetailItem(
+                    "Litros restantes",
+                    "${sale.remainingLiters.toStringAsFixed(2)} L",
                   ),
                 ],
               ),
               _SaleDetailSection(
                 title: "Cobro",
                 fields: [
-                  _SaleDetailItem("Metodo", sale.paymentMethod.label),
+                  _SaleDetailItem("Método", sale.paymentMethod.label),
                   _SaleDetailItem(
                     "Precio unitario",
                     "\$${sale.unitPrice.toStringAsFixed(2)}",
@@ -83,23 +104,26 @@ class SaleDetailsDialog extends StatelessWidget {
                     "Cambio",
                     "\$${sale.changeAmount.toStringAsFixed(2)}",
                   ),
-                  _SaleDetailItem(
-                    "Estado",
-                    // sale.isDispatched ? "Despachada" : "Pendiente",
-                    sale.dispatchStatus.label
-                  ),
+                  _SaleDetailItem("Pendiente", _money(sale.pendingAmount)),
                 ],
               ),
               _SaleDetailSection(
-                title: "Tiempo y empleado del cliente",
+                title: "Pago y despacho",
                 fields: [
+                  _SaleDetailItem("Pagada", _yesNo(sale.isPaid)),
+                  _SaleDetailItem("Fecha de pago", paidAt),
                   _SaleDetailItem(
-                    "Segundos",
-                    "${(sale.dispatchDurationMS / 1000).toStringAsFixed(3)} s",
+                    "Usuario de cobro",
+                    _emptyAsNotAvailable(sale.paidByUsername),
+                  ),
+                  _SaleDetailItem("Despachada", _yesNo(sale.isDispatched)),
+                  _SaleDetailItem(
+                    "Estado del despacho",
+                    sale.dispatchStatus.label,
                   ),
                   _SaleDetailItem(
-                    "Empleado",
-                    sale.customerEmployeeName ?? "",
+                    "Duración",
+                    "${dispatchDurationSeconds.toStringAsFixed(3)} s",
                   ),
                 ],
               ),
@@ -130,6 +154,25 @@ class SaleDetailsDialog extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _money(double value) => "\$${value.toStringAsFixed(2)}";
+
+  String _yesNo(bool value) => value ? "Sí" : "No";
+
+  String _emptyAsNotAvailable(String? value) {
+    final normalizedValue = value?.trim();
+    if (normalizedValue == null || normalizedValue.isEmpty) return "N/A";
+    return normalizedValue;
+  }
+
+  String _formatNullableDate(String? value) {
+    final normalizedValue = value?.trim();
+    if (normalizedValue == null || normalizedValue.isEmpty) return "N/A";
+
+    final parsed = DateTime.tryParse(normalizedValue);
+    if (parsed == null) return normalizedValue;
+    return DateFormat("dd/MM/yyyy hh:mm a").format(parsed.toLocal());
   }
 }
 

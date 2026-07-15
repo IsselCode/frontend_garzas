@@ -1,9 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
+import 'package:frontend_garzas/core/services/regex_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/config_garza_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
@@ -57,7 +59,7 @@ class _SelectGarzaViewState extends State<SelectGarzaView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Garzas con Agua ${dispatchController.dispatchValidate!.waterType == WaterType.pozo ? "de" : ""} ${dispatchController.dispatchValidate!.waterType.dp}',
+                  'Garzas con Agua ${dispatchController.activeWaterType == WaterType.pozo ? "de" : ""} ${dispatchController.activeWaterType!.dp}',
                   style: textTheme.displayLarge,
                 ),
                 Text(
@@ -217,7 +219,140 @@ class _SelectGarzaViewState extends State<SelectGarzaView> {
 
     NavigationService navigationService = locator();
     dispatchController.selectedGarza = garza;
+    if (dispatchController.isPendingDispatchFlow) {
+      if (garza.garzaType == GarzaType.valvula) {
+        final limitQuantity = await showDialog<double>(
+          context: context,
+          builder: (context) => _PendingDispatchLimitDialog(
+            unitOfMeasurement: dispatchController.activeUnitOfMeasurement!,
+          ),
+        );
+
+        if (!mounted || limitQuantity == null) return;
+        dispatchController.setPendingDispatchLimitQuantity(limitQuantity);
+      } else {
+        dispatchController.setPendingDispatchLimitQuantity(null);
+      }
+
+      CtrlResponse response = await dispatchController
+          .createSelectedPendingDispatch();
+      if (!mounted) return;
+
+      if (!response.success) {
+        locator<ToastService>().error(response.message!);
+        return;
+      }
+    }
     navigationService.navigateTo(FinishDispatchView());
+  }
+}
+
+class _PendingDispatchLimitDialog extends StatefulWidget {
+  final UnitOfMeasurement unitOfMeasurement;
+
+  const _PendingDispatchLimitDialog({required this.unitOfMeasurement});
+
+  @override
+  State<_PendingDispatchLimitDialog> createState() =>
+      _PendingDispatchLimitDialogState();
+}
+
+class _PendingDispatchLimitDialogState
+    extends State<_PendingDispatchLimitDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _quantityController = TextEditingController();
+  final _quantityFocus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _quantityFocus.requestFocus();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return Dialog(
+      child: Container(
+        width: 390,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            spacing: 15,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Limite de seguridad',
+                style: textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                'Ingresa el limite en ${widget.unitOfMeasurement.dp.toLowerCase()} para esta garza automatica.',
+                style: textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              IsselTextFormField(
+                controller: _quantityController,
+                focusNode: _quantityFocus,
+                hintText: widget.unitOfMeasurement.dp,
+                prefixIcon: Icons.water_drop_outlined,
+                fillColor: theme.scaffoldBackgroundColor,
+                textAlign: TextAlign.center,
+                inputFormatters: <TextInputFormatter>[
+                  RegexService.positiveNumberFormatter,
+                ],
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Ingresa la cantidad';
+                  }
+
+                  final quantity = double.tryParse(value.trim());
+                  if (quantity == null || quantity <= 0) {
+                    return 'Ingresa un valor positivo';
+                  }
+
+                  return null;
+                },
+                onSubmitted: (_) => _submit(),
+              ),
+              Divider(color: colorScheme.outline),
+              IsselButton(text: 'Continuar', height: 50, onTap: _submit),
+              IsselButton(
+                text: 'Volver',
+                height: 50,
+                color: Colors.transparent,
+                textColor: colorScheme.onSurface,
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    Navigator.pop(context, double.parse(_quantityController.text.trim()));
+  }
+
+  @override
+  void dispose() {
+    _quantityController.dispose();
+    _quantityFocus.dispose();
+    super.dispose();
   }
 }
 

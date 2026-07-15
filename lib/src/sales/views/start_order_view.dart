@@ -26,6 +26,7 @@ class StartOrderView extends StatefulWidget {
         printerService: locator(),
         generalConfigController: context.read(),
         authController: context.read(),
+        pendingDispatchesApi: locator(),
       ),
       builder: (context, child) => const StartOrderView._(),
     );
@@ -63,10 +64,7 @@ class _StartOrderViewState extends State<StartOrderView> {
           // Body
           LayoutBuilder(
             builder: (context, constraints) {
-              final scaleFactor = (constraints.maxWidth / 1366).clamp(
-                1.0,
-                1.7,
-              );
+              final scaleFactor = (constraints.maxWidth / 1366).clamp(1.0, 1.7);
               final formWidth = 350 * scaleFactor;
               final contentSpacing = 30 * scaleFactor;
               final sectionSpacing = 10 * scaleFactor;

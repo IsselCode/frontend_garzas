@@ -15,19 +15,32 @@ class DispatchSessionsApi {
   final String _runtimeStreamPath = '/garzas/runtime/stream';
 
   Future<DispatchSessionEntity> createSession({
-    required String dispatchCode,
+    String? dispatchCode,
+    int? pendingDispatchId,
     required int garzaNumber,
     String? customerEmployeeName,
   }) async {
     try {
+      if ((dispatchCode == null) == (pendingDispatchId == null)) {
+        throw AppException(
+          message:
+              'Se debe enviar codigo de despacho o despacho pendiente, pero no ambos',
+        );
+      }
+
+      final body = <String, dynamic>{'garza_number': garzaNumber};
+
+      if (dispatchCode != null) {
+        body['dispatch_code'] = dispatchCode;
+        body['customer_employee_name'] = customerEmployeeName;
+      } else {
+        body['pending_dispatch_id'] = pendingDispatchId;
+      }
+
       final response = await apiClient.post(
         _sessionsPath,
         authRequired: true,
-        body: {
-          'dispatch_code': dispatchCode,
-          'garza_number': garzaNumber,
-          'customer_employee_name': customerEmployeeName,
-        },
+        body: body,
       );
 
       return DispatchSessionEntity.fromMap(response);

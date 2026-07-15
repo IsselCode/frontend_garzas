@@ -50,6 +50,7 @@ class SaleInfoDto extends Equatable {
 
     if (paymentMethod != PaymentMethod.cash) {
       amountPaid = 0;
+      changeAmount = 0;
     }
 
     if (amountPaid == null) {
@@ -58,8 +59,6 @@ class SaleInfoDto extends Equatable {
 
     if (paymentMethod == PaymentMethod.cash && changeAmount == null) {
       throw AppException(message: "El cambio restante es obligatorio");
-    } else {
-      changeAmount = 0;
     }
 
     return SaleInfoDto._(
@@ -69,7 +68,7 @@ class SaleInfoDto extends Equatable {
       quantity: quantity,
       paymentMethod: paymentMethod,
       amountPaid: amountPaid,
-      changeAmount: changeAmount,
+      changeAmount: changeAmount ?? 0,
     );
   }
 
