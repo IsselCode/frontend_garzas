@@ -123,6 +123,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                               spacing: 10,
                               children: [
                                 Expanded(
+                                  flex: 2,
                                   child: _CutAmountPill(
                                     asset: AppAssets.cash,
                                     amount: cut.openingAmount,
@@ -162,6 +163,13 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                   child: _CutAmountPill(
                                     asset: AppAssets.card,
                                     amount: cut.cardTotal,
+                                    highlight: true,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _CutAmountPill(
+                                    asset: AppAssets.credit,
+                                    amount: cut.creditTotal,
                                     highlight: true,
                                   ),
                                 ),
@@ -219,6 +227,7 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
                                           ),
                                     ),
                                   ),
+                                  Expanded(child: SizedBox()),
                                 ],
                               ),
                             ),
@@ -323,7 +332,7 @@ class _CutAmountPill extends StatelessWidget {
   });
 
   final String asset;
-  final double amount;
+  final double? amount;
   final bool highlight;
 
   @override
@@ -339,10 +348,11 @@ class _CutAmountPill extends StatelessWidget {
       widget: Row(
         spacing: 10,
         children: [
+          if (amount != null)
           Image.asset(asset, width: 24, height: 24),
           Expanded(
             child: Text(
-              '\$${amount.toStringAsFixed(2)}',
+              amount == null ? "" : amount == 0 ? "-" : "\$${amount!.toStringAsFixed(2)}",
               textAlign: TextAlign.right,
               style: (highlight ? textTheme.titleMedium : textTheme.titleSmall)
                   ?.copyWith(
