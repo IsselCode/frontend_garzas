@@ -43,18 +43,22 @@ class PendingDispatchesApi {
     required int garzaNumber,
     required UnitOfMeasurement unitOfMeasurement,
     double? quantity,
-    required String customerEmployeeName,
+    String? customerEmployeeName,
   }) async {
     try {
       final body = <String, dynamic>{
         'plate_or_unit_reference': plateOrUnitReference,
         'garza_number': garzaNumber,
         'unit_of_measurement': unitOfMeasurement.name,
-        'customer_employee_name': customerEmployeeName,
       };
 
       if (quantity != null) {
         body['quantity'] = quantity;
+      }
+
+      final employeeName = customerEmployeeName?.trim();
+      if (employeeName != null && employeeName.isNotEmpty) {
+        body['customer_employee_name'] = employeeName;
       }
 
       final response = await apiClient.post(

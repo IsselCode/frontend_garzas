@@ -36,7 +36,7 @@ class PendingDispatchEntity extends Equatable {
   final int garzaNumber;
   final String? operatorUid;
   final String? operatorUsername;
-  final String customerEmployeeName;
+  final String? customerEmployeeName;
   final WaterType waterType;
   final UnitOfMeasurement unitOfMeasurement;
   final double? quantity;

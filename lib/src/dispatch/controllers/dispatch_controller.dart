@@ -128,7 +128,7 @@ class DispatchController extends ChangeNotifier {
   }
 
   void preparePendingDispatch({
-    required String customerEmployeeName,
+    String? customerEmployeeName,
     required String plateOrUnitReference,
     required WaterType waterType,
     required UnitOfMeasurement unitOfMeasurement,
@@ -136,7 +136,10 @@ class DispatchController extends ChangeNotifier {
     dispatchValidate = null;
     selectedPendingDispatch = null;
     selectedGarza = null;
-    this.customerEmployeeName = customerEmployeeName.trim();
+    final employeeName = customerEmployeeName?.trim();
+    this.customerEmployeeName = employeeName == null || employeeName.isEmpty
+        ? null
+        : employeeName;
     pendingPlateOrUnitReference = plateOrUnitReference.trim();
     pendingWaterType = waterType;
     pendingUnitOfMeasurement = unitOfMeasurement;
@@ -204,12 +207,10 @@ class DispatchController extends ChangeNotifier {
     final plateOrUnitReference = pendingPlateOrUnitReference;
     final unitOfMeasurement = pendingUnitOfMeasurement;
     final quantity = pendingQuantity;
-    final employeeName = customerEmployeeName;
 
     if (garza == null ||
         plateOrUnitReference == null ||
-        unitOfMeasurement == null ||
-        employeeName == null) {
+        unitOfMeasurement == null) {
       return CtrlResponse(
         success: false,
         message: 'Faltan datos para crear el despacho pendiente',
@@ -223,7 +224,7 @@ class DispatchController extends ChangeNotifier {
             garzaNumber: garza.number,
             unitOfMeasurement: unitOfMeasurement,
             quantity: quantity,
-            customerEmployeeName: employeeName,
+            customerEmployeeName: customerEmployeeName,
           );
       pendingWaterType = selectedPendingDispatch!.waterType;
       pendingUnitOfMeasurement = selectedPendingDispatch!.unitOfMeasurement;

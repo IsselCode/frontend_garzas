@@ -459,14 +459,16 @@ class _PendingPaymentTile extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(
-                pendingDispatch.customerEmployeeName,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.72),
+              if (pendingDispatch.customerEmployeeName?.trim().isNotEmpty ??
+                  false)
+                Text(
+                  pendingDispatch.customerEmployeeName!.trim(),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
               Wrap(
                 spacing: 14,
                 runSpacing: 6,

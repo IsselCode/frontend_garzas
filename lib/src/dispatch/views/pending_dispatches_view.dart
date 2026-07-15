@@ -352,11 +352,15 @@ class _PendingDispatchTile extends StatelessWidget {
                         ),
                       ],
                     ),
-                    _PendingDispatchInfoRow(
-                      scaleFactor: scaleFactor,
-                      icon: Icons.badge_outlined,
-                      text: pendingDispatch.customerEmployeeName,
-                    ),
+                    if (pendingDispatch.customerEmployeeName
+                            ?.trim()
+                            .isNotEmpty ??
+                        false)
+                      _PendingDispatchInfoRow(
+                        scaleFactor: scaleFactor,
+                        icon: Icons.badge_outlined,
+                        text: pendingDispatch.customerEmployeeName!.trim(),
+                      ),
                     Wrap(
                       spacing: 14 * scaleFactor,
                       runSpacing: 6 * scaleFactor,
@@ -585,7 +589,6 @@ class _CreatePendingDispatchDialogState
                 hintText: 'Empleado del cliente',
                 prefixIcon: Icons.badge_outlined,
                 fillColor: theme.scaffoldBackgroundColor,
-                validator: _requiredValidator,
                 onSubmitted: (_) => _referenceFocus.requestFocus(),
               ),
               IsselTextFormField(
@@ -662,7 +665,7 @@ class _CreatePendingDispatchDialogState
                   ),
                 ],
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(height: 10),
               IsselButton(
                 text: 'Seleccionar garza',
                 height: 50,
@@ -712,13 +715,13 @@ class _CreatePendingDispatchDialogState
 }
 
 class _PendingDispatchFormValue {
-  final String customerEmployeeName;
+  final String? customerEmployeeName;
   final String plateOrUnitReference;
   final WaterType waterType;
   final UnitOfMeasurement unitOfMeasurement;
 
   const _PendingDispatchFormValue({
-    required this.customerEmployeeName,
+    this.customerEmployeeName,
     required this.plateOrUnitReference,
     required this.waterType,
     required this.unitOfMeasurement,
