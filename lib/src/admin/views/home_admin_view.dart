@@ -8,6 +8,7 @@ import 'package:frontend_garzas/src/admin/views/clients_view.dart';
 import 'package:frontend_garzas/src/admin/views/config_garzas_view.dart';
 import 'package:frontend_garzas/src/admin/views/credits_view.dart';
 import 'package:frontend_garzas/src/admin/views/general_config_view.dart';
+import 'package:frontend_garzas/src/admin/views/pending_payments_view.dart';
 import 'package:frontend_garzas/src/admin/views/reports_and_logs_view.dart';
 import 'package:frontend_garzas/src/admin/views/user_management_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -28,37 +29,38 @@ class HomeAdminView extends StatelessWidget {
     // Services
     NavigationService navigationService = locator();
 
-
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Text("Administración", style: textTheme.displayLarge),
+            Text(
+              "¿Qué quieres hacer hoy?",
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.outline),
+            ),
 
-            Text("Administración", style: textTheme.displayLarge,),
-            Text("¿Qué quieres hacer hoy?", style: textTheme.bodyMedium?.copyWith(color: colorScheme.outline),),
-
-            const SizedBox(height: 40,),
+            const SizedBox(height: 40),
 
             // Elementos
             Row(
               spacing: 30,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 IsselActionBox(
                   title: "Reportes y Logs",
                   asset: AppAssets.statistics,
-                  onTap: () => navigationService.navigateTo(ReportsAndLogsView()),
-                  height: 230,
+                  onTap: () =>
+                      navigationService.navigateTo(ReportsAndLogsView()),
+                  height: 240,
                   width: 200,
                 ),
 
                 IsselActionBox(
-                  title: "Cortes y Creditos",
+                  title: "Finanzas",
                   asset: AppAssets.cashRegister,
                   onTap: () => openCutsCreditsDialog(context),
-                  height: 230,
+                  height: 240,
                   width: 200,
                 ),
 
@@ -66,7 +68,7 @@ class HomeAdminView extends StatelessWidget {
                   title: "Clientes y Usuarios",
                   asset: AppAssets.customers,
                   onTap: () => openUsersDialog(context),
-                  height: 230,
+                  height: 240,
                   width: 200,
                 ),
 
@@ -74,13 +76,11 @@ class HomeAdminView extends StatelessWidget {
                   title: "Configuración",
                   asset: AppAssets.configs,
                   onTap: () => openConfigDialog(context),
-                  height: 230,
+                  height: 240,
                   width: 200,
                 ),
-
               ],
             ),
-
           ],
         ),
       ),
@@ -88,7 +88,6 @@ class HomeAdminView extends StatelessWidget {
   }
 
   void openUsersDialog(BuildContext context) async {
-
     UsersType? type = await showDialog<UsersType>(
       context: context,
       builder: (context) => UsersDialog(),
@@ -102,11 +101,9 @@ class HomeAdminView extends StatelessWidget {
     } else {
       navigationService.navigateTo(ClientsView());
     }
-
   }
 
   void openCutsCreditsDialog(BuildContext context) async {
-
     CutsCreditsType? type = await showDialog<CutsCreditsType>(
       context: context,
       builder: (context) => CutsCreditsDialog(),
@@ -117,14 +114,14 @@ class HomeAdminView extends StatelessWidget {
     NavigationService navigationService = locator();
     if (type == CutsCreditsType.cuts) {
       navigationService.navigateTo(CashRegisterView());
-    } else {
+    } else if (type == CutsCreditsType.credits) {
       navigationService.navigateTo(CreditsView());
+    } else {
+      navigationService.navigateTo(PendingPaymentsView());
     }
-
   }
 
   void openConfigDialog(BuildContext context) async {
-
     ConfigType? type = await showDialog<ConfigType>(
       context: context,
       builder: (context) => ConfigDialog(),
@@ -138,7 +135,5 @@ class HomeAdminView extends StatelessWidget {
     } else {
       navigationService.navigateTo(GeneralConfigView());
     }
-
   }
-
 }

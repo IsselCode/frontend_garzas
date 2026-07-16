@@ -3,10 +3,7 @@ import 'package:issel_code_widgets/issel_code_widgets.dart';
 
 import '../../../../core/app/consts.dart';
 
-enum CutsCreditsType {
-  cuts,
-  credits
-}
+enum CutsCreditsType { cuts, credits, pendingPayments }
 
 class CutsCreditsDialog extends StatelessWidget {
   const CutsCreditsDialog({super.key});
@@ -19,24 +16,20 @@ class CutsCreditsDialog extends StatelessWidget {
 
     return Dialog(
       child: Container(
-        width: 450,
+        width: 650,
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24)
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
           spacing: 25,
           mainAxisSize: MainAxisSize.min,
           children: [
             //* Imagen
-            IsselAssetContainer(
-              asset: AppAssets.logo,
-              height: 84,
-              width: 84,
-            ),
+            IsselAssetContainer(asset: AppAssets.logo, height: 84, width: 84),
             //* Titulo
-            Text("¿Qué harás?", style: textTheme.headlineMedium,),
+            Text("¿Qué harás?", style: textTheme.headlineMedium),
             //* Action Boxes
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -49,7 +42,7 @@ class CutsCreditsDialog extends StatelessWidget {
                     height: 150,
                     width: 150,
                     color: colorScheme.surfaceContainer,
-                    onTap: () => Navigator.pop(context, CutsCreditsType.cuts,),
+                    onTap: () => Navigator.pop(context, CutsCreditsType.cuts),
                   ),
                 ),
                 Material(
@@ -59,9 +52,21 @@ class CutsCreditsDialog extends StatelessWidget {
                     height: 150,
                     width: 150,
                     color: colorScheme.surfaceContainer,
-                    onTap: () => Navigator.pop(context, CutsCreditsType.credits,),
+                    onTap: () =>
+                        Navigator.pop(context, CutsCreditsType.credits),
                   ),
-                )
+                ),
+                Material(
+                  child: IsselActionBox(
+                    asset: AppAssets.cash,
+                    title: "Pagos pendientes",
+                    height: 150,
+                    width: 150,
+                    color: colorScheme.surfaceContainer,
+                    onTap: () =>
+                        Navigator.pop(context, CutsCreditsType.pendingPayments),
+                  ),
+                ),
               ],
             ),
             //* Cancelar
@@ -70,7 +75,7 @@ class CutsCreditsDialog extends StatelessWidget {
               textColor: AppColors.grey,
               text: "Cancelar",
               onTap: () => Navigator.pop(context),
-            )
+            ),
           ],
         ),
       ),

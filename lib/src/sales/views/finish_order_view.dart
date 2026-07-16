@@ -262,7 +262,7 @@ class FinishOrderView extends StatelessWidget {
                                     ),
                                     IsselPill(
                                       widget: Text(
-                                        "\$${orderController.totalRemaining ?? 0.0}",
+                                        "\$${(orderController.totalRemaining ?? 0.0).toStringAsFixed(2)}",
                                         textAlign: TextAlign.center,
                                         style: textTheme.titleLarge?.copyWith(
                                           color: colorScheme.primary,
