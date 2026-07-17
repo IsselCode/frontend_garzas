@@ -32,14 +32,18 @@ class GarzaTotalEntity extends Equatable {
   int garzaNumber;
   String garzaTitle;
   double totalAmount;
+  double expectedAmount;
   double totalLiters;
+  double expectedLiters;
   int salesCount;
 
   GarzaTotalEntity({
     required this.garzaNumber,
     required this.garzaTitle,
     required this.totalAmount,
+    required this.expectedAmount,
     required this.totalLiters,
+    required this.expectedLiters,
     required this.salesCount
   });
 
@@ -48,13 +52,15 @@ class GarzaTotalEntity extends Equatable {
         garzaNumber: data["garza_number"],
         garzaTitle: data["garza_title"],
         totalAmount: (data["total_amount"] as num).toDouble(),
+        expectedAmount: (data["expected_amount"] as num).toDouble(),
         totalLiters: (data["total_liters"] as num).toDouble(),
+        expectedLiters: (data["expected_liters"] as num).toDouble(),
         salesCount: data["sales_count"],
     );
   }
 
   @override
-  List<Object?> get props => [garzaNumber, garzaTitle, totalAmount, totalLiters, salesCount];
+  List<Object?> get props => [garzaNumber, garzaTitle, totalAmount, expectedAmount, totalLiters, expectedLiters, salesCount];
 
 }
 

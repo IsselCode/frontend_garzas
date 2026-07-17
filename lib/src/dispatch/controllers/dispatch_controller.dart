@@ -576,7 +576,7 @@ class DispatchController extends ChangeNotifier {
   double _litersToUnit(double liters, UnitOfMeasurement unit) {
     switch (unit) {
       case UnitOfMeasurement.liters:
-        return liters / 1000;
+        return liters;
       case UnitOfMeasurement.gallons:
         return liters / 3.785411784;
     }

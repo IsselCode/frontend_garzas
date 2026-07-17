@@ -48,30 +48,31 @@ class StatisticGarzaContainer extends StatelessWidget {
                     Positioned(
                       right: 5,
                       top: 5,
-                      child: Image.asset(asset, fit: BoxFit.contain, width: 50,)
+                      child: Image.asset(asset, fit: BoxFit.contain, width: 50),
                     ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 1,
-                        children: [
-                          _StatisticText(
-                            text: title,
-                            style: textTheme.titleSmall,
-                          ),
-                          _StatisticText(
-                            text: "\$${total.toStringAsFixed(2)}",
-                            style: textTheme.bodyMedium,
-                          ),
-                          _StatisticText(
-                            text: "L: ${liters.toStringAsFixed(2)}",
-                            style: textTheme.bodyMedium,
-                            textAlign: TextAlign.end,
-                          ),
-
-                        ],
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 28),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          spacing: 1,
+                          children: [
+                            _StatisticText(
+                              text: title,
+                              style: textTheme.titleSmall,
+                            ),
+                            _StatisticText(
+                              text: "\$${total.toStringAsFixed(2)}",
+                              style: textTheme.bodyMedium,
+                            ),
+                            _StatisticText(
+                              text: "L: ${liters.toStringAsFixed(2)}",
+                              style: textTheme.bodyMedium,
+                              textAlign: TextAlign.end,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

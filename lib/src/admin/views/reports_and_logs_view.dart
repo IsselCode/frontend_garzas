@@ -766,7 +766,11 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
                                                 garza?.garzaTitle ??
                                                 "Garza $garzaNumber",
                                             total: garza?.totalAmount ?? 0,
+                                            expectedTotal:
+                                                garza?.expectedAmount ?? 0,
                                             liters: garza?.totalLiters ?? 0,
+                                            expectedLiters:
+                                                garza?.expectedLiters ?? 0,
                                           ),
                                         );
                                       }),

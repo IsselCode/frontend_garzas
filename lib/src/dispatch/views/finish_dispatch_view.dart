@@ -107,7 +107,7 @@ class FinishDispatchView extends StatelessWidget {
                             ),
                             IsselTextFormField(
                               height: controlHeight,
-                              hintText: "Nombre del cliente",
+                              hintText: "Cantidad",
                               controller: TextEditingController(
                                 text: quantityText,
                               ),
