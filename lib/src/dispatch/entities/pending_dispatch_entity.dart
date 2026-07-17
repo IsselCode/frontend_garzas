@@ -22,7 +22,7 @@ enum PendingDispatchStatus {
         return PendingDispatchStatus.dispatched;
       case 'cancelled':
         return PendingDispatchStatus.cancelled;
-      case 'settled':
+      case 'paid':
         return PendingDispatchStatus.settled;
       default:
         return PendingDispatchStatus.pendingDispatch;
