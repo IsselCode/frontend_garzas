@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/text_back_button.dart';
@@ -23,19 +25,74 @@ class DispatchSessionView extends StatefulWidget {
 }
 
 class _DispatchSessionViewState extends State<DispatchSessionView> {
+  late final DispatchController _dispatchController;
   Future<CtrlResponse<DispatchSessionEntity>>? _loadSession;
+  Timer? _dispatchTimer;
+  Duration _dispatchElapsed = Duration.zero;
+  int? _trackedSessionId;
 
   @override
   void initState() {
     super.initState();
-    final controller = context.read<DispatchController>();
+    _dispatchController = context.read<DispatchController>();
+    _dispatchController.addListener(_handleSessionUpdate);
     final sessionId =
-        controller.activeSession?.id ??
-        controller.selectedRuntimeGarza?.activeSessionId;
+        _dispatchController.activeSession?.id ??
+        _dispatchController.selectedRuntimeGarza?.activeSessionId;
 
     if (sessionId != null) {
-      _loadSession = controller.loadRuntimeSession(sessionId);
+      _loadSession = _dispatchController.loadRuntimeSession(sessionId);
     }
+
+    _syncTimerWithSession(_dispatchController.activeSession);
+  }
+
+  @override
+  void dispose() {
+    _dispatchController.removeListener(_handleSessionUpdate);
+    _dispatchTimer?.cancel();
+    super.dispose();
+  }
+
+  void _handleSessionUpdate() {
+    if (!mounted) return;
+    _syncTimerWithSession(_dispatchController.activeSession);
+  }
+
+  void _syncTimerWithSession(DispatchSessionEntity? session) {
+    if (session == null) return;
+
+    if (_trackedSessionId != session.id) {
+      _dispatchTimer?.cancel();
+      _dispatchTimer = null;
+      _trackedSessionId = session.id;
+      _dispatchElapsed = _dispatchController.dispatchElapsed;
+    }
+
+    final isFinished =
+        session.state == DispatchState.completed ||
+        session.state == DispatchState.interrupted;
+    final shouldRun =
+        !isFinished &&
+        (session.state == DispatchState.dispensing ||
+            (session.mode == DispatchMode.manual &&
+                session.state != DispatchState.paused));
+
+    if (!shouldRun) {
+      _dispatchTimer?.cancel();
+      _dispatchTimer = null;
+      _dispatchElapsed = _dispatchController.dispatchElapsed;
+      return;
+    }
+
+    if (_dispatchTimer?.isActive ?? false) return;
+
+    _dispatchTimer = Timer.periodic(const Duration(milliseconds: 10), (_) {
+      if (!mounted) return;
+      setState(() {
+        _dispatchElapsed = _dispatchController.dispatchElapsed;
+      });
+    });
   }
 
   @override
@@ -88,63 +145,75 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
                         decoration: BoxDecoration(
                           gradient: AppGradients.primaryToSecondary,
                         ),
-                        child: Center(
-                          child: SizedBox(
-                            width: 320,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              spacing: 18,
-                              children: [
-                                Text(
-                                  'Control de despacho',
-                                  style: textTheme.displaySmall?.copyWith(
-                                    color: colorScheme.onPrimary,
-                                  ),
-                                  textAlign: TextAlign.center,
+                        child: Stack(
+                          children: [
+                            Center(
+                              child: SizedBox(
+                                width: 320,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 18,
+                                  children: [
+                                    Text(
+                                      'Control de despacho',
+                                      style: textTheme.displaySmall?.copyWith(
+                                        color: colorScheme.onPrimary,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    if (isCompleted) ...[
+                                      Text(
+                                        'El despacho se realizo con exito',
+                                        style: textTheme.titleMedium?.copyWith(
+                                          color: colorScheme.onPrimary,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      IsselButton(
+                                        text: 'Volver',
+                                        onTap: _goToDispatchHome,
+                                      ),
+                                    ] else if (hasActiveAlarms) ...[
+                                      Text(
+                                        'Se interrumpio el despacho por una alarma',
+                                        style: textTheme.titleMedium?.copyWith(
+                                          color: colorScheme.onPrimary,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      IsselButton(
+                                        text: 'Salir al home de despacho',
+                                        onTap: _goToDispatchHome,
+                                      ),
+                                    ] else if (actions.isEmpty)
+                                      Text(
+                                        'Sin acciones disponibles',
+                                        style: textTheme.titleMedium?.copyWith(
+                                          color: colorScheme.onPrimary,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      )
+                                    else
+                                      ...actions.map(
+                                        (action) => IsselButton(
+                                          text: action.label,
+                                          color: action.color,
+                                          onTap: () => _runAction(action),
+                                        ),
+                                      ),
+                                  ],
                                 ),
-                                if (isCompleted) ...[
-                                  Text(
-                                    'El despacho se realizo con exito',
-                                    style: textTheme.titleMedium?.copyWith(
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  IsselButton(
-                                    text: 'Volver',
-                                    onTap: _goToDispatchHome,
-                                  ),
-                                ] else if (hasActiveAlarms) ...[
-                                  Text(
-                                    'Se interrumpio el despacho por una alarma',
-                                    style: textTheme.titleMedium?.copyWith(
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  IsselButton(
-                                    text: 'Salir al home de despacho',
-                                    onTap: _goToDispatchHome,
-                                  ),
-                                ] else if (actions.isEmpty)
-                                  Text(
-                                    'Sin acciones disponibles',
-                                    style: textTheme.titleMedium?.copyWith(
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  )
-                                else
-                                  ...actions.map(
-                                    (action) => IsselButton(
-                                      text: action.label,
-                                      color: action.color,
-                                      onTap: () => _runAction(action),
-                                    ),
-                                  ),
-                              ],
+                              ),
                             ),
-                          ),
+                            Positioned(
+                              right: 24,
+                              bottom: 24,
+                              child: _DispatchTimerDisplay(
+                                elapsed: _dispatchElapsed,
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -277,6 +346,41 @@ class _SessionAction {
   });
 }
 
+class _DispatchTimerDisplay extends StatelessWidget {
+  final Duration elapsed;
+  final Color color;
+
+  const _DispatchTimerDisplay({required this.elapsed, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final minutes = elapsed.inMinutes.toString().padLeft(2, '0');
+    final seconds = elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final milliseconds = elapsed.inMilliseconds
+        .remainder(1000)
+        .toString()
+        .padLeft(3, '0');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'Tiempo de despacho',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(color: color),
+        ),
+        Text(
+          '$minutes:$seconds:$milliseconds',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _SessionSummary extends StatelessWidget {
   final GarzaRuntimeEntity? runtimeGarza;
   final DispatchSessionEntity? session;
@@ -297,13 +401,9 @@ class _SessionSummary extends StatelessWidget {
         ? DispatchState.completed.label
         : runtimeGarza?.currentState?.label ?? session?.state.label ?? '-';
     final authorized =
-        runtimeGarza?.authorizedVolume ??
-        session?.authorizedVolume ??
-        0;
+        runtimeGarza?.authorizedVolume ?? session?.authorizedVolume ?? 0;
     final dispensed =
-        runtimeGarza?.dispensedVolume ??
-        session?.dispensedVolume ??
-        0;
+        runtimeGarza?.dispensedVolume ?? session?.dispensedVolume ?? 0;
     final unitOfMeasurement =
         runtimeGarza?.unitOfMeasurement ?? session?.unitOfMeasurement;
     final unitLabel = unitOfMeasurement?.dp ?? 'Cantidad';

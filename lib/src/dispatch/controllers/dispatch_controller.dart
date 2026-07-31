@@ -54,6 +54,10 @@ class DispatchController extends ChangeNotifier {
   bool _selectedRuntimeGarzaStartedOccupied = false;
   bool selectedRuntimeGarzaWasReleased = false;
   final Map<int, Set<String>> _activeAlarmsByGarza = {};
+  final Stopwatch _dispatchStopwatch = Stopwatch();
+  int? _timedDispatchSessionId;
+
+  Duration get dispatchElapsed => _dispatchStopwatch.elapsed;
 
   List<GarzaRuntimeEntity> get busyGarzas =>
       runtimeGarzas.where(_isRuntimeGarzaOccupied).toList();
@@ -300,6 +304,7 @@ class DispatchController extends ChangeNotifier {
       _selectedRuntimeGarzaStartedOccupied = false;
       selectedRuntimeGarzaWasReleased = false;
       activeSession = await dispatchSessionsApi.getSession(session.id);
+      _syncDispatchStopwatch(activeSession!);
       notifyListeners();
       return CtrlResponse(success: true, element: activeSession);
     } on AppException catch (e) {
@@ -313,6 +318,7 @@ class DispatchController extends ChangeNotifier {
     try {
       final session = await dispatchSessionsApi.getSession(sessionId);
       activeSession = session;
+      _syncDispatchStopwatch(session);
       notifyListeners();
       return CtrlResponse(success: true, element: session);
     } on AppException catch (e) {
@@ -361,6 +367,7 @@ class DispatchController extends ChangeNotifier {
     try {
       final session = await action(sessionId);
       activeSession = session;
+      _syncDispatchStopwatch(session);
       notifyListeners();
       return CtrlResponse(success: true, element: session);
     } on AppException catch (e) {
@@ -463,6 +470,7 @@ class DispatchController extends ChangeNotifier {
       dispensedVolume: runtimeGarza.dispensedVolume,
       updatedAt: runtimeGarza.updatedAt,
     );
+    _syncDispatchStopwatch(activeSession!);
   }
 
   GarzaRuntimeEntity? _findRuntimeGarzaByNumber(
@@ -500,6 +508,7 @@ class DispatchController extends ChangeNotifier {
       if (activeSession?.id != sessionId) return;
 
       activeSession = refreshedSession;
+      _syncDispatchStopwatch(refreshedSession);
       if (refreshedSession.state == DispatchState.completed ||
           refreshedSession.state == DispatchState.interrupted) {
         selectedRuntimeGarza = null;
@@ -579,6 +588,30 @@ class DispatchController extends ChangeNotifier {
         return liters;
       case UnitOfMeasurement.gallons:
         return liters / 3.785411784;
+    }
+  }
+
+  void _syncDispatchStopwatch(DispatchSessionEntity session) {
+    if (_timedDispatchSessionId != session.id) {
+      _dispatchStopwatch
+        ..stop()
+        ..reset();
+      _timedDispatchSessionId = session.id;
+    }
+
+    final isFinished =
+        session.state == DispatchState.completed ||
+        session.state == DispatchState.interrupted;
+    final shouldRun =
+        !isFinished &&
+        (session.state == DispatchState.dispensing ||
+            (session.mode == DispatchMode.manual &&
+                session.state != DispatchState.paused));
+
+    if (shouldRun) {
+      _dispatchStopwatch.start();
+    } else {
+      _dispatchStopwatch.stop();
     }
   }
 
