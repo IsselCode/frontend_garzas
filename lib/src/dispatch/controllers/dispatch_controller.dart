@@ -54,10 +54,13 @@ class DispatchController extends ChangeNotifier {
   bool _selectedRuntimeGarzaStartedOccupied = false;
   bool selectedRuntimeGarzaWasReleased = false;
   final Map<int, Set<String>> _activeAlarmsByGarza = {};
-  final Stopwatch _dispatchStopwatch = Stopwatch();
-  int? _timedDispatchSessionId;
+  final Map<int, Stopwatch> _dispatchStopwatches = {};
 
-  Duration get dispatchElapsed => _dispatchStopwatch.elapsed;
+  Duration get dispatchElapsed {
+    final sessionId = activeSession?.id;
+    if (sessionId == null) return Duration.zero;
+    return _dispatchStopwatches[sessionId]?.elapsed ?? Duration.zero;
+  }
 
   List<GarzaRuntimeEntity> get busyGarzas =>
       runtimeGarzas.where(_isRuntimeGarzaOccupied).toList();
@@ -592,12 +595,10 @@ class DispatchController extends ChangeNotifier {
   }
 
   void _syncDispatchStopwatch(DispatchSessionEntity session) {
-    if (_timedDispatchSessionId != session.id) {
-      _dispatchStopwatch
-        ..stop()
-        ..reset();
-      _timedDispatchSessionId = session.id;
-    }
+    final stopwatch = _dispatchStopwatches.putIfAbsent(
+      session.id,
+      Stopwatch.new,
+    );
 
     final isFinished =
         session.state == DispatchState.completed ||
@@ -609,15 +610,19 @@ class DispatchController extends ChangeNotifier {
                 session.state != DispatchState.paused));
 
     if (shouldRun) {
-      _dispatchStopwatch.start();
+      stopwatch.start();
     } else {
-      _dispatchStopwatch.stop();
+      stopwatch.stop();
     }
   }
 
   @override
   void dispose() {
     _runtimeSubscription?.cancel();
+    for (final stopwatch in _dispatchStopwatches.values) {
+      stopwatch.stop();
+    }
+    _dispatchStopwatches.clear();
     super.dispose();
   }
 }
