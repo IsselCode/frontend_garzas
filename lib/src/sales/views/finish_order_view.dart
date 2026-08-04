@@ -275,11 +275,15 @@ class FinishOrderView extends StatelessWidget {
                                 ),
                               IsselButton(
                                 height: controlHeight,
-                                text: orderController.isPendingDispatchPayment
+                                text: orderController.isCreatingSale
+                                    ? 'Procesando...'
+                                    : orderController.isPendingDispatchPayment
                                     ? "Cobrar despacho"
                                     : "Generar Venta",
                                 focusNode: buttonFocus,
-                                onTap: () => createSell(context),
+                                onTap: orderController.isCreatingSale
+                                    ? null
+                                    : () => createSell(context),
                               ),
                             ],
                           ),

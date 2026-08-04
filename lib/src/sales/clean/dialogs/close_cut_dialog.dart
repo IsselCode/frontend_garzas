@@ -348,19 +348,25 @@ class _CutAmountPill extends StatelessWidget {
       widget: Row(
         spacing: 10,
         children: [
-          if (amount != null)
-          Image.asset(asset, width: 24, height: 24),
+          if (amount != null) Image.asset(asset, width: 24, height: 24),
           Expanded(
-            child: Text(
-              amount == null ? "" : amount == 0 ? "-" : "\$${amount!.toStringAsFixed(2)}",
-              textAlign: TextAlign.right,
-              style: (highlight ? textTheme.titleMedium : textTheme.titleSmall)
-                  ?.copyWith(
-                    color: highlight
-                        ? colorScheme.primary
-                        : colorScheme.onSurface,
-                    fontWeight: FontWeight.w900,
-                  ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                amount == null
+                    ? ""
+                    : amount == 0
+                    ? "-"
+                    : "\$${amount!.toStringAsFixed(2)}",
+                maxLines: 1,
+                style: textTheme.titleSmall?.copyWith(
+                  color: highlight
+                      ? colorScheme.primary
+                      : colorScheme.onSurface,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
             ),
           ),
         ],

@@ -15,6 +15,7 @@ import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:printing/printing.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../commons/ctrl_response.dart';
 import '../../../commons/entities/client_entity.dart';
@@ -66,8 +67,11 @@ class OrderController extends ChangeNotifier {
 
   SaleEntity? _saleEntity;
   PendingDispatchEntity? pendingDispatchToSettle;
+  final String _saleIdempotencyKey = const Uuid().v4();
+  bool _isCreatingSale = false;
 
   bool get isPendingDispatchPayment => pendingDispatchToSettle != null;
+  bool get isCreatingSale => _isCreatingSale;
 
   void preparePendingDispatchPayment({
     required PendingDispatchEntity pendingDispatch,
@@ -187,6 +191,16 @@ class OrderController extends ChangeNotifier {
   }
 
   Future<CtrlResponse<SaleEntity>> createSell() async {
+    if (_isCreatingSale) {
+      return CtrlResponse(
+        success: false,
+        message: 'La venta ya se está procesando',
+      );
+    }
+
+    _isCreatingSale = true;
+    notifyListeners();
+
     try {
       if (paymentMethod == PaymentMethod.credit && selectedClient == null) {
         return CtrlResponse(
@@ -236,12 +250,18 @@ class OrderController extends ChangeNotifier {
           changeAmount: totalRemaining,
         );
 
-        _saleEntity = await salesApi.createSale(dto);
+        _saleEntity = await salesApi.createSale(
+          dto,
+          idempotencyKey: _saleIdempotencyKey,
+        );
       }
 
       return CtrlResponse(success: true);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
+    } finally {
+      _isCreatingSale = false;
+      notifyListeners();
     }
   }
 

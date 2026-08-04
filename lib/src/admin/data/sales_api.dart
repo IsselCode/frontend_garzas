@@ -26,9 +26,12 @@ class SalesApi {
   String _dispatchValidatePath(String code) => "/sales/$code/dispatch/validate";
   String _dispatchPath(String code) => "/sales/$code/dispatch";
 
-  String _listPendingCreditSalesByClientPath(int clientId) => "/sales/credit/by-client/$clientId";
-  String _createCreditPaymentPath(String folio) => "/sales/$folio/credit-payments";
-  String _listCreditPaymentsPath(String folio) => "/sales/$folio/credit-payments";
+  String _listPendingCreditSalesByClientPath(int clientId) =>
+      "/sales/credit/by-client/$clientId";
+  String _createCreditPaymentPath(String folio) =>
+      "/sales/$folio/credit-payments";
+  String _listCreditPaymentsPath(String folio) =>
+      "/sales/$folio/credit-payments";
   final String _getPendingCreditsPath = "/sales/credit/pending";
 
   Future<List<SaleEntity>> listSales() async {
@@ -63,10 +66,7 @@ class SalesApi {
 
   Future<void> deleteSaleByFolio(String folio) async {
     try {
-      await apiClient.delete(
-        _deleteSaleByFolio(folio),
-        authRequired: true
-      );
+      await apiClient.delete(_deleteSaleByFolio(folio), authRequired: true);
     } on AppException {
       rethrow;
     } catch (e) {
@@ -154,11 +154,15 @@ class SalesApi {
     return response["total"];
   }
 
-  Future<SaleEntity> createSale(SaleInfoDto dto) async {
+  Future<SaleEntity> createSale(
+    SaleInfoDto dto, {
+    required String idempotencyKey,
+  }) async {
     Map<String, dynamic> response = await apiClient.post(
       _salesPath,
       authRequired: true,
       body: dto.toJson(),
+      headers: {'Idempotency-Key': idempotencyKey},
     );
 
     return SaleEntity.fromMap(response);
