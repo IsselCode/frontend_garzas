@@ -63,6 +63,7 @@ class DispatchSessionEntity extends Equatable {
   final UnitOfMeasurement unitOfMeasurement;
   final double authorizedVolume;
   final double dispensedVolume;
+  final int? dispatchElapsedMs;
   final DispatchState state;
   final String? closeReason;
   final String? lastPlcSnapshotJson;
@@ -84,6 +85,7 @@ class DispatchSessionEntity extends Equatable {
     required this.unitOfMeasurement,
     required this.authorizedVolume,
     required this.dispensedVolume,
+    this.dispatchElapsedMs,
     required this.state,
     required this.closeReason,
     required this.lastPlcSnapshotJson,
@@ -109,6 +111,10 @@ class DispatchSessionEntity extends Equatable {
       ),
       authorizedVolume: (map['authorized_volume'] as num).toDouble(),
       dispensedVolume: (map['dispensed_volume'] as num).toDouble(),
+      dispatchElapsedMs: switch (map['dispatch_elapsed_ms']) {
+        final num value => value.toInt(),
+        _ => null,
+      },
       state:
           DispatchState.fromString(map['state']) ?? DispatchState.interrupted,
       closeReason: map['close_reason'],
@@ -133,6 +139,7 @@ class DispatchSessionEntity extends Equatable {
     UnitOfMeasurement? unitOfMeasurement,
     double? authorizedVolume,
     double? dispensedVolume,
+    int? dispatchElapsedMs,
     DispatchState? state,
     String? closeReason,
     String? lastPlcSnapshotJson,
@@ -154,6 +161,7 @@ class DispatchSessionEntity extends Equatable {
       unitOfMeasurement: unitOfMeasurement ?? this.unitOfMeasurement,
       authorizedVolume: authorizedVolume ?? this.authorizedVolume,
       dispensedVolume: dispensedVolume ?? this.dispensedVolume,
+      dispatchElapsedMs: dispatchElapsedMs ?? this.dispatchElapsedMs,
       state: state ?? this.state,
       closeReason: closeReason ?? this.closeReason,
       lastPlcSnapshotJson: lastPlcSnapshotJson ?? this.lastPlcSnapshotJson,
@@ -178,6 +186,7 @@ class DispatchSessionEntity extends Equatable {
     unitOfMeasurement,
     authorizedVolume,
     dispensedVolume,
+    dispatchElapsedMs,
     state,
     closeReason,
     lastPlcSnapshotJson,

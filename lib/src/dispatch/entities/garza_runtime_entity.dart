@@ -41,6 +41,7 @@ class GarzaRuntimeEntity extends Equatable {
   final UnitOfMeasurement unitOfMeasurement;
   final double authorizedVolume;
   final double dispensedVolume;
+  final int? dispatchElapsedMs;
   final Map<String, bool> alarms;
   final String updatedAt;
 
@@ -56,6 +57,7 @@ class GarzaRuntimeEntity extends Equatable {
     required this.unitOfMeasurement,
     required this.authorizedVolume,
     required this.dispensedVolume,
+    this.dispatchElapsedMs,
     required this.alarms,
     required this.updatedAt,
   });
@@ -98,6 +100,10 @@ class GarzaRuntimeEntity extends Equatable {
       ),
       authorizedVolume: (map['authorized_volume'] as num).toDouble(),
       dispensedVolume: (map['dispensed_volume'] as num).toDouble(),
+      dispatchElapsedMs: switch (map['dispatch_elapsed_ms']) {
+        final num value => value.toInt(),
+        _ => null,
+      },
       alarms: Map<String, bool>.from(map['alarms'] ?? {}),
       updatedAt: map['updated_at'],
     );
@@ -116,6 +122,7 @@ class GarzaRuntimeEntity extends Equatable {
     unitOfMeasurement,
     authorizedVolume,
     dispensedVolume,
+    dispatchElapsedMs,
     alarms,
     updatedAt,
   ];

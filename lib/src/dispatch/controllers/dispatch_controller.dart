@@ -54,12 +54,12 @@ class DispatchController extends ChangeNotifier {
   bool _selectedRuntimeGarzaStartedOccupied = false;
   bool selectedRuntimeGarzaWasReleased = false;
   final Map<int, Set<String>> _activeAlarmsByGarza = {};
-  final Map<int, Stopwatch> _dispatchStopwatches = {};
+  final Map<int, _DispatchTimerState> _dispatchTimers = {};
 
   Duration get dispatchElapsed {
     final sessionId = activeSession?.id;
     if (sessionId == null) return Duration.zero;
-    return _dispatchStopwatches[sessionId]?.elapsed ?? Duration.zero;
+    return _dispatchTimers[sessionId]?.elapsed ?? Duration.zero;
   }
 
   List<GarzaRuntimeEntity> get busyGarzas =>
@@ -307,7 +307,7 @@ class DispatchController extends ChangeNotifier {
       _selectedRuntimeGarzaStartedOccupied = false;
       selectedRuntimeGarzaWasReleased = false;
       activeSession = await dispatchSessionsApi.getSession(session.id);
-      _syncDispatchStopwatch(activeSession!);
+      _syncDispatchTimer(activeSession!);
       notifyListeners();
       return CtrlResponse(success: true, element: activeSession);
     } on AppException catch (e) {
@@ -321,7 +321,7 @@ class DispatchController extends ChangeNotifier {
     try {
       final session = await dispatchSessionsApi.getSession(sessionId);
       activeSession = session;
-      _syncDispatchStopwatch(session);
+      _syncDispatchTimer(session);
       notifyListeners();
       return CtrlResponse(success: true, element: session);
     } on AppException catch (e) {
@@ -370,7 +370,7 @@ class DispatchController extends ChangeNotifier {
     try {
       final session = await action(sessionId);
       activeSession = session;
-      _syncDispatchStopwatch(session);
+      _syncDispatchTimer(session);
       notifyListeners();
       return CtrlResponse(success: true, element: session);
     } on AppException catch (e) {
@@ -444,6 +444,13 @@ class DispatchController extends ChangeNotifier {
         currentGarza.activeSessionId == null) {
       selectedRuntimeGarza = currentGarza;
       selectedRuntimeGarzaWasReleased = true;
+      _syncDispatchTimer(
+        session.copyWith(
+          state: currentGarza.currentState ?? DispatchState.completed,
+        ),
+        backendElapsedMs: currentGarza.dispatchElapsedMs,
+        isBusy: false,
+      );
       _refreshActiveSessionFromServer(session.id);
       return;
     }
@@ -473,7 +480,11 @@ class DispatchController extends ChangeNotifier {
       dispensedVolume: runtimeGarza.dispensedVolume,
       updatedAt: runtimeGarza.updatedAt,
     );
-    _syncDispatchStopwatch(activeSession!);
+    _syncDispatchTimer(
+      activeSession!,
+      backendElapsedMs: runtimeGarza.dispatchElapsedMs,
+      isBusy: runtimeGarza.isBusy,
+    );
   }
 
   GarzaRuntimeEntity? _findRuntimeGarzaByNumber(
@@ -511,7 +522,7 @@ class DispatchController extends ChangeNotifier {
       if (activeSession?.id != sessionId) return;
 
       activeSession = refreshedSession;
-      _syncDispatchStopwatch(refreshedSession);
+      _syncDispatchTimer(refreshedSession);
       if (refreshedSession.state == DispatchState.completed ||
           refreshedSession.state == DispatchState.interrupted) {
         selectedRuntimeGarza = null;
@@ -594,35 +605,63 @@ class DispatchController extends ChangeNotifier {
     }
   }
 
-  void _syncDispatchStopwatch(DispatchSessionEntity session) {
-    final stopwatch = _dispatchStopwatches.putIfAbsent(
+  void _syncDispatchTimer(
+    DispatchSessionEntity session, {
+    int? backendElapsedMs,
+    bool? isBusy,
+  }) {
+    final timer = _dispatchTimers.putIfAbsent(
       session.id,
-      Stopwatch.new,
+      _DispatchTimerState.new,
     );
+
+    final synchronizedElapsedMs = backendElapsedMs ?? session.dispatchElapsedMs;
+    if (synchronizedElapsedMs != null) {
+      timer.synchronize(Duration(milliseconds: synchronizedElapsedMs));
+    }
 
     final isFinished =
         session.state == DispatchState.completed ||
         session.state == DispatchState.interrupted;
     final shouldRun =
         !isFinished &&
+        isBusy != false &&
         (session.state == DispatchState.dispensing ||
             (session.mode == DispatchMode.manual &&
                 session.state != DispatchState.paused));
 
     if (shouldRun) {
-      stopwatch.start();
+      timer.start();
     } else {
-      stopwatch.stop();
+      timer.stop();
     }
   }
 
   @override
   void dispose() {
     _runtimeSubscription?.cancel();
-    for (final stopwatch in _dispatchStopwatches.values) {
-      stopwatch.stop();
+    for (final timer in _dispatchTimers.values) {
+      timer.stop();
     }
-    _dispatchStopwatches.clear();
+    _dispatchTimers.clear();
     super.dispose();
   }
+}
+
+class _DispatchTimerState {
+  Duration _synchronizedElapsed = Duration.zero;
+  final Stopwatch _sinceSynchronization = Stopwatch();
+
+  Duration get elapsed => _synchronizedElapsed + _sinceSynchronization.elapsed;
+
+  void synchronize(Duration elapsed) {
+    _synchronizedElapsed = elapsed.isNegative ? Duration.zero : elapsed;
+    _sinceSynchronization
+      ..stop()
+      ..reset();
+  }
+
+  void start() => _sinceSynchronization.start();
+
+  void stop() => _sinceSynchronization.stop();
 }

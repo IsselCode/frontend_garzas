@@ -361,22 +361,147 @@ class _DispatchTimerDisplay extends StatelessWidget {
         .toString()
         .padLeft(3, '0');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'Tiempo de despacho',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(color: color),
-        ),
-        Text(
-          '$minutes:$seconds:$milliseconds',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.bold,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.16),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.timer_outlined, color: color, size: 24),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Tiempo de despacho',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: color.withValues(alpha: 0.85),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '$minutes:$seconds:$milliseconds',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 10),
+          Tooltip(
+            message: 'Información sobre el tiempo',
+            child: IconButton(
+              onPressed: () => _showTimerInfo(context),
+              icon: Icon(
+                Icons.info_outline_rounded,
+                color: color.withValues(alpha: 0.9),
+              ),
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTimerInfo(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Cerrar información del tiempo',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 380,
+              margin: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 24,
+                    offset: Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.sync_rounded,
+                      color: colorScheme.onPrimaryContainer,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Acerca del tiempo',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'El tiempo oficial del despacho lo conserva el servidor. '
+                    'Este contador lo muestra y se actualiza automáticamente '
+                    'para mantenerse coordinado con los demás equipos.\n\n'
+                    'Por la conexión, puede tardar un instante en reflejar el '
+                    'valor más reciente.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Entendido'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutBack,
+          reverseCurve: Curves.easeIn,
+        );
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: curvedAnimation, child: child),
+        );
+      },
     );
   }
 }
