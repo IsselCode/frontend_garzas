@@ -30,6 +30,7 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
   Timer? _dispatchTimer;
   Duration _dispatchElapsed = Duration.zero;
   int? _trackedSessionId;
+  bool _isActionPending = false;
 
   @override
   void initState() {
@@ -196,9 +197,19 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
                                     else
                                       ...actions.map(
                                         (action) => IsselButton(
-                                          text: action.label,
+                                          text:
+                                              (_isActionPending ||
+                                                  controller
+                                                      .isRunningSessionAction)
+                                              ? 'Procesando...'
+                                              : action.label,
                                           color: action.color,
-                                          onTap: () => _runAction(action),
+                                          onTap:
+                                              (_isActionPending ||
+                                                  controller
+                                                      .isRunningSessionAction)
+                                              ? null
+                                              : () => _runAction(action),
                                         ),
                                       ),
                                   ],
@@ -236,35 +247,43 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
   }
 
   Future<void> _runAction(_SessionAction action) async {
-    if (action.confirmBeforeRun) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => const ConfirmFinishDispatchDialog(),
-      );
+    if (_isActionPending || _dispatchController.isRunningSessionAction) return;
 
-      if (!mounted || confirmed != true) return;
-    }
+    setState(() => _isActionPending = true);
 
-    final loaderOverlay = context.loaderOverlay;
-    loaderOverlay.show();
-    final response = await action.callback();
+    try {
+      if (action.confirmBeforeRun) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => const ConfirmFinishDispatchDialog(),
+        );
 
-    if (!mounted) return;
-
-    loaderOverlay.hide();
-
-    final toastService = locator<ToastService>();
-    if (response.success) {
-      toastService.success('Sesion actualizada');
-      if (action.goHomeOnSuccess) {
-        _goToDispatchHome();
+        if (!mounted || confirmed != true) return;
       }
-      return;
-    }
 
-    toastService.error(
-      response.message ?? 'No fue posible actualizar la sesion',
-    );
+      final loaderOverlay = context.loaderOverlay;
+      loaderOverlay.show();
+      final response = await action.callback();
+
+      if (!mounted) return;
+
+      loaderOverlay.hide();
+
+      final toastService = locator<ToastService>();
+      if (response.success) {
+        toastService.success('Sesion actualizada');
+        if (action.goHomeOnSuccess) {
+          _goToDispatchHome();
+        }
+        return;
+      }
+
+      toastService.error(
+        response.message ?? 'No fue posible actualizar la sesion',
+      );
+    } finally {
+      if (mounted) setState(() => _isActionPending = false);
+    }
   }
 
   void _goToDispatchHome() {

@@ -31,7 +31,7 @@ class FinishDispatchView extends StatelessWidget {
     // Services
 
     // Controllers
-    DispatchController dispatchController = context.read();
+    DispatchController dispatchController = context.watch();
 
     // Data
     WaterType wt = dispatchController.activeWaterType!;
@@ -159,9 +159,15 @@ class FinishDispatchView extends StatelessWidget {
 
                               IsselButton(
                                 height: controlHeight,
-                                text: "Continuar",
+                                text:
+                                    dispatchController.isCreatingDispatchSession
+                                    ? "Procesando..."
+                                    : "Continuar",
                                 focusNode: buttonFocus,
-                                onTap: () => dispatchWater(context),
+                                onTap:
+                                    dispatchController.isCreatingDispatchSession
+                                    ? null
+                                    : () => dispatchWater(context),
                               ),
                             ],
                           ),
@@ -188,6 +194,8 @@ class FinishDispatchView extends StatelessWidget {
 
   void dispatchWater(BuildContext context) async {
     DispatchController dispatchController = context.read();
+    if (dispatchController.isCreatingDispatchSession) return;
+
     CtrlResponse<DispatchSessionEntity> response = await dispatchController
         .createDispatchSession();
 

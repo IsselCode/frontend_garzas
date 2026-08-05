@@ -53,8 +53,13 @@ class DispatchController extends ChangeNotifier {
   bool _isRefreshingReleasedSession = false;
   bool _selectedRuntimeGarzaStartedOccupied = false;
   bool selectedRuntimeGarzaWasReleased = false;
+  bool _isCreatingDispatchSession = false;
+  bool _isRunningSessionAction = false;
   final Map<int, Set<String>> _activeAlarmsByGarza = {};
   final Map<int, _DispatchTimerState> _dispatchTimers = {};
+
+  bool get isCreatingDispatchSession => _isCreatingDispatchSession;
+  bool get isRunningSessionAction => _isRunningSessionAction;
 
   Duration get dispatchElapsed {
     final sessionId = activeSession?.id;
@@ -290,6 +295,15 @@ class DispatchController extends ChangeNotifier {
   }
 
   Future<CtrlResponse<DispatchSessionEntity>> createDispatchSession() async {
+    if (_isCreatingDispatchSession) {
+      return CtrlResponse(
+        success: false,
+        message: 'El despacho ya se esta procesando',
+      );
+    }
+
+    _isCreatingDispatchSession = true;
+    notifyListeners();
     try {
       final pendingDispatch = selectedPendingDispatch;
       final session = pendingDispatch == null
@@ -312,6 +326,9 @@ class DispatchController extends ChangeNotifier {
       return CtrlResponse(success: true, element: activeSession);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
+    } finally {
+      _isCreatingDispatchSession = false;
+      notifyListeners();
     }
   }
 
@@ -361,12 +378,21 @@ class DispatchController extends ChangeNotifier {
     required Future<DispatchSessionEntity> Function(int sessionId) action,
     required String missingMessage,
   }) async {
+    if (_isRunningSessionAction) {
+      return CtrlResponse(
+        success: false,
+        message: 'La accion del despacho ya se esta procesando',
+      );
+    }
+
     final sessionId =
         activeSession?.id ?? selectedRuntimeGarza?.activeSessionId;
     if (sessionId == null) {
       return CtrlResponse(success: false, message: missingMessage);
     }
 
+    _isRunningSessionAction = true;
+    notifyListeners();
     try {
       final session = await action(sessionId);
       activeSession = session;
@@ -375,6 +401,9 @@ class DispatchController extends ChangeNotifier {
       return CtrlResponse(success: true, element: session);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
+    } finally {
+      _isRunningSessionAction = false;
+      notifyListeners();
     }
   }
 
