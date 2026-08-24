@@ -43,6 +43,23 @@ class ClosedCutSaleEntity extends Equatable {
   ];
 }
 
+class LitersSoldByWaterTypeEntity extends Equatable {
+  final double potable;
+  final double pozo;
+
+  const LitersSoldByWaterTypeEntity({this.potable = 0, this.pozo = 0});
+
+  factory LitersSoldByWaterTypeEntity.fromMap(Map<String, dynamic> map) {
+    return LitersSoldByWaterTypeEntity(
+      potable: (map["potable"] as num?)?.toDouble() ?? 0,
+      pozo: (map["pozo"] as num?)?.toDouble() ?? 0,
+    );
+  }
+
+  @override
+  List<Object?> get props => [potable, pozo];
+}
+
 class ClosedCutSummaryEntity extends Equatable {
   final double openingAmount;
   final double cashTotal;
@@ -54,6 +71,7 @@ class ClosedCutSummaryEntity extends Equatable {
   final int cardSalesCount;
   final int creditSalesCount;
   final double totalLitersSold;
+  final LitersSoldByWaterTypeEntity litersSoldByWaterType;
   final List<ClosedCutSaleEntity> sales;
 
   const ClosedCutSummaryEntity({
@@ -67,10 +85,14 @@ class ClosedCutSummaryEntity extends Equatable {
     required this.cardSalesCount,
     required this.creditSalesCount,
     required this.totalLitersSold,
+    this.litersSoldByWaterType = const LitersSoldByWaterTypeEntity(),
     required this.sales,
   });
 
   factory ClosedCutSummaryEntity.fromMap(Map<String, dynamic> map) {
+    final litersSoldByWaterTypeMap =
+        (map["liters_sold_by_water_type"] as Map?)?.cast<String, dynamic>() ??
+        const <String, dynamic>{};
     final sales = (map["sales"] as List? ?? const [])
         .cast<Map<String, dynamic>>()
         .map(ClosedCutSaleEntity.fromMap)
@@ -87,6 +109,9 @@ class ClosedCutSummaryEntity extends Equatable {
       cardSalesCount: (map["card_sales_count"] as num).toInt(),
       creditSalesCount: (map["credit_sales_count"] as num).toInt(),
       totalLitersSold: (map["total_liters_sold"] as num).toDouble(),
+      litersSoldByWaterType: LitersSoldByWaterTypeEntity.fromMap(
+        litersSoldByWaterTypeMap,
+      ),
       sales: sales,
     );
   }
@@ -103,6 +128,7 @@ class ClosedCutSummaryEntity extends Equatable {
     cardSalesCount,
     creditSalesCount,
     totalLitersSold,
+    litersSoldByWaterType,
     sales,
   ];
 }

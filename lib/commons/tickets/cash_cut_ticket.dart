@@ -166,6 +166,14 @@ Future<Uint8List> cashCutTicketPdf(
             row('Ventas a credito:', '${summary.creditSalesCount}'),
             pw.SizedBox(height: 4),
             row(
+              'Litros potable:',
+              formatNumber(summary.litersSoldByWaterType.potable),
+            ),
+            row(
+              'Litros pozo:',
+              formatNumber(summary.litersSoldByWaterType.pozo),
+            ),
+            row(
               'Litros vendidos:',
               formatNumber(summary.totalLitersSold),
               bold: true,
