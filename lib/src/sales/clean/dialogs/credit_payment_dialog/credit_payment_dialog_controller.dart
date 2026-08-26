@@ -6,6 +6,7 @@ import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../../core/errors/exceptions.dart';
 import '../../../../admin/data/sales_api.dart';
@@ -27,7 +28,7 @@ class CreditPaymentDialogController extends ChangeNotifier {
       if (indexPage == 0) {
         title = "Selecciona al cliente";
       } else if (indexPage == 1) {
-        title = "Selecciona el credito";
+        title = "Selecciona los creditos";
       } else {
         title = "Termina el pago";
       }
@@ -42,24 +43,91 @@ class CreditPaymentDialogController extends ChangeNotifier {
   List<CreditEntity> creditsClient = [];
   List<ClientEntity> clients = [];
 
+  final List<CreditEntity> _selectedCredits = [];
+  String? _bulkPaymentIdempotencyKey;
+  bool _isPayingCredits = false;
+
+  List<CreditEntity> get selectedCredits =>
+      List<CreditEntity>.unmodifiable(_selectedCredits);
+
+  double get selectedCreditsTotal => _selectedCredits.fold(
+    0,
+    (total, credit) => total + credit.salePendingAmount,
+  );
+
+  bool get allCreditsSelected =>
+      creditsClient.isNotEmpty && creditsClient.every(isCreditSelected);
+
+  bool get isPayingCredits => _isPayingCredits;
+
   ClientEntity? _selectedClient;
   ClientEntity? get selectedClient => _selectedClient;
   set selectedClient(ClientEntity? value) {
     _selectedClient = value;
+    _selectedCredits.clear();
+    _bulkPaymentIdempotencyKey = null;
     notifyListeners();
   }
 
-  CreditEntity? _selectedCredit;
-  CreditEntity? get selectedCredit => _selectedCredit;
+  CreditEntity? get selectedCredit =>
+      _selectedCredits.length == 1 ? _selectedCredits.first : null;
+
   set selectedCredit(CreditEntity? value) {
-    _selectedCredit = value;
-    pageController.jumpToPage(2);
+    _selectedCredits.clear();
+    if (value != null) {
+      _selectedCredits.add(value);
+    }
+    _bulkPaymentIdempotencyKey = null;
+    notifyListeners();
   }
 
   PaymentMethod _selectedPaymentMethod = PaymentMethod.cash;
   PaymentMethod get selectedPaymentMethod => _selectedPaymentMethod;
   set selectedPaymentMethod(PaymentMethod value) {
     _selectedPaymentMethod = value;
+    _bulkPaymentIdempotencyKey = null;
+    notifyListeners();
+  }
+
+  bool isCreditSelected(CreditEntity credit) {
+    return _selectedCredits.any(
+      (selectedCredit) => selectedCredit.saleFolio == credit.saleFolio,
+    );
+  }
+
+  void toggleCreditSelection(CreditEntity credit) {
+    final selectedIndex = _selectedCredits.indexWhere(
+      (selectedCredit) => selectedCredit.saleFolio == credit.saleFolio,
+    );
+
+    if (selectedIndex == -1) {
+      if (_selectedCredits.length >= 100) {
+        toastService.error("Solo puedes seleccionar hasta 100 creditos");
+        return;
+      }
+      _selectedCredits.add(credit);
+    } else {
+      _selectedCredits.removeAt(selectedIndex);
+    }
+
+    _bulkPaymentIdempotencyKey = null;
+    notifyListeners();
+  }
+
+  void toggleSelectAllCredits() {
+    if (allCreditsSelected) {
+      _selectedCredits.clear();
+    } else {
+      if (creditsClient.length > 100) {
+        toastService.error("No puedes seleccionar más de 100 creditos");
+        return;
+      }
+      _selectedCredits
+        ..clear()
+        ..addAll(creditsClient);
+    }
+
+    _bulkPaymentIdempotencyKey = null;
     notifyListeners();
   }
 
@@ -70,10 +138,12 @@ class CreditPaymentDialogController extends ChangeNotifier {
 
   // Button
   Future<void> enter() async {
-    if (pageController.page == 0) {
+    if (indexPage == 0) {
       await findCreditsForSelectedClient();
-    } else if (pageController.page == 2) {
-      await payCredit();
+    } else if (indexPage == 1) {
+      await continueWithSelectedCredits();
+    } else if (indexPage == 2) {
+      await payCredits();
     }
 
     notifyListeners();
@@ -115,23 +185,73 @@ class CreditPaymentDialogController extends ChangeNotifier {
     }
 
     creditsClient = response.element ?? [];
+    _selectedCredits.clear();
+    _bulkPaymentIdempotencyKey = null;
     pageController.jumpToPage(1);
   }
 
-  Future<void> payCredit() async {
-    context.loaderOverlay.show();
-    CtrlResponse response = await _payCredit(
-      selectedCredit!.saleFolio,
-      selectedPaymentMethod,
-      selectedCredit!.salePendingAmount,
-    );
-    if (!context.mounted) return;
-    context.loaderOverlay.hide();
+  Future<void> continueWithSelectedCredits() async {
+    if (_selectedCredits.isEmpty) {
+      toastService.error("Selecciona al menos un credito");
+      return;
+    }
 
-    if (response.success) {
-      pageController.jumpToPage(0);
-    } else {
-      toastService.error(response.message!);
+    if (selectedCreditsTotal <= 0) {
+      toastService.error("El total a pagar debe ser mayor que cero");
+      return;
+    }
+
+    pageController.jumpToPage(2);
+  }
+
+  Future<void> payCredits() async {
+    if (_selectedCredits.isEmpty) {
+      toastService.error("Selecciona al menos un credito");
+      return;
+    }
+
+    if (_isPayingCredits) return;
+
+    final idempotencyKey = _bulkPaymentIdempotencyKey ??= const Uuid().v4();
+    final folios = _selectedCredits.map((credit) => credit.saleFolio).toList();
+    final total = selectedCreditsTotal;
+
+    _isPayingCredits = true;
+    notifyListeners();
+    context.loaderOverlay.show();
+
+    try {
+      final response = await _payCredits(
+        folios,
+        selectedPaymentMethod,
+        total,
+        idempotencyKey,
+      );
+
+      if (!response.success) {
+        toastService.error(
+          response.message ?? "No se pudieron registrar los pagos",
+        );
+        await _reloadCreditsAfterBulkPayment();
+        if (context.mounted) {
+          pageController.jumpToPage(1);
+        }
+        return;
+      }
+
+      _selectedCredits.clear();
+      _bulkPaymentIdempotencyKey = null;
+      toastService.success("Pagos registrados correctamente");
+      await _reloadCreditsAfterBulkPayment();
+      if (context.mounted) {
+        pageController.jumpToPage(1);
+      }
+    } finally {
+      if (context.mounted) {
+        context.loaderOverlay.hide();
+      }
+      _isPayingCredits = false;
+      notifyListeners();
     }
   }
 
@@ -149,16 +269,39 @@ class CreditPaymentDialogController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> _payCredit(
-    String folio,
+  Future<CtrlResponse> _payCredits(
+    List<String> folios,
     PaymentMethod method,
     double total,
+    String idempotencyKey,
   ) async {
     try {
-      await salesApi.createCreditPayment(folio, method, total);
+      await salesApi.createBulkCreditPayment(
+        folios: folios,
+        method: method,
+        total: total,
+        idempotencyKey: idempotencyKey,
+      );
       return CtrlResponse(success: true);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+  Future<void> _reloadCreditsAfterBulkPayment() async {
+    final client = selectedClient;
+    if (client == null) return;
+
+    final response = await _findCreditsByClientId(client.id);
+    _selectedCredits.clear();
+    _bulkPaymentIdempotencyKey = null;
+
+    if (response.success) {
+      creditsClient = response.element ?? [];
+    } else {
+      toastService.error(
+        response.message ?? "No se pudieron actualizar los creditos pendientes",
+      );
     }
   }
 

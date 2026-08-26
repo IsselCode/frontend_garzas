@@ -46,6 +46,24 @@ class CashRegisterController extends ChangeNotifier {
     }
   }
 
+  Future<CtrlResponse<ClosedCutSummaryEntity>> getCutReceipt(int cutId) async {
+    try {
+      final receipt = await cashRegisterApi.getReceiptByCutId(cutId);
+      return CtrlResponse(success: true, element: receipt);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
+  Future<CtrlResponse<List<ClosedCutSaleEntity>>> getCutSales(int cutId) async {
+    try {
+      final sales = await cashRegisterApi.getSalesByCutId(cutId);
+      return CtrlResponse(success: true, element: sales);
+    } on AppException catch (e) {
+      return CtrlResponse(success: false, message: e.message);
+    }
+  }
+
   Future<CtrlResponse> getCutsByDateRange({
     required DateTime startDate,
     required DateTime endDate,

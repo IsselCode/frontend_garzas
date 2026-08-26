@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/entities/client_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/dialogs/credit_payment_dialog/credit_payment_dialog_controller.dart';
-import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:provider/provider.dart';
@@ -113,15 +112,19 @@ class _ConfigPrinterDialogState extends State<CreditPaymentDialog> {
                   ),
 
                   //* Continuar
-                  if (controller.indexPage != 1)
-                    Expanded(
-                      child: IsselButton(
-                        text: "Continuar",
-                        textColor: colorScheme.onPrimary,
-                        color: colorScheme.primary,
-                        onTap: () async => controller.enter(),
-                      ),
+                  Expanded(
+                    child: IsselButton(
+                      text: "Continuar",
+                      textColor: colorScheme.onPrimary,
+                      color: colorScheme.primary,
+                      onTap:
+                          controller.isPayingCredits ||
+                              (controller.indexPage == 1 &&
+                                  controller.selectedCredits.isEmpty)
+                          ? null
+                          : () async => controller.enter(),
                     ),
+                  ),
                 ],
               ),
             ],
@@ -188,41 +191,77 @@ class _SelectCredit extends StatelessWidget {
     ColorScheme colorScheme = theme.colorScheme;
 
     // Controllers
-    CreditPaymentDialogController controller = context.read();
+    CreditPaymentDialogController controller = context.watch();
 
-    return SizedBox(
-      height: 360,
-      child: IsselTableWidget(
-        onTapRow: (index) {
-          CreditEntity credit = controller.creditsClient[index];
-          controller.selectedCredit = credit;
-        },
-        header: IsselHeaderTable(
-          titleHeaders: ["Total", "Pagado", "Pendiente", "Fecha"],
+    return Column(
+      spacing: 10,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("${controller.selectedCredits.length} seleccionados"),
+            IsselButton(
+              width: 230,
+              height: 45,
+              text: controller.allCreditsSelected
+                  ? "Quitar selección"
+                  : "Seleccionar todos",
+              color: colorScheme.primary,
+              onTap: controller.creditsClient.isEmpty
+                  ? null
+                  : controller.toggleSelectAllCredits,
+            ),
+          ],
         ),
-        rows: controller.creditsClient.map((e) {
-          return IsselRowTable(
-            cells: [
-              IsselPill(
-                text: e.total.toStringAsFixed(2),
-                color: colorScheme.surfaceContainer,
-              ),
-              IsselPill(
-                text: e.amountPaid.toStringAsFixed(2),
-                color: colorScheme.surfaceContainer,
-              ),
-              IsselPill(
-                text: e.salePendingAmount.toStringAsFixed(2),
-                color: colorScheme.surfaceContainer,
-              ),
-              IsselPill(
-                text: DateFormat("dd-MM-yy hh:mm a").format(e.createdAt),
-                color: colorScheme.surfaceContainer,
-              ),
-            ],
-          );
-        }).toList(),
-      ),
+        Expanded(
+          child: controller.creditsClient.isEmpty
+              ? const Center(child: Text("No hay creditos pendientes"))
+              : IsselTableWidget(
+                  onTapRow: (index) => controller.toggleCreditSelection(
+                    controller.creditsClient[index],
+                  ),
+                  header: IsselHeaderTable(
+                    titleHeaders: ["Folio", "Total", "Pendiente", "Fecha"],
+                  ),
+                  rows: controller.creditsClient.map((credit) {
+                    final selected = controller.isCreditSelected(credit);
+                    final rowColor = selected
+                        ? colorScheme.primaryContainer
+                        : colorScheme.surfaceContainer;
+                    final rowTextColor = selected
+                        ? colorScheme.onPrimaryContainer
+                        : null;
+
+                    return IsselRowTable(
+                      cells: [
+                        IsselPill(
+                          text: credit.saleFolio,
+                          color: rowColor,
+                          textColor: rowTextColor,
+                        ),
+                        IsselPill(
+                          text: credit.total.toStringAsFixed(2),
+                          color: rowColor,
+                          textColor: rowTextColor,
+                        ),
+                        IsselPill(
+                          text: credit.salePendingAmount.toStringAsFixed(2),
+                          color: rowColor,
+                          textColor: rowTextColor,
+                        ),
+                        IsselPill(
+                          text: DateFormat(
+                            "dd-MM-yy hh:mm a",
+                          ).format(credit.createdAt),
+                          color: rowColor,
+                          textColor: rowTextColor,
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+        ),
+      ],
     );
   }
 }
@@ -235,11 +274,8 @@ class _CreateCredit extends StatelessWidget {
     ThemeData theme = Theme.of(context);
     TextTheme textTheme = theme.textTheme;
     // Controllers
-    CreditPaymentDialogController controller = context.read();
-    PaymentMethod selectedPaymentMethod = context.select(
-      (CreditPaymentDialogController controller) =>
-          controller.selectedPaymentMethod,
-    );
+    CreditPaymentDialogController controller = context.watch();
+    PaymentMethod selectedPaymentMethod = controller.selectedPaymentMethod;
 
     return Column(
       spacing: 10,
@@ -268,11 +304,11 @@ class _CreateCredit extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 5,
           children: [
-            Text("Total a pagar", style: textTheme.titleSmall),
-            IsselPill(
-              text: controller.selectedCredit!.salePendingAmount
-                  .toStringAsFixed(2),
+            Text(
+              "Total a pagar (${controller.selectedCredits.length} creditos)",
+              style: textTheme.titleSmall,
             ),
+            IsselPill(text: controller.selectedCreditsTotal.toStringAsFixed(2)),
           ],
         ),
       ],

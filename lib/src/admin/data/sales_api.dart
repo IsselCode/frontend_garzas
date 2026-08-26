@@ -33,6 +33,7 @@ class SalesApi {
   String _listCreditPaymentsPath(String folio) =>
       "/sales/$folio/credit-payments";
   final String _getPendingCreditsPath = "/sales/credit/pending";
+  final String _bulkCreditPaymentsPath = "/sales/credit-payments/bulk";
 
   Future<List<SaleEntity>> listSales() async {
     try {
@@ -265,6 +266,26 @@ class SalesApi {
         _createCreditPaymentPath(folio),
         authRequired: true,
         body: body,
+      );
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+  }
+
+  Future<void> createBulkCreditPayment({
+    required List<String> folios,
+    required PaymentMethod method,
+    required double total,
+    required String idempotencyKey,
+  }) async {
+    try {
+      await apiClient.post(
+        _bulkCreditPaymentsPath,
+        authRequired: true,
+        headers: {"Idempotency-Key": idempotencyKey},
+        body: {"payment_method": method.name, "folios": folios, "total": total},
       );
     } on AppException {
       rethrow;

@@ -65,6 +65,8 @@ class ClosedCutSummaryEntity extends Equatable {
   final double cashTotal;
   final double cardTotal;
   final double creditTotal;
+  final double? declaredCashTotal;
+  final double? declaredCardTotal;
   final double expectedCashTotal;
   final int salesCount;
   final int cashSalesCount;
@@ -79,6 +81,8 @@ class ClosedCutSummaryEntity extends Equatable {
     required this.cashTotal,
     required this.cardTotal,
     required this.creditTotal,
+    this.declaredCashTotal,
+    this.declaredCardTotal,
     required this.expectedCashTotal,
     required this.salesCount,
     required this.cashSalesCount,
@@ -103,6 +107,8 @@ class ClosedCutSummaryEntity extends Equatable {
       cashTotal: (map["cash_total"] as num).toDouble(),
       cardTotal: (map["card_total"] as num).toDouble(),
       creditTotal: (map["credit_total"] as num).toDouble(),
+      declaredCashTotal: (map["declared_cash_total"] as num?)?.toDouble(),
+      declaredCardTotal: (map["declared_card_total"] as num?)?.toDouble(),
       expectedCashTotal: (map["expected_cash_total"] as num).toDouble(),
       salesCount: (map["sales_count"] as num).toInt(),
       cashSalesCount: (map["cash_sales_count"] as num).toInt(),
@@ -122,6 +128,8 @@ class ClosedCutSummaryEntity extends Equatable {
     cashTotal,
     cardTotal,
     creditTotal,
+    declaredCashTotal,
+    declaredCardTotal,
     expectedCashTotal,
     salesCount,
     cashSalesCount,

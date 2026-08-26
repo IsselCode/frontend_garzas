@@ -34,123 +34,160 @@ class PieChart2State extends State<PieChartSample2> {
     final chartSize = _chartSizeForWidth(screenWidth);
     final centerSpaceRadius = chartSize * 0.2;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 30,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 20,
       children: [
-        Container(
-          width: chartSize,
-          height: chartSize,
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainer,
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: PieChart(
-            PieChartData(
-              pieTouchData: PieTouchData(
-                touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                  setState(() {
-                    if (!event.isInterestedForInteractions ||
-                        pieTouchResponse == null ||
-                        pieTouchResponse.touchedSection == null) {
-                      touchedIndex = -1;
-                      return;
-                    }
-                    touchedIndex =
-                        pieTouchResponse.touchedSection!.touchedSectionIndex;
-                  });
-                },
+        Align(
+          alignment: Alignment.center,
+          child: Container(
+            width: chartSize,
+            height: chartSize,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: PieChart(
+              PieChartData(
+                pieTouchData: PieTouchData(
+                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                    setState(() {
+                      if (!event.isInterestedForInteractions ||
+                          pieTouchResponse == null ||
+                          pieTouchResponse.touchedSection == null) {
+                        touchedIndex = -1;
+                        return;
+                      }
+                      touchedIndex =
+                          pieTouchResponse.touchedSection!.touchedSectionIndex;
+                    });
+                  },
+                ),
+                borderData: FlBorderData(show: false),
+                sectionsSpace: 0,
+                centerSpaceRadius: centerSpaceRadius,
+                sections: showingSections(chartSize),
               ),
-              borderData: FlBorderData(show: false),
-              sectionsSpace: 0,
-              centerSpaceRadius: centerSpaceRadius,
-              sections: showingSections(chartSize),
             ),
           ),
         ),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 20,
-            children: [
-              Row(
-                spacing: 10,
-                mainAxisAlignment: MainAxisAlignment.center,
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 20,
+          children: [
+            Row(
+              spacing: 10,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SelectPaymentMethodWidget(
+                  color: Colors.green.withAlpha(60),
+                  image: AppAssets.cash,
+                  selected: paymentMethod == PaymentMethod.cash,
+                  onTap: () {
+                    paymentMethod = PaymentMethod.cash;
+                    pageController.animateToPage(
+                      0,
+                      duration: Duration(milliseconds: 250),
+                      curve: Curves.bounceInOut,
+                    );
+                    setState(() {});
+                  },
+                ),
+                SelectPaymentMethodWidget(
+                  image: AppAssets.card,
+                  color: Colors.blue.withAlpha(60),
+                  selected: paymentMethod == PaymentMethod.card,
+                  onTap: () {
+                    paymentMethod = PaymentMethod.card;
+                    pageController.animateToPage(
+                      1,
+                      duration: Duration(milliseconds: 250),
+                      curve: Curves.bounceInOut,
+                    );
+                    setState(() {});
+                  },
+                ),
+                SelectPaymentMethodWidget(
+                  image: AppAssets.credit,
+                  color: Colors.yellow.withAlpha(60),
+                  selected: paymentMethod == PaymentMethod.credit,
+                  onTap: () {
+                    paymentMethod = PaymentMethod.credit;
+                    pageController.animateToPage(
+                      2,
+                      duration: Duration(milliseconds: 250),
+                      curve: Curves.bounceInOut,
+                    );
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 168,
+              width: double.infinity,
+              child: PageView(
+                controller: pageController,
                 children: [
-                  SelectPaymentMethodWidget(
-                    color: Colors.green.withAlpha(60),
-                    image: AppAssets.cash,
-                    selected: paymentMethod == PaymentMethod.cash,
-                    onTap: () {
-                      paymentMethod = PaymentMethod.cash;
-                      pageController.animateToPage(
-                        0,
-                        duration: Duration(milliseconds: 250),
-                        curve: Curves.bounceInOut,
-                      );
-                      setState(() {});
-                    },
+                  Indicator(
+                    potableTotal: widget.summaries
+                        .where((element) => element.value == 1)
+                        .map((e) => e.totalAmount)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    potableLiters: widget.summaries
+                        .where((element) => element.value == 1)
+                        .map((e) => e.totalLiters)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    pozoTotal: widget.summaries
+                        .where((element) => element.value == 2)
+                        .map((e) => e.totalAmount)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    pozoLiters: widget.summaries
+                        .where((element) => element.value == 2)
+                        .map((e) => e.totalLiters)
+                        .firstWhere((element) => true, orElse: () => 0),
                   ),
-                  SelectPaymentMethodWidget(
-                    image: AppAssets.card,
-                    color: Colors.blue.withAlpha(60),
-                    selected: paymentMethod == PaymentMethod.card,
-                    onTap: () {
-                      paymentMethod = PaymentMethod.card;
-                      pageController.animateToPage(
-                        1,
-                        duration: Duration(milliseconds: 250),
-                        curve: Curves.bounceInOut,
-                      );
-                      setState(() {});
-                    },
+                  Indicator(
+                    potableTotal: widget.summaries
+                        .where((element) => element.value == 3)
+                        .map((e) => e.totalAmount)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    potableLiters: widget.summaries
+                        .where((element) => element.value == 3)
+                        .map((e) => e.totalLiters)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    pozoTotal: widget.summaries
+                        .where((element) => element.value == 4)
+                        .map((e) => e.totalAmount)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    pozoLiters: widget.summaries
+                        .where((element) => element.value == 4)
+                        .map((e) => e.totalLiters)
+                        .firstWhere((element) => true, orElse: () => 0),
                   ),
-                  SelectPaymentMethodWidget(
-                    image: AppAssets.credit,
-                    color: Colors.yellow.withAlpha(60),
-                    selected: paymentMethod == PaymentMethod.credit,
-                    onTap: () {
-                      paymentMethod = PaymentMethod.credit;
-                      pageController.animateToPage(
-                        2,
-                        duration: Duration(milliseconds: 250),
-                        curve: Curves.bounceInOut,
-                      );
-                      setState(() {});
-                    },
+                  Indicator(
+                    potableTotal: widget.summaries
+                        .where((element) => element.value == 5)
+                        .map((e) => e.totalAmount)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    potableLiters: widget.summaries
+                        .where((element) => element.value == 5)
+                        .map((e) => e.totalLiters)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    pozoTotal: widget.summaries
+                        .where((element) => element.value == 6)
+                        .map((e) => e.totalAmount)
+                        .firstWhere((element) => true, orElse: () => 0),
+                    pozoLiters: widget.summaries
+                        .where((element) => element.value == 6)
+                        .map((e) => e.totalLiters)
+                        .firstWhere((element) => true, orElse: () => 0),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 144,
-                width: double.infinity,
-                child: PageView(
-                  controller: pageController,
-                  children: [
-                    Indicator(
-                      potableTotal: widget.summaries.where((element) => element.value == 1).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      potableLiters: widget.summaries.where((element) => element.value == 1).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
-                      pozoTotal: widget.summaries.where((element) => element.value == 2).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      pozoLiters: widget.summaries.where((element) => element.value == 2).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
-                    ),
-                    Indicator(
-                      potableTotal: widget.summaries.where((element) => element.value == 3).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      potableLiters: widget.summaries.where((element) => element.value == 3).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
-                      pozoTotal: widget.summaries.where((element) => element.value == 4).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      pozoLiters: widget.summaries.where((element) => element.value == 4).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
-                    ),
-                    Indicator(
-                      potableTotal: widget.summaries.where((element) => element.value == 5).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      potableLiters: widget.summaries.where((element) => element.value == 5).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
-                      pozoTotal: widget.summaries.where((element) => element.value == 6).map((e) => e.totalAmount).firstWhere((element) => true, orElse: () => 0),
-                      pozoLiters: widget.summaries.where((element) => element.value == 6).map((e) => e.totalLiters).firstWhere((element) => true, orElse: () => 0),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ],
     );

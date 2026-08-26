@@ -16,6 +16,8 @@ class CashRegisterApi {
   final String _activeCashRegisterPath = "/cash-register/active";
   final String _activeCashRegisterSummaryPath = "/cash-register/summary";
   String _cashRegisterSummaryById(int id) => "/cash-register/$id/summary";
+  String _cashRegisterSalesById(int id) => "/cash-register/$id/sales";
+  String _cashRegisterReceiptById(int id) => "/cash-register/$id/receipt";
   final String _cashRegisterClosePath = "/cash-register/close";
 
   Future<List<CashRegisterEntity>> listCashRegisterCuts() async {
@@ -63,6 +65,36 @@ class CashRegisterApi {
       );
 
       return response.map((e) => SummaryEntity.fromMap(e)).toList();
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+  }
+
+  Future<ClosedCutSummaryEntity> getReceiptByCutId(int id) async {
+    try {
+      Map<String, dynamic> response = await apiClient.get(
+        _cashRegisterReceiptById(id),
+        authRequired: true,
+      );
+
+      return ClosedCutSummaryEntity.fromMap(response);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw AppException(message: e.toString());
+    }
+  }
+
+  Future<List<ClosedCutSaleEntity>> getSalesByCutId(int id) async {
+    try {
+      List response = await apiClient.get(
+        _cashRegisterSalesById(id),
+        authRequired: true,
+      );
+
+      return response.map((e) => ClosedCutSaleEntity.fromMap(e)).toList();
     } on AppException {
       rethrow;
     } catch (e) {

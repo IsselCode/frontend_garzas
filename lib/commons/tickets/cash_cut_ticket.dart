@@ -18,6 +18,7 @@ const PdfPageFormat cashCutTicketPageFormat = PdfPageFormat(
 class CashCutTicketEntity {
   final ClosedCutSummaryEntity summary;
   final AuthSession user;
+  final String? userDisplayName;
   final double declaredCashTotal;
   final double declaredCardTotal;
   final DateTime closedAt;
@@ -25,6 +26,7 @@ class CashCutTicketEntity {
   const CashCutTicketEntity({
     required this.summary,
     required this.user,
+    this.userDisplayName,
     required this.declaredCashTotal,
     required this.declaredCardTotal,
     required this.closedAt,
@@ -157,7 +159,11 @@ Future<Uint8List> cashCutTicketPdf(
             pw.SizedBox(height: 6),
             row('Fecha:', formatDate(ticket.closedAt), bold: true),
             row('Hora:', formatTime(ticket.closedAt), bold: true),
-            row('Usuario:', ticket.user.displayName, bold: true),
+            row(
+              'Usuario:',
+              ticket.userDisplayName ?? ticket.user.displayName,
+              bold: true,
+            ),
             sectionTitle('RESUMEN DE VENTAS'),
             row('Notas vendidas:', '${summary.salesCount}', bold: true),
             pw.SizedBox(height: 4),

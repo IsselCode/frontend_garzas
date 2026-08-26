@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class Indicator extends StatelessWidget {
-
   final double potableLiters;
   final double potableTotal;
   final double pozoLiters;
@@ -12,22 +11,21 @@ class Indicator extends StatelessWidget {
     required this.potableLiters,
     required this.potableTotal,
     required this.pozoLiters,
-    required this.pozoTotal
+    required this.pozoTotal,
   });
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     ColorScheme colorScheme = theme.colorScheme;
-    TextTheme textTheme = theme.textTheme;
 
     return Container(
-      width: 400,
+      width: double.infinity,
       padding: EdgeInsets.all(10),
       margin: EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: colorScheme.surfaceContainer
+        color: colorScheme.surfaceContainer,
       ),
       child: Row(
         spacing: 10,
@@ -39,8 +37,8 @@ class Indicator extends StatelessWidget {
                 Text("Potable"),
                 Container(
                   decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(5)
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(5),
                   ),
                   padding: EdgeInsets.all(10),
                   child: Column(
@@ -63,7 +61,7 @@ class Indicator extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(10)
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   padding: EdgeInsets.all(10),
                   child: Column(
@@ -79,7 +77,7 @@ class Indicator extends StatelessWidget {
             ),
           ),
         ],
-      )
+      ),
     );
   }
 }
