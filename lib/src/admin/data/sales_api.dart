@@ -8,6 +8,7 @@ import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.d
 import 'package:frontend_garzas/src/dispatch/entities/dispatch_validate_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/dtos/sale_info_dto.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
+import 'package:frontend_garzas/core/utils/date_range_query.dart';
 
 import '../clean/entities/monthly_garza_total_entity.dart';
 
@@ -114,14 +115,14 @@ class SalesApi {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    String start = startDate.toIso8601String().split("T").first;
-    String end = endDate.toIso8601String().split("T").first;
-
     try {
       List response = await apiClient.get(
         _salesByDateRangePath,
         authRequired: true,
-        queryParams: {"start_date": start, "end_date": end},
+        queryParams: DateRangeQuery.fromDates(
+          startDate: startDate,
+          endDate: endDate,
+        ),
       );
 
       return response.map((e) => SaleEntity.fromMap(e)).toList();
@@ -195,14 +196,13 @@ class SalesApi {
     DateTime? endDate,
   }) async {
     try {
-      late dynamic start;
-      late dynamic end;
       Map<String, dynamic>? queryParams;
 
       if (startDate != null && endDate != null) {
-        start = startDate.toIso8601String().split("T").first;
-        end = endDate.toIso8601String().split("T").first;
-        queryParams = {"start_date": start, "end_date": end};
+        queryParams = DateRangeQuery.fromDates(
+          startDate: startDate,
+          endDate: endDate,
+        );
       }
 
       List response = await apiClient.get(

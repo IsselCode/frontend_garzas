@@ -4,6 +4,7 @@ import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.da
 import 'package:frontend_garzas/src/admin/clean/entities/summary_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/active_cut_summary_entity.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/closed_cut_summary_entity.dart';
+import 'package:frontend_garzas/core/utils/date_range_query.dart';
 
 class CashRegisterApi {
   final ApiClient apiClient;
@@ -39,14 +40,14 @@ class CashRegisterApi {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    String start = startDate.toIso8601String().split("T").first;
-    String end = endDate.toIso8601String().split("T").first;
-
     try {
       List response = await apiClient.get(
         _cashRegisterByDateRangePath,
         authRequired: true,
-        queryParams: {"start_date": start, "end_date": end},
+        queryParams: DateRangeQuery.fromDates(
+          startDate: startDate,
+          endDate: endDate,
+        ),
       );
 
       return response.map((e) => CashRegisterEntity.fromMap(e)).toList();
