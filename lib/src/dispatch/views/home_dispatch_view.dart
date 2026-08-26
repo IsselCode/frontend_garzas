@@ -182,8 +182,10 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
                       scaleFactor: scaleFactor,
                       busyGarzas: dispatchController.busyGarzas,
                       alarmGarzas: dispatchController.alarmGarzas,
+                      lastDispatches: dispatchController.lastDispatchesForPanel,
                       runtimeMessage: dispatchController.runtimeMessage,
                       onTap: _openRuntimeGarza,
+                      onLastDispatchTap: _openLastDispatch,
                     ),
                   ),
                 Positioned(
@@ -271,21 +273,41 @@ class _HomeDispatchViewState extends State<HomeDispatchView> {
       _requestScannerFocus();
     });
   }
+
+  void _openLastDispatch(LastDispatchSnapshot lastDispatch) {
+    final dispatchController = context.read<DispatchController>();
+    final navigationService = locator<NavigationService>();
+
+    dispatchController.selectLastDispatch(lastDispatch);
+    setState(() {
+      _showRuntimePanel = false;
+      _isNavigating = true;
+    });
+    navigationService.navigateTo(DispatchSessionView()).whenComplete(() {
+      if (!mounted) return;
+      _isNavigating = false;
+      _requestScannerFocus();
+    });
+  }
 }
 
 class _GarzasRuntimePanel extends StatelessWidget {
   final double scaleFactor;
   final List<GarzaRuntimeEntity> busyGarzas;
   final List<GarzaRuntimeEntity> alarmGarzas;
+  final List<LastDispatchSnapshot> lastDispatches;
   final String? runtimeMessage;
   final void Function(GarzaRuntimeEntity garza) onTap;
+  final void Function(LastDispatchSnapshot lastDispatch) onLastDispatchTap;
 
   const _GarzasRuntimePanel({
     required this.scaleFactor,
     required this.busyGarzas,
     required this.alarmGarzas,
+    required this.lastDispatches,
     required this.runtimeMessage,
     required this.onTap,
+    required this.onLastDispatchTap,
   });
 
   @override
@@ -335,11 +357,13 @@ class _GarzasRuntimePanel extends StatelessWidget {
                   scaleFactor: scaleFactor,
                 ),
               ),
-            if (busyGarzas.isEmpty && alarmGarzas.isEmpty)
+            if (busyGarzas.isEmpty &&
+                alarmGarzas.isEmpty &&
+                lastDispatches.isEmpty)
               Padding(
                 padding: EdgeInsets.all(20 * scaleFactor),
                 child: Text(
-                  'No hay garzas ocupadas ni con alarmas',
+                  'No hay garzas con despachos activos o recientes',
                   style: scaledTextStyle(
                     textTheme.bodyMedium,
                     scaleFactor,
@@ -380,6 +404,21 @@ class _GarzasRuntimePanel extends StatelessWidget {
                           scaleFactor: scaleFactor,
                           garza: garza,
                           statusText: 'Liberada con alarma',
+                        ),
+                      ),
+                    ),
+                    if (lastDispatches.isNotEmpty)
+                      _RuntimeSectionTitle(
+                        text: 'Último despacho',
+                        scaleFactor: scaleFactor,
+                      ),
+                    ...lastDispatches.map(
+                      (lastDispatch) => Padding(
+                        padding: EdgeInsets.only(bottom: 10 * scaleFactor),
+                        child: _LastDispatchTile(
+                          scaleFactor: scaleFactor,
+                          lastDispatch: lastDispatch,
+                          onTap: () => onLastDispatchTap(lastDispatch),
                         ),
                       ),
                     ),
@@ -467,6 +506,114 @@ class _RuntimeSectionTitle extends StatelessWidget {
       ),
     );
   }
+}
+
+class _LastDispatchTile extends StatelessWidget {
+  final double scaleFactor;
+  final LastDispatchSnapshot lastDispatch;
+  final VoidCallback onTap;
+
+  const _LastDispatchTile({
+    required this.scaleFactor,
+    required this.lastDispatch,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final session = lastDispatch.session;
+    final runtimeGarza = lastDispatch.runtimeGarza;
+    final elapsed = lastDispatch.dispatchElapsedMs == null
+        ? '--:--:---'
+        : _formatDispatchDuration(
+            Duration(milliseconds: lastDispatch.dispatchElapsedMs!),
+          );
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8 * scaleFactor),
+      child: Ink(
+        padding: EdgeInsets.all(14 * scaleFactor),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(8 * scaleFactor),
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.history,
+              color: colorScheme.primary,
+              size: 42 * scaleFactor,
+            ),
+            SizedBox(width: 12 * scaleFactor),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Garza ${session.garzaNumber}',
+                    style: scaledTextStyle(textTheme.titleSmall, scaleFactor),
+                  ),
+                  Text(
+                    session.state.label,
+                    style: scaledTextStyle(
+                      textTheme.bodySmall,
+                      scaleFactor,
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${session.dispensedVolume.toStringAsFixed(1)} / ${session.authorizedVolume.toStringAsFixed(1)} ${session.unitOfMeasurement.abbr}  •  $elapsed',
+                    style: scaledTextStyle(
+                      textTheme.bodySmall,
+                      scaleFactor,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  if (session.saleFolio != null || session.dispatchCode != null)
+                    Text(
+                      session.saleFolio ?? session.dispatchCode!,
+                      style: scaledTextStyle(textTheme.bodySmall, scaleFactor),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  if (runtimeGarza?.hasActiveAlarms ?? false)
+                    Text(
+                      runtimeGarza!.activeAlarmDisplayNames.join(', '),
+                      style: scaledTextStyle(
+                        textTheme.bodySmall,
+                        scaleFactor,
+                        color: colorScheme.error,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: colorScheme.primary,
+              size: 24 * scaleFactor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _formatDispatchDuration(Duration duration) {
+  final minutes = duration.inMinutes.toString().padLeft(2, '0');
+  final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+  final milliseconds = duration.inMilliseconds
+      .remainder(1000)
+      .toString()
+      .padLeft(3, '0');
+  return '$minutes:$seconds:$milliseconds';
 }
 
 class _GarzaRuntimeTile extends StatelessWidget {

@@ -126,10 +126,14 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
 
                 final actions = _buildSessionActions(controller, session);
                 final hasActiveAlarms = runtimeGarza?.hasActiveAlarms ?? false;
+                final isInterrupted =
+                    runtimeGarza?.currentState == DispatchState.interrupted ||
+                    session?.state == DispatchState.interrupted;
                 final isCompleted =
                     runtimeGarza?.currentState == DispatchState.completed ||
                     session?.state == DispatchState.completed ||
-                    controller.selectedRuntimeGarzaWasReleased;
+                    (controller.selectedRuntimeGarzaWasReleased &&
+                        !isInterrupted);
 
                 return Row(
                   children: [
@@ -174,7 +178,8 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
                                         text: 'Volver',
                                         onTap: _goToDispatchHome,
                                       ),
-                                    ] else if (hasActiveAlarms) ...[
+                                    ] else if (isInterrupted ||
+                                        hasActiveAlarms) ...[
                                       Text(
                                         'Se interrumpio el despacho por una alarma',
                                         style: textTheme.titleMedium?.copyWith(
@@ -272,9 +277,6 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
       final toastService = locator<ToastService>();
       if (response.success) {
         toastService.success('Sesion actualizada');
-        if (action.goHomeOnSuccess) {
-          _goToDispatchHome();
-        }
         return;
       }
 
@@ -308,7 +310,6 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
           color: Colors.red,
           callback: controller.completeActiveSession,
           confirmBeforeRun: true,
-          goHomeOnSuccess: true,
         ),
       ];
     }
@@ -339,7 +340,6 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
             color: Colors.red,
             callback: controller.completeActiveSession,
             confirmBeforeRun: true,
-            goHomeOnSuccess: true,
           ),
         ];
       case DispatchState.completed:
@@ -354,14 +354,12 @@ class _SessionAction {
   final Color? color;
   final Future<CtrlResponse<DispatchSessionEntity>> Function() callback;
   final bool confirmBeforeRun;
-  final bool goHomeOnSuccess;
 
   const _SessionAction({
     required this.label,
     required this.callback,
     this.color,
     this.confirmBeforeRun = false,
-    this.goHomeOnSuccess = false,
   });
 }
 
@@ -541,15 +539,25 @@ class _SessionSummary extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
     final garzaNumber = runtimeGarza?.garzaNumber ?? session?.garzaNumber;
-    final state = wasReleasedFromRuntime
-        ? DispatchState.completed.label
+    final isFinished =
+        wasReleasedFromRuntime ||
+        session?.state == DispatchState.completed ||
+        session?.state == DispatchState.interrupted;
+    final state = isFinished
+        ? wasReleasedFromRuntime &&
+                  runtimeGarza?.currentState != DispatchState.interrupted
+              ? DispatchState.completed.label
+              : session?.state.label ?? DispatchState.completed.label
         : runtimeGarza?.currentState?.label ?? session?.state.label ?? '-';
-    final authorized =
-        runtimeGarza?.authorizedVolume ?? session?.authorizedVolume ?? 0;
-    final dispensed =
-        runtimeGarza?.dispensedVolume ?? session?.dispensedVolume ?? 0;
-    final unitOfMeasurement =
-        runtimeGarza?.unitOfMeasurement ?? session?.unitOfMeasurement;
+    final authorized = isFinished
+        ? session?.authorizedVolume ?? runtimeGarza?.authorizedVolume ?? 0
+        : runtimeGarza?.authorizedVolume ?? session?.authorizedVolume ?? 0;
+    final dispensed = isFinished
+        ? session?.dispensedVolume ?? runtimeGarza?.dispensedVolume ?? 0
+        : runtimeGarza?.dispensedVolume ?? session?.dispensedVolume ?? 0;
+    final unitOfMeasurement = isFinished
+        ? session?.unitOfMeasurement ?? runtimeGarza?.unitOfMeasurement
+        : runtimeGarza?.unitOfMeasurement ?? session?.unitOfMeasurement;
     final unitLabel = unitOfMeasurement?.dp ?? 'Cantidad';
     final unitAbbr = unitOfMeasurement?.abbr ?? '';
 
@@ -574,7 +582,9 @@ class _SessionSummary extends StatelessWidget {
             IsselTextFormField(
               hintText: "Folio",
               controller: TextEditingController(
-                text: runtimeGarza?.saleFolio ?? session?.saleFolio ?? '-',
+                text: isFinished
+                    ? session?.saleFolio ?? runtimeGarza?.saleFolio ?? '-'
+                    : runtimeGarza?.saleFolio ?? session?.saleFolio ?? '-',
               ),
               readOnly: true,
             ),
@@ -583,8 +593,11 @@ class _SessionSummary extends StatelessWidget {
             IsselTextFormField(
               hintText: "Codigo",
               controller: TextEditingController(
-                text:
-                    runtimeGarza?.dispatchCode ?? session?.dispatchCode ?? '-',
+                text: isFinished
+                    ? session?.dispatchCode ?? runtimeGarza?.dispatchCode ?? '-'
+                    : runtimeGarza?.dispatchCode ??
+                          session?.dispatchCode ??
+                          '-',
               ),
               readOnly: true,
             ),

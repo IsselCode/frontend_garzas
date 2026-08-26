@@ -18,6 +18,19 @@ import 'package:frontend_garzas/src/dispatch/entities/pending_dispatch_entity.da
 import '../../../core/services/toast_service.dart';
 import '../../../inject_container.dart';
 
+class LastDispatchSnapshot {
+  final DispatchSessionEntity session;
+  final GarzaRuntimeEntity? runtimeGarza;
+
+  const LastDispatchSnapshot({
+    required this.session,
+    required this.runtimeGarza,
+  });
+
+  int? get dispatchElapsedMs =>
+      session.dispatchElapsedMs ?? runtimeGarza?.dispatchElapsedMs;
+}
+
 class DispatchController extends ChangeNotifier {
   SalesApi salesApi;
   GarzasApi garzasApi;
@@ -57,6 +70,7 @@ class DispatchController extends ChangeNotifier {
   bool _isRunningSessionAction = false;
   final Map<int, Set<String>> _activeAlarmsByGarza = {};
   final Map<int, _DispatchTimerState> _dispatchTimers = {};
+  final Map<int, LastDispatchSnapshot> _lastDispatchesByGarza = {};
 
   bool get isCreatingDispatchSession => _isCreatingDispatchSession;
   bool get isRunningSessionAction => _isRunningSessionAction;
@@ -78,7 +92,27 @@ class DispatchController extends ChangeNotifier {
       )
       .toList();
 
-  int get runtimePanelGarzasCount => busyGarzasCount + alarmGarzas.length;
+  List<LastDispatchSnapshot> get lastDispatches =>
+      _lastDispatchesByGarza.values.toList()..sort(
+        (a, b) => a.session.garzaNumber.compareTo(b.session.garzaNumber),
+      );
+
+  List<LastDispatchSnapshot> get lastDispatchesForPanel {
+    final activeGarzaNumbers = {
+      ...busyGarzas.map((garza) => garza.garzaNumber),
+      ...alarmGarzas.map((garza) => garza.garzaNumber),
+    };
+
+    return lastDispatches
+        .where(
+          (dispatch) =>
+              !activeGarzaNumbers.contains(dispatch.session.garzaNumber),
+        )
+        .toList();
+  }
+
+  int get runtimePanelGarzasCount =>
+      busyGarzasCount + alarmGarzas.length + lastDispatchesForPanel.length;
 
   bool get hasRuntimeWarning => runtimeMessage?.trim().isNotEmpty ?? false;
 
@@ -294,6 +328,19 @@ class DispatchController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void selectLastDispatch(LastDispatchSnapshot lastDispatch) {
+    activeSession = lastDispatch.session;
+    selectedRuntimeGarza = lastDispatch.runtimeGarza;
+    _selectedRuntimeGarzaStartedOccupied = false;
+    selectedRuntimeGarzaWasReleased = false;
+    _syncDispatchTimer(
+      lastDispatch.session,
+      backendElapsedMs: lastDispatch.dispatchElapsedMs,
+      isBusy: false,
+    );
+    notifyListeners();
+  }
+
   Future<CtrlResponse<DispatchSessionEntity>> createDispatchSession() async {
     if (_isCreatingDispatchSession) {
       return CtrlResponse(
@@ -321,6 +368,7 @@ class DispatchController extends ChangeNotifier {
       _selectedRuntimeGarzaStartedOccupied = false;
       selectedRuntimeGarzaWasReleased = false;
       activeSession = await dispatchSessionsApi.getSession(session.id);
+      _lastDispatchesByGarza.remove(activeSession!.garzaNumber);
       _syncDispatchTimer(activeSession!);
       notifyListeners();
       return CtrlResponse(success: true, element: activeSession);
@@ -395,8 +443,12 @@ class DispatchController extends ChangeNotifier {
     notifyListeners();
     try {
       final session = await action(sessionId);
+      final runtimeGarza = selectedRuntimeGarza;
       activeSession = session;
       _syncDispatchTimer(session);
+      if (_isFinishedSession(session)) {
+        _rememberLastDispatch(session, runtimeGarza: runtimeGarza);
+      }
       notifyListeners();
       return CtrlResponse(success: true, element: session);
     } on AppException catch (e) {
@@ -473,13 +525,20 @@ class DispatchController extends ChangeNotifier {
         currentGarza.activeSessionId == null) {
       selectedRuntimeGarza = currentGarza;
       selectedRuntimeGarzaWasReleased = true;
+      activeSession = session.copyWith(
+        state: currentGarza.currentState ?? DispatchState.completed,
+        authorizedVolume: currentGarza.authorizedVolume,
+        dispensedVolume: currentGarza.dispensedVolume,
+        dispatchElapsedMs:
+            currentGarza.dispatchElapsedMs ?? session.dispatchElapsedMs,
+        updatedAt: currentGarza.updatedAt,
+      );
       _syncDispatchTimer(
-        session.copyWith(
-          state: currentGarza.currentState ?? DispatchState.completed,
-        ),
+        activeSession!,
         backendElapsedMs: currentGarza.dispatchElapsedMs,
         isBusy: false,
       );
+      _rememberLastDispatch(activeSession!, runtimeGarza: currentGarza);
       _refreshActiveSessionFromServer(session.id);
       return;
     }
@@ -514,6 +573,9 @@ class DispatchController extends ChangeNotifier {
       backendElapsedMs: runtimeGarza.dispatchElapsedMs,
       isBusy: runtimeGarza.isBusy,
     );
+    if (_isFinishedSession(activeSession!)) {
+      _rememberLastDispatch(activeSession!, runtimeGarza: runtimeGarza);
+    }
   }
 
   GarzaRuntimeEntity? _findRuntimeGarzaByNumber(
@@ -552,9 +614,11 @@ class DispatchController extends ChangeNotifier {
 
       activeSession = refreshedSession;
       _syncDispatchTimer(refreshedSession);
-      if (refreshedSession.state == DispatchState.completed ||
-          refreshedSession.state == DispatchState.interrupted) {
-        selectedRuntimeGarza = null;
+      if (_isFinishedSession(refreshedSession)) {
+        _rememberLastDispatch(
+          refreshedSession,
+          runtimeGarza: selectedRuntimeGarza,
+        );
       }
       notifyListeners();
     } on AppException {
@@ -632,6 +696,28 @@ class DispatchController extends ChangeNotifier {
       case UnitOfMeasurement.gallons:
         return liters / 3.785411784;
     }
+  }
+
+  bool _isFinishedSession(DispatchSessionEntity session) {
+    return session.state == DispatchState.completed ||
+        session.state == DispatchState.interrupted;
+  }
+
+  void _rememberLastDispatch(
+    DispatchSessionEntity session, {
+    required GarzaRuntimeEntity? runtimeGarza,
+  }) {
+    final elapsedMs =
+        session.dispatchElapsedMs ?? runtimeGarza?.dispatchElapsedMs;
+    final normalizedSession =
+        elapsedMs == null || session.dispatchElapsedMs != null
+        ? session
+        : session.copyWith(dispatchElapsedMs: elapsedMs);
+
+    _lastDispatchesByGarza[session.garzaNumber] = LastDispatchSnapshot(
+      session: normalizedSession,
+      runtimeGarza: runtimeGarza,
+    );
   }
 
   void _syncDispatchTimer(
