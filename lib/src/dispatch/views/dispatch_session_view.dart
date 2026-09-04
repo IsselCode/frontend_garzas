@@ -70,14 +70,10 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
       _dispatchElapsed = _dispatchController.dispatchElapsed;
     }
 
-    final isFinished =
-        session.state == DispatchState.completed ||
-        session.state == DispatchState.interrupted;
-    final shouldRun =
-        !isFinished &&
-        (session.state == DispatchState.dispensing ||
-            (session.mode == DispatchMode.manual &&
-                session.state != DispatchState.paused));
+    final shouldRun = _dispatchController.shouldRunDispatchTimer(
+      session,
+      runtimeGarza: _dispatchController.selectedRuntimeGarza,
+    );
 
     if (!shouldRun) {
       _dispatchTimer?.cancel();
@@ -548,6 +544,8 @@ class _SessionSummary extends StatelessWidget {
                   runtimeGarza?.currentState != DispatchState.interrupted
               ? DispatchState.completed.label
               : session?.state.label ?? DispatchState.completed.label
+        : session?.state == DispatchState.paused
+        ? DispatchState.paused.label
         : runtimeGarza?.currentState?.label ?? session?.state.label ?? '-';
     final authorized = isFinished
         ? session?.authorizedVolume ?? runtimeGarza?.authorizedVolume ?? 0

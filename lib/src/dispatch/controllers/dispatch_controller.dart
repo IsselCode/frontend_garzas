@@ -292,6 +292,29 @@ class DispatchController extends ChangeNotifier {
     return getRuntimeGarza(garzaNumber)?.hasActiveAlarms ?? false;
   }
 
+  /// Indicates whether the local dispatch timer is allowed to advance.
+  ///
+  /// The session state is authoritative for actions confirmed by the API,
+  /// while runtime contributes the physical busy/alarm conditions.
+  bool shouldRunDispatchTimer(
+    DispatchSessionEntity session, {
+    GarzaRuntimeEntity? runtimeGarza,
+    bool? isBusy,
+  }) {
+    final runtime = runtimeGarza ?? selectedRuntimeGarza;
+    final isSameGarza = runtime?.garzaNumber == session.garzaNumber;
+    final hasActiveAlarms = isSameGarza && (runtime?.hasActiveAlarms ?? false);
+    final runtimeIsBusy = isBusy ?? (isSameGarza ? runtime?.isBusy : null);
+    final isFinished = _isFinishedSession(session);
+
+    return !isFinished &&
+        !hasActiveAlarms &&
+        runtimeIsBusy != false &&
+        (session.state == DispatchState.dispensing ||
+            (session.mode == DispatchMode.manual &&
+                session.state != DispatchState.paused));
+  }
+
   List<String> getGarzaAlarmDisplayNames(int garzaNumber) {
     return getRuntimeGarza(garzaNumber)?.activeAlarmDisplayNames ?? [];
   }
@@ -520,6 +543,18 @@ class DispatchController extends ChangeNotifier {
 
     final currentGarza = _findRuntimeGarzaByNumber(garzas, session.garzaNumber);
     if (currentGarza != null &&
+        _isRuntimeSnapshotOlderThanSession(currentGarza, session)) {
+      // The action response (pause/complete/etc.) is newer than this stream
+      // event. Keep the confirmed session state so the old snapshot cannot
+      // restart the timer or make the UI look active again.
+      // Keep the runtime reference updated so a newly reported alarm still
+      // stops the timer even when the rest of the snapshot is stale.
+      selectedRuntimeGarza = currentGarza;
+      selectedRuntimeGarzaWasReleased = false;
+      return;
+    }
+
+    if (currentGarza != null &&
         _selectedRuntimeGarzaStartedOccupied &&
         !currentGarza.isBusy &&
         currentGarza.activeSessionId == null) {
@@ -611,6 +646,7 @@ class DispatchController extends ChangeNotifier {
     try {
       final refreshedSession = await dispatchSessionsApi.getSession(sessionId);
       if (activeSession?.id != sessionId) return;
+      if (_isSessionOlderThan(refreshedSession, activeSession!)) return;
 
       activeSession = refreshedSession;
       _syncDispatchTimer(refreshedSession);
@@ -629,7 +665,7 @@ class DispatchController extends ChangeNotifier {
   }
 
   void _notifyNewAlarms(List<GarzaRuntimeEntity> garzas) {
-    final toastService = locator<ToastService>();
+    ToastService? toastService;
 
     for (final garza in garzas) {
       final previousAlarms = _activeAlarmsByGarza[garza.garzaNumber] ?? {};
@@ -638,7 +674,7 @@ class DispatchController extends ChangeNotifier {
       if (_hasReceivedRuntimeSnapshot) {
         final newAlarms = currentAlarms.difference(previousAlarms);
         for (final alarm in newAlarms) {
-          toastService.error(
+          (toastService ??= locator<ToastService>()).error(
             'Alarma en garza ${garza.garzaNumber}: ${GarzaRuntimeEntity.alarmDisplayName(alarm)}',
           );
         }
@@ -703,6 +739,26 @@ class DispatchController extends ChangeNotifier {
         session.state == DispatchState.interrupted;
   }
 
+  bool _isRuntimeSnapshotOlderThanSession(
+    GarzaRuntimeEntity runtimeGarza,
+    DispatchSessionEntity session,
+  ) {
+    final runtimeUpdatedAt = DateTime.tryParse(runtimeGarza.updatedAt);
+    final sessionUpdatedAt = DateTime.tryParse(session.updatedAt);
+    if (runtimeUpdatedAt == null || sessionUpdatedAt == null) return false;
+    return runtimeUpdatedAt.isBefore(sessionUpdatedAt);
+  }
+
+  bool _isSessionOlderThan(
+    DispatchSessionEntity candidate,
+    DispatchSessionEntity current,
+  ) {
+    final candidateUpdatedAt = DateTime.tryParse(candidate.updatedAt);
+    final currentUpdatedAt = DateTime.tryParse(current.updatedAt);
+    if (candidateUpdatedAt == null || currentUpdatedAt == null) return false;
+    return candidateUpdatedAt.isBefore(currentUpdatedAt);
+  }
+
   void _rememberLastDispatch(
     DispatchSessionEntity session, {
     required GarzaRuntimeEntity? runtimeGarza,
@@ -735,17 +791,11 @@ class DispatchController extends ChangeNotifier {
       timer.synchronize(Duration(milliseconds: synchronizedElapsedMs));
     }
 
-    final isFinished =
-        session.state == DispatchState.completed ||
-        session.state == DispatchState.interrupted;
-    final shouldRun =
-        !isFinished &&
-        isBusy != false &&
-        (session.state == DispatchState.dispensing ||
-            (session.mode == DispatchMode.manual &&
-                session.state != DispatchState.paused));
-
-    if (shouldRun) {
+    if (shouldRunDispatchTimer(
+      session,
+      isBusy: isBusy,
+      runtimeGarza: selectedRuntimeGarza,
+    )) {
       timer.start();
     } else {
       timer.stop();
