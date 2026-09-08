@@ -10,6 +10,7 @@ import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.d
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/credits_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/flow_meter_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
@@ -86,6 +87,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (context) => locator<CreditsController>(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => locator<FlowMeterController>(),
+        ),
       ],
       child:
           Consumer4<
@@ -150,4 +154,5 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 // 935197744457

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/cuts_credits_dialog.dart';
+import 'package:frontend_garzas/src/admin/clean/dialogs/reports_logs_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/users_dialog.dart';
 import 'package:frontend_garzas/src/admin/views/cash_register_view.dart';
 import 'package:frontend_garzas/src/admin/views/clients_view.dart';
 import 'package:frontend_garzas/src/admin/views/config_garzas_view.dart';
 import 'package:frontend_garzas/src/admin/views/credits_view.dart';
 import 'package:frontend_garzas/src/admin/views/general_config_view.dart';
+import 'package:frontend_garzas/src/admin/views/liters_statistics_view.dart';
 import 'package:frontend_garzas/src/admin/views/pending_payments_view.dart';
 import 'package:frontend_garzas/src/admin/views/reports_and_logs_view.dart';
 import 'package:frontend_garzas/src/admin/views/user_management_view.dart';
@@ -25,9 +27,6 @@ class HomeAdminView extends StatelessWidget {
     ThemeData theme = Theme.of(context);
     ColorScheme colorScheme = theme.colorScheme;
     TextTheme textTheme = theme.textTheme;
-
-    // Services
-    NavigationService navigationService = locator();
 
     return Scaffold(
       body: Center(
@@ -50,8 +49,7 @@ class HomeAdminView extends StatelessWidget {
                 IsselActionBox(
                   title: "Reportes y Logs",
                   asset: AppAssets.statistics,
-                  onTap: () =>
-                      navigationService.navigateTo(ReportsAndLogsView()),
+                  onTap: () => openReportsLogsDialog(context),
                   height: 240,
                   width: 200,
                 ),
@@ -118,6 +116,22 @@ class HomeAdminView extends StatelessWidget {
       navigationService.navigateTo(CreditsView());
     } else {
       navigationService.navigateTo(PendingPaymentsView());
+    }
+  }
+
+  void openReportsLogsDialog(BuildContext context) async {
+    ReportsLogsType? type = await showDialog<ReportsLogsType>(
+      context: context,
+      builder: (context) => const ReportsLogsDialog(),
+    );
+
+    if (type == null) return;
+
+    NavigationService navigationService = locator();
+    if (type == ReportsLogsType.reportsAndLogs) {
+      navigationService.navigateTo(const ReportsAndLogsView());
+    } else {
+      navigationService.navigateTo(const LitersStatisticsView());
     }
   }
 

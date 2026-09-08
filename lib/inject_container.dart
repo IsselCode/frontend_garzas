@@ -8,12 +8,14 @@ import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.d
 import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/config_garzas_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/credits_controller.dart';
+import 'package:frontend_garzas/src/admin/controllers/flow_meter_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/statistics_controller.dart';
 import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/admin/data/cash_register_api.dart';
 import 'package:frontend_garzas/src/admin/data/clients_api.dart';
 import 'package:frontend_garzas/src/admin/data/garzas_api.dart';
+import 'package:frontend_garzas/src/admin/data/flow_meter_api.dart';
 import 'package:frontend_garzas/src/admin/data/general_api.dart';
 import 'package:frontend_garzas/src/admin/data/logs_api.dart';
 import 'package:frontend_garzas/src/admin/data/sales_api.dart';
@@ -55,6 +57,7 @@ Future<void> injectContainer() async {
   locator.registerLazySingleton(() => GeneralApi(apiClient: locator()));
   locator.registerLazySingleton(() => LogsApi(apiClient: locator()));
   locator.registerLazySingleton(() => SalesApi(apiClient: locator()));
+  locator.registerLazySingleton(() => FlowMeterApi(apiClient: locator()));
   locator.registerLazySingleton(() => CashRegisterApi(apiClient: locator()));
   locator.registerLazySingleton(
     () => DispatchSessionsApi(apiClient: locator()),
@@ -100,5 +103,8 @@ Future<void> injectContainer() async {
   );
   locator.registerLazySingleton(
     () => StatisticsController(logsApi: locator(), salesApi: locator()),
+  );
+  locator.registerLazySingleton(
+    () => FlowMeterController(flowMeterApi: locator()),
   );
 }
