@@ -18,6 +18,9 @@ import 'package:issel_code_widgets/issel_code_widgets.dart';
 import '../../../inject_container.dart';
 import '../clean/dialogs/config_dialog.dart';
 
+// TODO: Enable when the flow-meter statistics feature is ready for release.
+const bool _flowMeterStatisticsEnabled = false;
+
 class HomeAdminView extends StatelessWidget {
   const HomeAdminView({super.key});
 
@@ -49,7 +52,7 @@ class HomeAdminView extends StatelessWidget {
                 IsselActionBox(
                   title: "Reportes y Logs",
                   asset: AppAssets.statistics,
-                  onTap: () => openReportsLogsDialog(context),
+                  onTap: () => openReportsLogs(context),
                   height: 240,
                   width: 200,
                 ),
@@ -117,6 +120,15 @@ class HomeAdminView extends StatelessWidget {
     } else {
       navigationService.navigateTo(PendingPaymentsView());
     }
+  }
+
+  void openReportsLogs(BuildContext context) {
+    if (!_flowMeterStatisticsEnabled) {
+      locator<NavigationService>().navigateTo(const ReportsAndLogsView());
+      return;
+    }
+
+    openReportsLogsDialog(context);
   }
 
   void openReportsLogsDialog(BuildContext context) async {

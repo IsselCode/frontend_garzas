@@ -92,22 +92,19 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child:
-          Consumer4<
-            TitleBarController,
-            AuthController,
-            DispatchController,
-            ServerStatusController
-          >(
+          Consumer3<TitleBarController, AuthController, ServerStatusController>(
             builder:
                 (
                   context,
                   titleBarController,
                   authController,
-                  dispatchController,
                   serverStatusController,
                   child,
                 ) {
                   NavigationService navigationService = locator();
+                  // Runtime snapshots are consumed by dispatch widgets. The
+                  // app root only needs this controller to manage the stream.
+                  final dispatchController = context.read<DispatchController>();
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     dispatchController.syncRuntimeStream(
                       shouldRun:

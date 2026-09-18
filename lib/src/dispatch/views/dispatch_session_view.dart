@@ -28,7 +28,7 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
   late final DispatchController _dispatchController;
   Future<CtrlResponse<DispatchSessionEntity>>? _loadSession;
   Timer? _dispatchTimer;
-  Duration _dispatchElapsed = Duration.zero;
+  final _dispatchElapsed = ValueNotifier<Duration>(Duration.zero);
   int? _trackedSessionId;
   bool _isActionPending = false;
 
@@ -52,6 +52,7 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
   void dispose() {
     _dispatchController.removeListener(_handleSessionUpdate);
     _dispatchTimer?.cancel();
+    _dispatchElapsed.dispose();
     super.dispose();
   }
 
@@ -61,15 +62,21 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
   }
 
   void _syncTimerWithSession(DispatchSessionEntity? session) {
-    if (session == null) return;
+    if (session == null) {
+      _dispatchTimer?.cancel();
+      _dispatchTimer = null;
+      _trackedSessionId = null;
+      _dispatchElapsed.value = Duration.zero;
+      return;
+    }
 
     if (_trackedSessionId != session.id) {
       _dispatchTimer?.cancel();
       _dispatchTimer = null;
       _trackedSessionId = session.id;
-      _dispatchElapsed = _dispatchController.dispatchElapsed;
     }
 
+    _dispatchElapsed.value = _dispatchController.dispatchElapsed;
     final shouldRun = _dispatchController.shouldRunDispatchTimer(
       session,
       runtimeGarza: _dispatchController.selectedRuntimeGarza,
@@ -78,17 +85,16 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
     if (!shouldRun) {
       _dispatchTimer?.cancel();
       _dispatchTimer = null;
-      _dispatchElapsed = _dispatchController.dispatchElapsed;
       return;
     }
 
     if (_dispatchTimer?.isActive ?? false) return;
 
-    _dispatchTimer = Timer.periodic(const Duration(milliseconds: 10), (_) {
+    // Refresh only the clock; elapsed time still comes from the controller's
+    // stopwatch and the server, rather than counting visual refresh ticks.
+    _dispatchTimer = Timer.periodic(const Duration(milliseconds: 20), (_) {
       if (!mounted) return;
-      setState(() {
-        _dispatchElapsed = _dispatchController.dispatchElapsed;
-      });
+      _dispatchElapsed.value = _dispatchController.dispatchElapsed;
     });
   }
 
@@ -220,9 +226,13 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
                             Positioned(
                               right: 24,
                               bottom: 24,
-                              child: _DispatchTimerDisplay(
-                                elapsed: _dispatchElapsed,
-                                color: colorScheme.onPrimary,
+                              child: ValueListenableBuilder<Duration>(
+                                valueListenable: _dispatchElapsed,
+                                builder: (context, elapsed, child) =>
+                                    _DispatchTimerDisplay(
+                                      elapsed: elapsed,
+                                      color: colorScheme.onPrimary,
+                                    ),
                               ),
                             ),
                           ],
@@ -570,44 +580,29 @@ class _SessionSummary extends StatelessWidget {
             Text('Garza $garzaNumber', style: textTheme.displayMedium),
 
             Text("Estado", style: textTheme.titleMedium),
-            IsselTextFormField(
-              hintText: "Nombre del cliente",
-              controller: TextEditingController(text: state),
-              readOnly: true,
-            ),
+            _SessionValueField(hintText: "Nombre del cliente", text: state),
 
             Text("Folio", style: textTheme.titleMedium),
-            IsselTextFormField(
+            _SessionValueField(
               hintText: "Folio",
-              controller: TextEditingController(
-                text: isFinished
-                    ? session?.saleFolio ?? runtimeGarza?.saleFolio ?? '-'
-                    : runtimeGarza?.saleFolio ?? session?.saleFolio ?? '-',
-              ),
-              readOnly: true,
+              text: isFinished
+                  ? session?.saleFolio ?? runtimeGarza?.saleFolio ?? '-'
+                  : runtimeGarza?.saleFolio ?? session?.saleFolio ?? '-',
             ),
 
             Text("Codigo", style: textTheme.titleMedium),
-            IsselTextFormField(
+            _SessionValueField(
               hintText: "Codigo",
-              controller: TextEditingController(
-                text: isFinished
-                    ? session?.dispatchCode ?? runtimeGarza?.dispatchCode ?? '-'
-                    : runtimeGarza?.dispatchCode ??
-                          session?.dispatchCode ??
-                          '-',
-              ),
-              readOnly: true,
+              text: isFinished
+                  ? session?.dispatchCode ?? runtimeGarza?.dispatchCode ?? '-'
+                  : runtimeGarza?.dispatchCode ?? session?.dispatchCode ?? '-',
             ),
 
             Text(unitLabel, style: textTheme.titleMedium),
-            IsselTextFormField(
+            _SessionValueField(
               hintText: unitLabel,
-              controller: TextEditingController(
-                text:
-                    '${dispensed.toStringAsFixed(2)} / ${authorized.toStringAsFixed(2)} $unitAbbr',
-              ),
-              readOnly: true,
+              text:
+                  '${dispensed.toStringAsFixed(2)} / ${authorized.toStringAsFixed(2)} $unitAbbr',
             ),
 
             if (runtimeGarza?.hasActiveAlarms ?? false)
@@ -620,4 +615,44 @@ class _SessionSummary extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Keeps the read-only field controller alive across runtime snapshots.
+class _SessionValueField extends StatefulWidget {
+  final String hintText;
+  final String text;
+
+  const _SessionValueField({required this.hintText, required this.text});
+
+  @override
+  State<_SessionValueField> createState() => _SessionValueFieldState();
+}
+
+class _SessionValueFieldState extends State<_SessionValueField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.text);
+  }
+
+  @override
+  void didUpdateWidget(_SessionValueField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text != oldWidget.text) _controller.text = widget.text;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => IsselTextFormField(
+    hintText: widget.hintText,
+    controller: _controller,
+    readOnly: true,
+  );
 }
