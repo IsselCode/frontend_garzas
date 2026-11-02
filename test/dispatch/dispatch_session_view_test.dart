@@ -71,6 +71,41 @@ void main() {
   });
 
   testWidgets(
+    'older runtime readings cannot hide a newer session volume or state',
+    (tester) async {
+      final response = Completer<DispatchSessionEntity>();
+      final fixture = await _mount(tester, sessionResponse: response.future);
+      fixture.controller.syncRuntimeStream(shouldRun: true);
+      fixture.api.snapshots.add(_snapshot(25, state: 'PAUSED'));
+      await tester.pump();
+      expect(find.text('25.00 / 100.00 l'), findsOneWidget);
+
+      response.complete(
+        _session.copyWith(
+          dispensedVolume: 30,
+          updatedAt: '2026-09-17T00:00:02Z',
+        ),
+      );
+      await tester.pump();
+      expect(find.text('30.00 / 100.00 l'), findsOneWidget);
+      expect(find.text('Despachando'), findsOneWidget);
+      expect(find.text('Pausar'), findsOneWidget);
+
+      fixture.api.snapshots.add(_snapshot(28, state: 'PAUSED'));
+      await tester.pump();
+      expect(find.text('30.00 / 100.00 l'), findsOneWidget);
+      expect(find.text('Despachando'), findsOneWidget);
+
+      fixture.api.snapshots.add(_snapshot(35, second: 3));
+      await tester.pump();
+      expect(find.text('35.00 / 100.00 l'), findsOneWidget);
+      expect(find.text('Despachando'), findsOneWidget);
+      expect(find.text('Pausar'), findsOneWidget);
+      await fixture.dispose(tester);
+    },
+  );
+
+  testWidgets(
     'pause and resume keep the clock synchronized with confirmed state',
     (tester) async {
       final fixture = await _mount(tester);
@@ -118,19 +153,64 @@ void main() {
     expect(find.text('00:02:000'), findsOneWidget);
     await fixture.dispose(tester);
   });
+
+  testWidgets(
+    'stream loss freezes the displayed time and explains the interruption',
+    (tester) async {
+      final fixture = await _mount(tester);
+      fixture.controller.syncRuntimeStream(shouldRun: true);
+      fixture.controller.displayElapsed = const Duration(seconds: 2);
+      fixture.api.snapshots.add(_snapshot(25));
+      await tester.pump();
+      await fixture.api.snapshots.close();
+      await tester.pump();
+      expect(
+        find.text('Sin actualizaciones del despacho. Esperando reconexión.'),
+        findsOneWidget,
+      );
+      expect(find.text('00:02:000'), findsOneWidget);
+      fixture.controller.displayElapsed = const Duration(seconds: 10);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('00:02:000'), findsOneWidget);
+      await fixture.dispose(tester);
+    },
+  );
+
+  testWidgets('live time remains visible while a screen refresh is pending', (
+    tester,
+  ) async {
+    final response = Completer<DispatchSessionEntity>();
+    final fixture = await _mount(tester, sessionResponse: response.future);
+    expect(find.byType(IsselTextFormField), findsWidgets);
+    expect(find.text('00:01:000'), findsOneWidget);
+    fixture.controller.syncRuntimeStream(shouldRun: true);
+    fixture.controller.displayElapsed = const Duration(seconds: 2);
+    fixture.api.snapshots.add(_snapshot(30));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('00:02:000'), findsOneWidget);
+    response.complete(_session.copyWith(state: DispatchState.paused));
+    await tester.pump();
+    expect(fixture.controller.activeSession?.state, DispatchState.dispensing);
+    expect(find.text('Pausar'), findsOneWidget);
+    await fixture.dispose(tester);
+  });
 }
 
 List<IsselTextFormField> _fields(WidgetTester tester) => tester
     .widgetList<IsselTextFormField>(find.byType(IsselTextFormField))
     .toList();
 
-Future<_Fixture> _mount(WidgetTester tester) async {
+Future<_Fixture> _mount(
+  WidgetTester tester, {
+  Future<DispatchSessionEntity>? sessionResponse,
+}) async {
   tester.view.physicalSize = const Size(1366, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final client = ApiClient(serverStatusController: ServerStatusController());
-  final api = _SessionApi(client);
+  final api = _SessionApi(client)..sessionResponse = sessionResponse;
   final controller = _ClockController(client, api)..activeSession = _session;
   await tester.pumpWidget(
     ChangeNotifierProvider<DispatchController>.value(
@@ -177,10 +257,12 @@ class _SessionApi extends DispatchSessionsApi {
   _SessionApi(ApiClient client) : super(apiClient: client);
   final snapshots = StreamController<GarzaRuntimeResponseEntity>.broadcast();
   final actions = <String>[];
+  Future<DispatchSessionEntity>? sessionResponse;
   @override
   Stream<GarzaRuntimeResponseEntity> streamGarzaRuntime() => snapshots.stream;
   @override
-  Future<DispatchSessionEntity> getSession(int id) async => _session;
+  Future<DispatchSessionEntity> getSession(int id) async =>
+      sessionResponse ?? _session;
   @override
   Future<DispatchSessionEntity> pauseSession(int id) async {
     actions.add('pause');
@@ -215,23 +297,27 @@ final _session = DispatchSessionEntity.fromMap({
   'updated_at': '2026-09-17T00:00:00Z',
 });
 
-GarzaRuntimeResponseEntity _snapshot(double liters, {bool alarm = false}) =>
-    GarzaRuntimeResponseEntity.fromMap({
-      'garzas': [
-        {
-          'garza_number': 1,
-          'is_enabled': true,
-          'mode': 'automatic',
-          'is_busy': true,
-          'current_state': 'DISPENSING',
-          'active_session_id': 1,
-          'unit_of_measurement': 'liters',
-          'authorized_volume': 100,
-          'dispensed_volume': liters,
-          'dispatch_elapsed_ms': 2000,
-          'alarms': <String, bool>{'emergency_stop': alarm},
-          'updated_at': '2026-09-17T00:00:01Z',
-        },
-      ],
-      'updated_at': '2026-09-17T00:00:01Z',
-    });
+GarzaRuntimeResponseEntity _snapshot(
+  double liters, {
+  bool alarm = false,
+  int second = 1,
+  String state = 'DISPENSING',
+}) => GarzaRuntimeResponseEntity.fromMap({
+  'garzas': [
+    {
+      'garza_number': 1,
+      'is_enabled': true,
+      'mode': 'automatic',
+      'is_busy': true,
+      'current_state': state,
+      'active_session_id': 1,
+      'unit_of_measurement': 'liters',
+      'authorized_volume': 100,
+      'dispensed_volume': liters,
+      'dispatch_elapsed_ms': 2000,
+      'alarms': <String, bool>{'emergency_stop': alarm},
+      'updated_at': '2026-09-17T00:00:${second.toString().padLeft(2, '0')}Z',
+    },
+  ],
+  'updated_at': '2026-09-17T00:00:${second.toString().padLeft(2, '0')}Z',
+});

@@ -114,7 +114,9 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
               future: _loadSession,
               builder: (context, snapshot) {
                 if (_loadSession != null &&
-                    snapshot.connectionState == ConnectionState.waiting) {
+                    snapshot.connectionState == ConnectionState.waiting &&
+                    controller.activeSession == null &&
+                    runtimeGarza == null) {
                   return const IsselShimmer(width: 640, height: 360);
                 }
 
@@ -168,6 +170,14 @@ class _DispatchSessionViewState extends State<DispatchSessionView> {
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
+                                    if (controller.runtimeStreamInterrupted)
+                                      Text(
+                                        'Sin actualizaciones del despacho. Esperando reconexión.',
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.onPrimary,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     if (isCompleted) ...[
                                       Text(
                                         'El despacho se realizo con exito',
@@ -554,18 +564,15 @@ class _SessionSummary extends StatelessWidget {
                   runtimeGarza?.currentState != DispatchState.interrupted
               ? DispatchState.completed.label
               : session?.state.label ?? DispatchState.completed.label
-        : session?.state == DispatchState.paused
-        ? DispatchState.paused.label
-        : runtimeGarza?.currentState?.label ?? session?.state.label ?? '-';
-    final authorized = isFinished
-        ? session?.authorizedVolume ?? runtimeGarza?.authorizedVolume ?? 0
-        : runtimeGarza?.authorizedVolume ?? session?.authorizedVolume ?? 0;
-    final dispensed = isFinished
-        ? session?.dispensedVolume ?? runtimeGarza?.dispensedVolume ?? 0
-        : runtimeGarza?.dispensedVolume ?? session?.dispensedVolume ?? 0;
-    final unitOfMeasurement = isFinished
-        ? session?.unitOfMeasurement ?? runtimeGarza?.unitOfMeasurement
-        : runtimeGarza?.unitOfMeasurement ?? session?.unitOfMeasurement;
+        : session?.state.label ?? runtimeGarza?.currentState?.label ?? '-';
+    // The controller reconciles HTTP responses and runtime updates. Prefer
+    // that session so an older runtime reference cannot hide newer readings.
+    final authorized =
+        session?.authorizedVolume ?? runtimeGarza?.authorizedVolume ?? 0;
+    final dispensed =
+        session?.dispensedVolume ?? runtimeGarza?.dispensedVolume ?? 0;
+    final unitOfMeasurement =
+        session?.unitOfMeasurement ?? runtimeGarza?.unitOfMeasurement;
     final unitLabel = unitOfMeasurement?.dp ?? 'Cantidad';
     final unitAbbr = unitOfMeasurement?.abbr ?? '';
 

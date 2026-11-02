@@ -314,7 +314,155 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('02:03:456'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
+    controller.syncRuntimeStream(shouldRun: false);
   });
+
+  testWidgets(
+    'switching garza A to B and back keeps liters live and stops at completion',
+    (tester) async {
+      controller.syncRuntimeStream(shouldRun: false);
+      controller.syncRuntimeStream(shouldRun: true);
+      tester.view.physicalSize = const Size(1366, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final navigation = NavigationService();
+      locator.registerSingleton<NavigationService>(navigation);
+      addTearDown(() => locator.unregister<NavigationService>());
+
+      final firstLoadA = Completer<DispatchSessionEntity>();
+      final loadB = Completer<DispatchSessionEntity>();
+      final secondLoadA = Completer<DispatchSessionEntity>();
+      final staleA = _session(
+        1,
+        11,
+        volume: 5500,
+      ).copyWith(state: DispatchState.dispensing, authorizedVolume: 10000);
+      final staleB = _session(
+        2,
+        22,
+        volume: 1000,
+      ).copyWith(state: DispatchState.dispensing, authorizedVolume: 10000);
+      final completedA = staleA.copyWith(
+        state: DispatchState.completed,
+        dispensedVolume: 10000,
+        dispatchElapsedMs: 123456,
+        updatedAt: '2026-11-02T18:30:13Z',
+      );
+      var loadsA = 0;
+      api.load = (id) {
+        if (id == 22) return loadB.future;
+        return switch (++loadsA) {
+          1 => firstLoadA.future,
+          2 => secondLoadA.future,
+          _ => Future.value(completedA),
+        };
+      };
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<DispatchController>.value(value: controller),
+            ChangeNotifierProvider<AuthController>(
+              create: (_) => _AuthController(),
+            ),
+          ],
+          child: GlobalLoaderOverlay(
+            child: MaterialApp(
+              navigatorKey: navigation.navigatorKey,
+              home: const HomeDispatchView(),
+            ),
+          ),
+        ),
+      );
+
+      final garzaB = _runtime(
+        2,
+        sessionId: 22,
+        volume: 1000,
+        authorizedVolume: 10000,
+      );
+      void sendA(double liters, int second, {bool completed = false}) {
+        api.snapshots.add(
+          GarzaRuntimeResponseEntity(
+            garzas: [
+              _runtime(
+                1,
+                sessionId: completed ? null : 11,
+                state: completed ? 'COMPLETED' : 'DISPENSING',
+                volume: liters,
+                authorizedVolume: 10000,
+                elapsedMs: completed ? 123456 : 120000,
+                second: second,
+              ),
+              garzaB,
+            ],
+            updatedAt: null,
+            message: null,
+          ),
+        );
+      }
+
+      Future<void> finishNavigation() async {
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.pump();
+      }
+
+      Future<void> openGarza(int number) async {
+        await tester.tap(find.byIcon(Icons.local_drink_outlined));
+        await tester.pump();
+        await tester.tap(find.text('Garza $number'));
+        await finishNavigation();
+      }
+
+      Future<void> goHome() async {
+        await tester.tap(find.text('Realizar nuevo despacho'));
+        await finishNavigation();
+      }
+
+      sendA(5500, 10);
+      await tester.pump();
+      await openGarza(1);
+      expect(find.text('5500.00 / 10000.00 l'), findsOneWidget);
+      await goHome();
+      await openGarza(2);
+      expect(find.text('1000.00 / 10000.00 l'), findsOneWidget);
+
+      sendA(6500, 11);
+      firstLoadA.complete(staleA);
+      await tester.pump();
+      expect(controller.activeSession?.id, 22);
+      expect(find.text('Garza 2'), findsOneWidget);
+      expect(find.text('1000.00 / 10000.00 l'), findsOneWidget);
+
+      await goHome();
+      await openGarza(1);
+      expect(find.text('6500.00 / 10000.00 l'), findsOneWidget);
+      sendA(7500, 12);
+      loadB.complete(staleB);
+      await tester.pump();
+      expect(controller.activeSession?.id, 11);
+      expect(find.text('7500.00 / 10000.00 l'), findsOneWidget);
+      expect(find.text('Pausar'), findsOneWidget);
+
+      sendA(10000, 13, completed: true);
+      await tester.pump();
+      secondLoadA.complete(staleA);
+      await tester.pump();
+      expect(find.text('10000.00 / 10000.00 l'), findsOneWidget);
+      expect(find.text('Completada'), findsOneWidget);
+      expect(find.text('Pausar'), findsNothing);
+      expect(find.text('02:03:456'), findsOneWidget);
+      expect(controller.dispatchElapsed.inMilliseconds, 123456);
+      await tester.pump(const Duration(seconds: 2));
+      expect(controller.dispatchElapsed.inMilliseconds, 123456);
+      expect(find.text('02:03:456'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      controller.syncRuntimeStream(shouldRun: false);
+    },
+  );
 }
 
 class _AuthController extends ChangeNotifier implements AuthController {
@@ -348,6 +496,8 @@ GarzaRuntimeEntity _runtime(
   String? state,
   double? volume,
   int? elapsedMs,
+  double? authorizedVolume,
+  int second = 10,
 }) => GarzaRuntimeEntity.fromMap({
   'garza_number': number,
   'is_enabled': true,
@@ -358,11 +508,11 @@ GarzaRuntimeEntity _runtime(
   'sale_folio': sessionId == null ? null : 'F-$sessionId',
   'dispatch_code': sessionId == null ? null : 'D-$sessionId',
   'unit_of_measurement': 'liters',
-  'authorized_volume': sessionId == null ? 0 : 100,
+  'authorized_volume': authorizedVolume ?? (sessionId == null ? 0 : 100),
   'dispensed_volume': volume ?? (sessionId == null ? 0 : 90),
   'dispatch_elapsed_ms': elapsedMs ?? (sessionId == null ? 0 : 120000),
   'alarms': <String, bool>{},
-  'updated_at': '2026-11-02T18:30:10Z',
+  'updated_at': '2026-11-02T18:30:${second.toString().padLeft(2, '0')}Z',
 });
 
 DispatchSessionEntity _session(
