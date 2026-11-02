@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:barcode/barcode.dart';
+import 'package:frontend_garzas/commons/tickets/ticket_pdf_fonts.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/general_config_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 const PdfPageFormat sellTicketPageFormat = PdfPageFormat(
   72 * PdfPageFormat.mm,
@@ -59,8 +59,8 @@ Future<Uint8List> sellTicketPdf(
   PdfPageFormat pageFormat = sellTicketPageFormat,
 }) async {
   final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
-  final fontTitle = await PdfGoogleFonts.montserratAlternatesBlackItalic();
-  final fontText = await PdfGoogleFonts.montserratMedium();
+  final fontTitle = await TicketPdfFonts.sellTitle;
+  final fontText = await TicketPdfFonts.regular;
 
   final businessName = generalConfigEntity.businessName.trim();
   final businessAddress = generalConfigEntity.businessAddress.trim();

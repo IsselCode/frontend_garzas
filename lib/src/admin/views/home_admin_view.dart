@@ -18,8 +18,7 @@ import 'package:issel_code_widgets/issel_code_widgets.dart';
 import '../../../inject_container.dart';
 import '../clean/dialogs/config_dialog.dart';
 
-// TODO: Enable when the flow-meter statistics feature is ready for release.
-const bool _flowMeterStatisticsEnabled = false;
+const bool _flowMeterStatisticsEnabled = true;
 
 class HomeAdminView extends StatelessWidget {
   const HomeAdminView({super.key});

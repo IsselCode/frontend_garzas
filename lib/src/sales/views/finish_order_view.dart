@@ -3,7 +3,6 @@ import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/scaled_text_style.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/sales/controllers/order_controller.dart';
 import 'package:frontend_garzas/src/sales/views/generate_ticket_view.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
@@ -13,6 +12,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../../commons/text_back_button.dart';
 import '../../../core/app/consts.dart';
 import '../../../core/services/regex_service.dart';
+import '../../../core/utils/print_timing.dart';
 import '../../../inject_container.dart';
 import '../../admin/clean/enums/enums.dart';
 import '../../admin/clean/widgets/config_garza_container.dart';
@@ -319,17 +319,37 @@ class FinishOrderView extends StatelessWidget {
     }
   }
 
-  void createSell(BuildContext context) async {
-    OrderController orderController = context.read();
-    CtrlResponse<SaleEntity> response = await orderController.createSell();
-    if (!context.mounted) return;
+  Future<void> createSell(BuildContext context) async {
+    final timing = PrintTiming('venta.generar_ticket');
+    timing.event('clic: Generar venta');
+    var handedOffToTicket = false;
 
-    if (response.success) {
-      NavigationService navigationService = locator();
-      navigationService.pushAndRemoveUntil(GenerateTicketView.init(context));
-    } else {
-      ToastService toastService = locator();
-      toastService.error(response.message!);
+    try {
+      final orderController = context.read<OrderController>();
+      final response = await orderController.createSell(timing: timing);
+      if (!context.mounted) {
+        timing.event('vista cerrada antes de completar la acción');
+        return;
+      }
+
+      if (response.success) {
+        NavigationService navigationService = locator();
+        navigationService.pushAndRemoveUntil(
+          GenerateTicketView.init(context, timing: timing),
+        );
+        handedOffToTicket = true;
+      } else {
+        timing.event('venta no completada');
+        ToastService toastService = locator();
+        toastService.error(response.message!);
+      }
+    } catch (error) {
+      timing.event('error al generar venta: ${error.runtimeType}');
+      rethrow;
+    } finally {
+      if (!handedOffToTicket) {
+        await timing.finish();
+      }
     }
   }
 }

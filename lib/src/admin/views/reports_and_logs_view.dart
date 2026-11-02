@@ -7,6 +7,7 @@ import 'package:frontend_garzas/commons/tickets/sell_ticket.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
+import 'package:frontend_garzas/core/utils/print_timing.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/date_range_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/dialogs/sale_details_dialog.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/monthly_garza_total_entity.dart';
@@ -878,6 +879,8 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
   }
 
   Future<void> _reprintTicket(SaleEntity sale) async {
+    final timing = PrintTiming('venta.reimpresion');
+    timing.event('clic: Reimprimir ticket');
     final toastService = locator<ToastService>();
     final printerService = locator<PrinterService>();
     final configController = context.read<GeneralConfigController>();
@@ -885,14 +888,21 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
     context.loaderOverlay.show();
 
     try {
-      final printer = await printerService.getSelectedPrinter();
+      final printer = await timing.measure(
+        'obtener impresora',
+        () => printerService.getSelectedPrinter(),
+      );
       if (printer == null) {
+        timing.event('sin impresora seleccionada');
         toastService.error("No hay ninguna impresora seleccionada");
         return;
       }
 
       if (configController.generalConfigEntity == null) {
-        final response = await configController.loadGeneralConfig();
+        final response = await timing.measure(
+          'cargar configuración del ticket',
+          () => configController.loadGeneralConfig(),
+        );
         if (!response.success || configController.generalConfigEntity == null) {
           toastService.error(
             response.message ?? "No se pudo cargar la configuración del ticket",
@@ -919,21 +929,38 @@ class _ReportsAndLogsViewState extends State<ReportsAndLogsView> {
         sellerName: sale.sellerUsername,
       );
 
-      await Printing.directPrintPdf(
-        printer: printer,
-        format: sellTicketPageFormat,
-        dynamicLayout: false,
-        usePrinterSettings: true,
-        onLayout: (format) => sellTicketPdf(config, ticket, pageFormat: format),
+      final pdfBytes = await timing.measure(
+        'construcción del PDF',
+        () => sellTicketPdf(
+          config,
+          ticket,
+          pageFormat: sellTicketPageFormat,
+        ),
       );
 
+      final result = await timing.measure(
+        'impresión: envío del PDF y respuesta del sistema',
+        () => Future<bool>.sync(
+          () => Printing.directPrintPdf(
+            printer: printer,
+            format: sellTicketPageFormat,
+            dynamicLayout: false,
+            usePrinterSettings: true,
+            onLayout: (_) async => pdfBytes,
+          ),
+        ),
+      );
+      if (!result) timing.event('impresión no completada');
+
       toastService.success("Ticket reimpreso correctamente");
-    } catch (_) {
+    } catch (error) {
+      timing.event('error de reimpresión: ${error.runtimeType}');
       toastService.error("No se pudo reimprimir el ticket");
     } finally {
       if (mounted) {
         context.loaderOverlay.hide();
       }
+      await timing.finish();
     }
   }
 

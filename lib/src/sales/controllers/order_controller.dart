@@ -3,6 +3,7 @@ import 'package:frontend_garzas/commons/tickets/sell_ticket.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
+import 'package:frontend_garzas/core/utils/print_timing.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
 import 'package:frontend_garzas/src/admin/clean/widgets/config_garza_container.dart';
 import 'package:frontend_garzas/src/admin/controllers/general_config_controller.dart';
@@ -190,8 +191,12 @@ class OrderController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse<SaleEntity>> createSell() async {
+  Future<CtrlResponse<SaleEntity>> createSell({PrintTiming? timing}) async {
+    final operationTiming = timing ?? PrintTiming('venta.crear');
+    final ownsTiming = timing == null;
+
     if (_isCreatingSale) {
+      if (ownsTiming) await operationTiming.finish();
       return CtrlResponse(
         success: false,
         message: 'La venta ya se está procesando',
@@ -219,8 +224,12 @@ class OrderController extends ChangeNotifier {
         }
       }
 
-      Printer? printer = await printerService.getSelectedPrinter();
+      Printer? printer = await operationTiming.measure(
+        'validar impresora',
+        () => printerService.getSelectedPrinter(),
+      );
       if (printer == null) {
+        operationTiming.event('sin impresora seleccionada');
         return CtrlResponse(
           success: false,
           message: "No hay ninguna impresora seleccionada",
@@ -228,16 +237,19 @@ class OrderController extends ChangeNotifier {
       }
 
       if (isPendingDispatchPayment) {
-        _saleEntity = await pendingDispatchesApi.settlePendingDispatch(
-          id: pendingDispatchToSettle!.id,
-          clientId: selectedClient?.id,
-          paymentMethod: paymentMethod,
-          amountPaid: paymentMethod == PaymentMethod.cash
-              ? double.tryParse(clientMoneyCtrl.text) ?? 0
-              : 0,
-          changeAmount: paymentMethod == PaymentMethod.cash
-              ? totalRemaining ?? 0
-              : 0,
+        _saleEntity = await operationTiming.measure(
+          'liquidar despacho pendiente',
+          () => pendingDispatchesApi.settlePendingDispatch(
+            id: pendingDispatchToSettle!.id,
+            clientId: selectedClient?.id,
+            paymentMethod: paymentMethod,
+            amountPaid: paymentMethod == PaymentMethod.cash
+                ? double.tryParse(clientMoneyCtrl.text) ?? 0
+                : 0,
+            changeAmount: paymentMethod == PaymentMethod.cash
+                ? totalRemaining ?? 0
+                : 0,
+          ),
         );
       } else {
         SaleInfoDto dto = SaleInfoDto(
@@ -250,70 +262,100 @@ class OrderController extends ChangeNotifier {
           changeAmount: totalRemaining,
         );
 
-        _saleEntity = await salesApi.createSale(
-          dto,
-          idempotencyKey: _saleIdempotencyKey,
+        _saleEntity = await operationTiming.measure(
+          'crear venta en backend',
+          () => salesApi.createSale(dto, idempotencyKey: _saleIdempotencyKey),
         );
       }
 
       return CtrlResponse(success: true);
     } on AppException catch (e) {
+      operationTiming.event('error de venta: ${e.runtimeType}');
       return CtrlResponse(success: false, message: e.message);
     } finally {
+      if (ownsTiming) await operationTiming.finish();
       _isCreatingSale = false;
       notifyListeners();
     }
   }
 
-  Future<void> printTicket() async {
-    ToastService toastService = locator();
-    Printer? printer = await printerService.getSelectedPrinter();
-    if (printer == null) {
-      toastService.error("No hay ninguna impresora seleccionada");
-      return;
-    }
-
-    if (generalConfigController.generalConfigEntity == null) {
-      await generalConfigController.loadGeneralConfig();
-    }
-
-    if (_saleEntity == null) {
-      toastService.error("Ocurrio un error con la venta");
-      return;
-    }
-
-    final config = generalConfigController.generalConfigEntity!;
-
-    //TODO: Para probar o guardar ticket en PC
-    // Uint8List bytes = await sellTicketPdf(config, ticket);
-    // await Printing.sharePdf(bytes: bytes, filename: "CUALQUIER NOMBRE");
-
-    for (int copy = 0; copy < config.printQnty; copy++) {
-      final ticket = SellTicketEntity(
-        ticketNumber: _saleEntity!.id,
-        copyNumber: copy + 1,
-        folio: _saleEntity!.folio,
-        commercialName: _saleEntity!.commercialName,
-        waterType: _saleEntity!.waterType,
-        unitOfMeasurement: _saleEntity!.unitOfMeasurement,
-        quantity: _saleEntity!.quantity,
-        total: total,
-        paymentMethod: _saleEntity!.paymentMethod,
-        amountPaid: _saleEntity!.amountPaid,
-        changeAmount: _saleEntity!.changeAmount,
-        dispatchCode: _saleEntity!.dispatchCode,
-        createdAt: _saleEntity!.createdAt,
-        sellerName: authController.session!.displayName,
-        alreadyDispatched: isPendingDispatchPayment,
+  Future<void> printTicket({PrintTiming? timing}) async {
+    final operationTiming = timing ?? PrintTiming('venta.imprimir');
+    final ownsTiming = timing == null;
+    try {
+      ToastService toastService = locator();
+      Printer? printer = await operationTiming.measure(
+        'obtener impresora para imprimir',
+        () => printerService.getSelectedPrinter(),
       );
+      if (printer == null) {
+        operationTiming.event('sin impresora seleccionada para imprimir');
+        toastService.error("No hay ninguna impresora seleccionada");
+        return;
+      }
 
-      await Printing.directPrintPdf(
-        printer: printer,
-        format: sellTicketPageFormat,
-        dynamicLayout: false,
-        usePrinterSettings: true,
-        onLayout: (format) => sellTicketPdf(config, ticket, pageFormat: format),
-      );
+      if (generalConfigController.generalConfigEntity == null) {
+        await operationTiming.measure(
+          'cargar configuración del ticket',
+          () => generalConfigController.loadGeneralConfig(),
+        );
+      }
+
+      if (_saleEntity == null) {
+        operationTiming.event('no hay venta para imprimir');
+        toastService.error("Ocurrio un error con la venta");
+        return;
+      }
+
+      final config = generalConfigController.generalConfigEntity!;
+
+      for (int copy = 0; copy < config.printQnty; copy++) {
+        final copyNumber = copy + 1;
+        final ticket = SellTicketEntity(
+          ticketNumber: _saleEntity!.id,
+          copyNumber: copyNumber,
+          folio: _saleEntity!.folio,
+          commercialName: _saleEntity!.commercialName,
+          waterType: _saleEntity!.waterType,
+          unitOfMeasurement: _saleEntity!.unitOfMeasurement,
+          quantity: _saleEntity!.quantity,
+          total: total,
+          paymentMethod: _saleEntity!.paymentMethod,
+          amountPaid: _saleEntity!.amountPaid,
+          changeAmount: _saleEntity!.changeAmount,
+          dispatchCode: _saleEntity!.dispatchCode,
+          createdAt: _saleEntity!.createdAt,
+          sellerName: authController.session!.displayName,
+          alreadyDispatched: isPendingDispatchPayment,
+        );
+
+        final pdfBytes = await operationTiming.measure(
+          'construcción del PDF, copia $copyNumber',
+          () => sellTicketPdf(
+            config,
+            ticket,
+            pageFormat: sellTicketPageFormat,
+          ),
+        );
+
+        final result = await operationTiming.measure(
+          'impresión: envío del PDF y respuesta del sistema, copia $copyNumber',
+          () => Future<bool>.sync(
+            () => Printing.directPrintPdf(
+              printer: printer,
+              format: sellTicketPageFormat,
+              dynamicLayout: false,
+              usePrinterSettings: true,
+              onLayout: (_) async => pdfBytes,
+            ),
+          ),
+        );
+        if (!result) {
+          operationTiming.event('impresión no completada, copia $copyNumber');
+        }
+      }
+    } finally {
+      if (ownsTiming) await operationTiming.finish();
     }
   }
 

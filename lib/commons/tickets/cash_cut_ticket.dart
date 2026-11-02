@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:frontend_garzas/commons/tickets/ticket_pdf_fonts.dart';
 import 'package:frontend_garzas/src/auth/models/auth_session.dart';
 import 'package:frontend_garzas/src/sales/clean/entities/closed_cut_summary_entity.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 const PdfPageFormat cashCutTicketPageFormat = PdfPageFormat(
   72 * PdfPageFormat.mm,
@@ -38,9 +38,9 @@ Future<Uint8List> cashCutTicketPdf(
   PdfPageFormat pageFormat = cashCutTicketPageFormat,
 }) async {
   final pdf = pw.Document(version: PdfVersion.pdf_1_5, compress: true);
-  final fontTitle = await PdfGoogleFonts.montserratAlternatesBlack();
-  final fontText = await PdfGoogleFonts.montserratMedium();
-  final fontBold = await PdfGoogleFonts.montserratBold();
+  final fontTitle = await TicketPdfFonts.cashCutTitle;
+  final fontText = await TicketPdfFonts.regular;
+  final fontBold = await TicketPdfFonts.bold;
   final summary = ticket.summary;
   final cashDifference = ticket.declaredCashTotal - summary.expectedCashTotal;
   final cardDifference = ticket.declaredCardTotal - summary.cardTotal;
