@@ -1,3 +1,6 @@
+import 'package:frontend_garzas/commons/dialogs/notched_dialog.dart';
+import 'package:frontend_garzas/commons/widgets/paged_list_panel.dart';
+import '../../../commons/paged_list_state.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/scaled_text_style.dart';
 import 'package:flutter/services.dart';
@@ -202,9 +205,16 @@ class _PendingPaymentsDialogState extends State<_PendingPaymentsDialog> {
   late Future<List<ClientEntity>> _clients;
   List<ClientEntity> _showedClients = [];
 
+  late final PagedListState<PendingDispatchEntity> _pendingPaging;
+
   @override
   void initState() {
     super.initState();
+    _pendingPaging = PagedListState(
+      onChanged: () {
+        if (mounted) setState(() {});
+      },
+    );
     _pendingDispatches = _loadPendingDispatches();
     _clients = _loadClients();
   }
@@ -215,18 +225,23 @@ class _PendingPaymentsDialogState extends State<_PendingPaymentsDialog> {
     return clients;
   }
 
-  Future<CtrlResponse<List<PendingDispatchEntity>>>
-  _loadPendingDispatches() async {
-    try {
-      final pendingDispatches = await locator<PendingDispatchesApi>()
-          .listPendingDispatches(
-            status: 'pending_payment',
-            plateOrUnitReference: _referenceController.text,
-          );
-      return CtrlResponse(success: true, element: pendingDispatches);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
-    }
+  Future<CtrlResponse<List<PendingDispatchEntity>>> _loadPendingDispatches({
+    int page = 1,
+  }) async {
+    final reference = _referenceController.text;
+    final result = await _pendingPaging.load(
+      (number) => locator<PendingDispatchesApi>().listPage(
+        page: number,
+        status: 'pending_payment',
+        plateOrUnitReference: reference,
+      ),
+      page: page,
+    );
+    return CtrlResponse(
+      success: result.success,
+      message: result.message,
+      element: _pendingPaging.items,
+    );
   }
 
   @override
@@ -235,97 +250,80 @@ class _PendingPaymentsDialogState extends State<_PendingPaymentsDialog> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return Dialog(
-      child: Container(
-        width: 620,
-        height: 640,
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 14,
-          children: [
-            Text(
-              'Despachos por cobrar',
-              style: textTheme.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            FutureBuilder(
-              future: _clients,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const IsselShimmer(width: double.infinity, height: 50);
-                }
+    return NotchedDialog(
+      icon: Icons.payments_outlined,
+      maxWidth: 620,
+      onClose: () => Navigator.of(context).pop(),
+      height: 640,
+      scrollable: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 14,
+        children: [
+          Text(
+            'Despachos por cobrar',
+            style: textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+          FutureBuilder(
+            future: _clients,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const IsselShimmer(width: double.infinity, height: 50);
+              }
 
-                return IsselSearchDropdown<ClientEntity>(
-                  height: 60,
-                  maxItemsToShow: 5,
-                  color: colorScheme.surfaceContainer,
-                  items: _showedClients.map((client) {
-                    return DropdownMenuItem(
-                      value: client,
-                      child: Text(client.commercialName),
-                    );
-                  }).toList(),
-                  value: _selectedClient,
-                  hintText: 'Selecciona un cliente',
-                  onChanged: (client) {
-                    setState(() {
-                      _selectedClient = client;
-                    });
-                  },
-                  onSearchSubmitted: _searchClients,
-                );
-              },
-            ),
-            Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  child: IsselTextFormField(
-                    controller: _referenceController,
-                    hintText: 'Placa o unidad',
-                    prefixIcon: Icons.local_shipping_outlined,
-                    fillColor: theme.scaffoldBackgroundColor,
-                    onSubmitted: (_) => _searchPendingDispatches(),
-                  ),
+              return IsselSearchDropdown<ClientEntity>(
+                height: 60,
+                maxItemsToShow: 5,
+                color: colorScheme.surfaceContainer,
+                items: _showedClients.map((client) {
+                  return DropdownMenuItem(
+                    value: client,
+                    child: Text(client.commercialName),
+                  );
+                }).toList(),
+                value: _selectedClient,
+                hintText: 'Selecciona un cliente',
+                onChanged: (client) {
+                  setState(() {
+                    _selectedClient = client;
+                  });
+                },
+                onSearchSubmitted: _searchClients,
+              );
+            },
+          ),
+          Row(
+            spacing: 10,
+            children: [
+              Expanded(
+                child: IsselTextFormField(
+                  controller: _referenceController,
+                  hintText: 'Placa o unidad',
+                  prefixIcon: Icons.local_shipping_outlined,
+                  fillColor: theme.scaffoldBackgroundColor,
+                  onSubmitted: (_) => _searchPendingDispatches(),
                 ),
-                SizedBox(
-                  width: 130,
-                  child: IsselButton(
-                    text: 'Buscar',
-                    height: 50,
-                    onTap: _searchPendingDispatches,
-                  ),
+              ),
+              SizedBox(
+                width: 130,
+                child: IsselButton(
+                  text: 'Buscar',
+                  height: 50,
+                  onTap: _searchPendingDispatches,
                 ),
-              ],
-            ),
-            Divider(color: colorScheme.outline),
-            Expanded(
+              ),
+            ],
+          ),
+          Divider(color: colorScheme.outline),
+          Expanded(
+            child: PagedListPanel(
+              state: _pendingPaging,
+              onPageChanged: (page) => _loadPendingDispatches(page: page),
               child: FutureBuilder<CtrlResponse<List<PendingDispatchEntity>>>(
                 future: _pendingDispatches,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const IsselShimmer(
-                      width: double.infinity,
-                      height: 260,
-                    );
-                  }
-
-                  final response = snapshot.data;
-                  if (response == null || !response.success) {
-                    return Center(
-                      child: Text(
-                        response?.message ??
-                            'No fue posible cargar los despachos',
-                      ),
-                    );
-                  }
-
-                  final pendingDispatches = response.element ?? [];
+                  final pendingDispatches = _pendingPaging.items;
                   if (pendingDispatches.isEmpty) {
                     return Center(
                       child: Text(
@@ -360,16 +358,16 @@ class _PendingPaymentsDialogState extends State<_PendingPaymentsDialog> {
                 },
               ),
             ),
-            Divider(color: colorScheme.outline),
-            IsselButton(
-              text: 'Cerrar',
-              height: 50,
-              color: Colors.transparent,
-              textColor: colorScheme.onSurface,
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+          ),
+          Divider(color: colorScheme.outline),
+          IsselButton(
+            text: 'Cerrar',
+            height: 50,
+            color: Colors.transparent,
+            textColor: colorScheme.onSurface,
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
       ),
     );
   }
@@ -397,6 +395,7 @@ class _PendingPaymentsDialogState extends State<_PendingPaymentsDialog> {
 
   @override
   void dispose() {
+    _pendingPaging.dispose();
     _referenceController.dispose();
     super.dispose();
   }

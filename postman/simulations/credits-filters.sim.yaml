@@ -1,0 +1,6 @@
+simulation: credits-filters
+routing: path
+mocks:
+  - name: garzas-credits
+    routeKey: backend
+    path: postman/mocks/garzas-credits

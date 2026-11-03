@@ -1,3 +1,5 @@
+import 'package:frontend_garzas/commons/entities/page_result.dart';
+import 'package:frontend_garzas/core/services/paginated_api.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/credit_payment_entity.dart';
@@ -11,6 +13,7 @@ import 'package:frontend_garzas/src/sales/clean/entities/credit_entity.dart';
 import 'package:frontend_garzas/core/utils/date_range_query.dart';
 
 import '../clean/entities/monthly_garza_total_entity.dart';
+import '../clean/enums/credit_status.dart';
 
 class SalesApi {
   final ApiClient apiClient;
@@ -36,17 +39,27 @@ class SalesApi {
   final String _getPendingCreditsPath = "/sales/credit/pending";
   final String _bulkCreditPaymentsPath = "/sales/credit-payments/bulk";
 
-  Future<List<SaleEntity>> listSales() async {
-    try {
-      List response = await apiClient.get(_salesPath, authRequired: true);
-
-      return response.map((e) => SaleEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
+  Future<PageResult<SaleEntity>> listSalesPage({
+    int page = 1,
+    int limit = 20,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    final ranged = startDate != null && endDate != null;
+    return PaginatedApi.get(
+      apiClient,
+      ranged ? _salesByDateRangePath : _salesPath,
+      SaleEntity.fromMap,
+      page: page,
+      limit: limit,
+      filters: ranged
+          ? DateRangeQuery.fromDates(startDate: startDate, endDate: endDate)
+          : {},
+    );
   }
+
+  Future<List<SaleEntity>> listSales() =>
+      PaginatedApi.all((page) => listSalesPage(page: page, limit: 100));
 
   Future<StatisticsEntity> getMonthlyPaymentTotals({DateTime? month}) async {
     try {
@@ -114,24 +127,14 @@ class SalesApi {
   Future<List<SaleEntity>> listByDateRange(
     DateTime startDate,
     DateTime endDate,
-  ) async {
-    try {
-      List response = await apiClient.get(
-        _salesByDateRangePath,
-        authRequired: true,
-        queryParams: DateRangeQuery.fromDates(
-          startDate: startDate,
-          endDate: endDate,
-        ),
-      );
-
-      return response.map((e) => SaleEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
+  ) => PaginatedApi.all(
+    (page) => listSalesPage(
+      page: page,
+      limit: 100,
+      startDate: startDate,
+      endDate: endDate,
+    ),
+  );
 
   Future<double> quotSale(
     WaterType waterType,
@@ -191,65 +194,84 @@ class SalesApi {
   }
 
   // Credits
+  Future<PageResult<CreditEntity>> getPendingCreditsPage({
+    int page = 1,
+    int limit = 20,
+    CreditStatus status = CreditStatus.pending,
+    String? search,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    final query = search?.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (query != null && query.runes.length > 45) {
+      throw AppException(
+        message: 'El cliente debe tener como máximo 45 caracteres',
+      );
+    }
+    return PaginatedApi.get(
+      apiClient,
+      _getPendingCreditsPath,
+      CreditEntity.fromMap,
+      page: page,
+      limit: limit,
+      filters: {
+        'status': status.name,
+        if (query != null && query.isNotEmpty) 'search': query,
+        if (startDate != null && endDate != null)
+          ...DateRangeQuery.fromDates(startDate: startDate, endDate: endDate),
+      },
+    );
+  }
+
   Future<List<CreditEntity>> getPendingCredits({
     DateTime? startDate,
     DateTime? endDate,
-  }) async {
-    try {
-      Map<String, dynamic>? queryParams;
+  }) => PaginatedApi.all(
+    (page) => getPendingCreditsPage(
+      page: page,
+      limit: 100,
+      startDate: startDate,
+      endDate: endDate,
+    ),
+  );
 
-      if (startDate != null && endDate != null) {
-        queryParams = DateRangeQuery.fromDates(
-          startDate: startDate,
-          endDate: endDate,
-        );
-      }
+  Future<PageResult<CreditPaymentEntity>> getCreditPaymentsPage(
+    String folio, {
+    int page = 1,
+    int limit = 20,
+  }) => PaginatedApi.get(
+    apiClient,
+    _listCreditPaymentsPath(folio),
+    CreditPaymentEntity.fromMap,
+    page: page,
+    limit: limit,
+  );
 
-      List response = await apiClient.get(
-        _getPendingCreditsPath,
-        authRequired: true,
-        queryParams: queryParams,
+  Future<List<CreditPaymentEntity>> getCreditPayments(String folio) =>
+      PaginatedApi.all(
+        (page) => getCreditPaymentsPage(folio, page: page, limit: 100),
       );
 
-      return response.map((e) => CreditEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
+  Future<PageResult<CreditEntity>> listPendingCreditSalesByClientPage(
+    int clientId, {
+    int page = 1,
+    int limit = 20,
+  }) => PaginatedApi.get(
+    apiClient,
+    _listPendingCreditSalesByClientPath(clientId),
+    CreditEntity.fromMap,
+    page: page,
+    limit: limit,
+  );
 
-  Future<List<CreditPaymentEntity>> getCreditPayments(String folio) async {
-    try {
-      List response = await apiClient.get(
-        _listCreditPaymentsPath(folio),
-        authRequired: true,
+  Future<List<CreditEntity>> listPendingCreditSalesByClient(int clientId) =>
+      PaginatedApi.all(
+        (page) => listPendingCreditSalesByClientPage(
+          clientId,
+          page: page,
+          limit: 100,
+        ),
       );
-
-      return response.map((e) => CreditPaymentEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
-
-  Future<List<CreditEntity>> listPendingCreditSalesByClient(
-    int clientId,
-  ) async {
-    try {
-      List response = await apiClient.get(
-        _listPendingCreditSalesByClientPath(clientId),
-        authRequired: true,
-      );
-
-      return response.map((e) => CreditEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
 
   Future<void> createCreditPayment(
     String folio,

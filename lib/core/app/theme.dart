@@ -82,7 +82,7 @@ ThemeData lightTheme = ThemeData(
     secondary: AppColors.secondary,
     onSecondary: AppColors.black,
     error: AppColors.red,
-    onError: AppColors.black,
+    onError: AppColors.white,
     surface: AppColors.whiteBackSurface,
     surfaceContainer: AppColors.lightBackground,
     onSurface: AppColors.black,

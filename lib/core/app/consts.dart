@@ -16,6 +16,8 @@ class AppAssets {
 
   static const logo = "$_baseImages/pabn.png";
   static const logo2 = "$_baseImages/rubi.png";
+  // PNG payload extracted without changes from drawer_icon.ico for Flutter.
+  static const drawerIcon = "$_baseImages/drawer_icon.png";
 
   static const configs = "$_baseImages/configs.png";
   static const customers = "$_baseImages/customers.png";

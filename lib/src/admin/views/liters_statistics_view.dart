@@ -9,7 +9,6 @@ import 'package:frontend_garzas/src/admin/controllers/flow_meter_controller.dart
 import 'package:intl/intl.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 class _FlowMeterDescriptions {
   static const metered =
@@ -40,7 +39,9 @@ extension on _GarzaFilter {
 }
 
 class LitersStatisticsView extends StatefulWidget {
-  const LitersStatisticsView({super.key});
+  const LitersStatisticsView({super.key, this.footer});
+
+  final Widget? footer;
 
   @override
   State<LitersStatisticsView> createState() => _LitersStatisticsViewState();
@@ -68,7 +69,7 @@ class _LitersStatisticsViewState extends State<LitersStatisticsView> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(
-          top: kWindowCaptionHeight + 10,
+          top: 10,
           left: 10,
           right: 10,
           bottom: 10,
@@ -77,7 +78,7 @@ class _LitersStatisticsViewState extends State<LitersStatisticsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 12,
           children: [
-            const TextBackButton(),
+            if (Navigator.canPop(context)) const TextBackButton(),
             Expanded(
               child: FutureBuilder<CtrlResponse>(
                 future: _loadCurrentMonth,
@@ -105,13 +106,32 @@ class _LitersStatisticsViewState extends State<LitersStatisticsView> {
                     );
                   }
 
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 12,
-                    children: [
-                      _MetricsWrap(metrics: currentMonth.metrics),
-                      Expanded(child: _buildChartPanel(controller, theme)),
-                    ],
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final metricsHeight = constraints.maxWidth >= 760
+                          ? 108.0
+                          : 226.0;
+                      final chartHeight = widget.footer == null
+                          ? math.max(
+                              360.0,
+                              constraints.maxHeight - metricsHeight - 12,
+                            )
+                          : (constraints.maxHeight * .52).clamp(360.0, 540.0);
+                      return SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: 12,
+                          children: [
+                            _MetricsWrap(metrics: currentMonth.metrics),
+                            SizedBox(
+                              height: chartHeight,
+                              child: _buildChartPanel(controller, theme),
+                            ),
+                            if (widget.footer != null) widget.footer!,
+                          ],
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -281,6 +301,24 @@ class _LitersStatisticsViewState extends State<LitersStatisticsView> {
     final chartBackground = colorScheme.surface;
     final gridColor = colorScheme.outlineVariant.withAlpha(isDark ? 120 : 160);
     final axisLabelColor = colorScheme.onSurfaceVariant;
+    final axisLabelStyle = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(fontSize: 10, color: axisLabelColor);
+    var yAxisWidth = 52.0;
+    for (final value in [minY, maxY]) {
+      final painter = TextPainter(
+        // Reserve enough room for the widest digit at this magnitude.
+        text: TextSpan(
+          text: _formatYAxisValue(value).replaceAll(RegExp(r'\d'), '8'),
+          style: axisLabelStyle,
+        ),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      yAxisWidth = math.max(yAxisWidth, painter.width.ceilToDouble() + 16);
+      painter.dispose();
+    }
     final tooltipTextColor = colorScheme.onSurface;
     final labelStep = math.max(1, (days.length / 6).ceil());
     const fieldNames = [
@@ -339,15 +377,17 @@ class _LitersStatisticsViewState extends State<LitersStatisticsView> {
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 52,
+            reservedSize: yAxisWidth,
             interval: interval,
             getTitlesWidget: (value, meta) => SideTitleWidget(
               meta: meta,
               fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
               child: Text(
                 _formatYAxisValue(value),
-                style: TextStyle(fontSize: 10, color: axisLabelColor),
-                textAlign: TextAlign.left,
+                style: axisLabelStyle,
+                maxLines: 1,
+                softWrap: false,
+                textAlign: TextAlign.right,
               ),
             ),
           ),
@@ -437,17 +477,7 @@ class _LitersStatisticsViewState extends State<LitersStatisticsView> {
 String _formatNumberWithCommas(double value) {
   if (!value.isFinite) return value.toString();
 
-  final rawValue = value.toString();
-  final negative = rawValue.startsWith('-');
-  final unsignedValue = negative ? rawValue.substring(1) : rawValue;
-  final parts = unsignedValue.split('.');
-  final integerPart = parts.first.replaceAllMapped(
-    RegExp(r'\B(?=(\d{3})+(?!\d))'),
-    (match) => ',',
-  );
-  final decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-
-  return '${negative ? '-' : ''}$integerPart$decimalPart';
+  return NumberFormat('#,##0.00', 'en_US').format(value);
 }
 
 class _MetricsWrap extends StatelessWidget {
@@ -489,12 +519,19 @@ class _MetricsWrap extends StatelessWidget {
       ),
     ];
 
-    return SizedBox(
-      height: 108,
-      child: Row(
-        spacing: 10,
-        children: [for (final card in cards) Expanded(child: card)],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 760 ? 4 : 2;
+        final width = (constraints.maxWidth - 10 * (columns - 1)) / columns;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final card in cards)
+              SizedBox(width: width, height: 108, child: card),
+          ],
+        );
+      },
     );
   }
 }
@@ -675,7 +712,7 @@ class _MetricDescriptionOverlay extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 100),
+        constraints: const BoxConstraints(maxHeight: 110),
         child: SizedBox(
           width: math.min(width, 310.0),
           child: Container(
@@ -717,7 +754,7 @@ class _MetricDescriptionOverlay extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         description,
-                        maxLines: 4,
+                        maxLines: 5,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.white,

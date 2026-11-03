@@ -1,3 +1,5 @@
+import 'package:frontend_garzas/commons/entities/page_result.dart';
+import 'package:frontend_garzas/core/services/paginated_api.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/cash_register_entity.dart';
@@ -21,42 +23,39 @@ class CashRegisterApi {
   String _cashRegisterReceiptById(int id) => "/cash-register/$id/receipt";
   final String _cashRegisterClosePath = "/cash-register/close";
 
-  Future<List<CashRegisterEntity>> listCashRegisterCuts() async {
-    try {
-      List response = await apiClient.get(
-        _cashRegisterPath,
-        authRequired: true,
-      );
-
-      return response.map((e) => CashRegisterEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
+  Future<PageResult<CashRegisterEntity>> listCutsPage({
+    int page = 1,
+    int limit = 20,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    final ranged = startDate != null && endDate != null;
+    return PaginatedApi.get(
+      apiClient,
+      ranged ? _cashRegisterByDateRangePath : _cashRegisterPath,
+      CashRegisterEntity.fromMap,
+      page: page,
+      limit: limit,
+      filters: ranged
+          ? DateRangeQuery.fromDates(startDate: startDate, endDate: endDate)
+          : {},
+    );
   }
+
+  Future<List<CashRegisterEntity>> listCashRegisterCuts() =>
+      PaginatedApi.all((page) => listCutsPage(page: page, limit: 100));
 
   Future<List<CashRegisterEntity>> listByDateRange(
     DateTime startDate,
     DateTime endDate,
-  ) async {
-    try {
-      List response = await apiClient.get(
-        _cashRegisterByDateRangePath,
-        authRequired: true,
-        queryParams: DateRangeQuery.fromDates(
-          startDate: startDate,
-          endDate: endDate,
-        ),
-      );
-
-      return response.map((e) => CashRegisterEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
+  ) => PaginatedApi.all(
+    (page) => listCutsPage(
+      page: page,
+      limit: 100,
+      startDate: startDate,
+      endDate: endDate,
+    ),
+  );
 
   Future<List<SummaryEntity>> getSummaryByCutId(int id) async {
     try {
@@ -88,20 +87,21 @@ class CashRegisterApi {
     }
   }
 
-  Future<List<ClosedCutSaleEntity>> getSalesByCutId(int id) async {
-    try {
-      List response = await apiClient.get(
-        _cashRegisterSalesById(id),
-        authRequired: true,
-      );
+  Future<PageResult<ClosedCutSaleEntity>> getSalesPageByCutId(
+    int id, {
+    int page = 1,
+    int limit = 20,
+  }) => PaginatedApi.get(
+    apiClient,
+    _cashRegisterSalesById(id),
+    ClosedCutSaleEntity.fromMap,
+    page: page,
+    limit: limit,
+  );
 
-      return response.map((e) => ClosedCutSaleEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
+  Future<List<ClosedCutSaleEntity>> getSalesByCutId(int id) => PaginatedApi.all(
+    (page) => getSalesPageByCutId(id, page: page, limit: 100),
+  );
 
   Future<CashRegisterEntity> openCut(double openingAmount) async {
     try {

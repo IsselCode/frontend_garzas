@@ -1,3 +1,4 @@
+import '../../../commons/paged_list_state.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -42,7 +43,10 @@ class DispatchController extends ChangeNotifier {
     required this.garzasApi,
     required this.dispatchSessionsApi,
     required this.pendingDispatchesApi,
-  });
+  }) {
+    pendingPaging = PagedListState(onChanged: notifyListeners);
+  }
+  late final PagedListState<PendingDispatchEntity> pendingPaging;
 
   DispatchValidateEntity? dispatchValidate;
   PendingDispatchEntity? selectedPendingDispatch;
@@ -227,15 +231,21 @@ class DispatchController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<CtrlResponse<List<PendingDispatchEntity>>>
-  listPendingDispatches() async {
-    try {
-      final pendingDispatches = await pendingDispatchesApi
-          .listPendingDispatches(status: 'pending_dispatch');
-      return CtrlResponse(success: true, element: pendingDispatches);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
-    }
+  Future<CtrlResponse<List<PendingDispatchEntity>>> listPendingDispatches({
+    int page = 1,
+  }) async {
+    final response = await pendingPaging.load(
+      (number) => pendingDispatchesApi.listPage(
+        page: number,
+        status: 'pending_dispatch',
+      ),
+      page: page,
+    );
+    return CtrlResponse(
+      success: response.success,
+      message: response.message,
+      element: pendingPaging.items,
+    );
   }
 
   Future<CtrlResponse<PendingDispatchEntity>> cancelPendingDispatch(
@@ -1086,6 +1096,7 @@ class DispatchController extends ChangeNotifier {
 
   @override
   void dispose() {
+    pendingPaging.dispose();
     _isDisposed = true;
     _runtimeGeneration++;
     _runtimeWatchdog?.cancel();

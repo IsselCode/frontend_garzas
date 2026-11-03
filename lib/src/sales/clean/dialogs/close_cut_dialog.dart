@@ -1,3 +1,4 @@
+import 'package:frontend_garzas/commons/dialogs/notched_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/tickets/cash_cut_ticket.dart';
@@ -52,273 +53,266 @@ class _ConfigPrinterDialogState extends State<CloseCutDialog> {
     CashRegisterController cashRegisterController = context.read();
     AuthController authController = context.read();
 
-    return Dialog(
-      child: Container(
-        width: 650,
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            spacing: 15,
-            mainAxisSize: MainAxisSize.min,
+    return NotchedDialog(
+      icon: Icons.point_of_sale_outlined,
+      maxWidth: 650,
+      onClose: () => Navigator.of(context).pop(),
+      child: Column(
+        spacing: 15,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Titulo
+          Flex(
+            direction: Axis.vertical,
+            spacing: 10,
             children: [
-              // Titulo
-              Flex(
-                direction: Axis.vertical,
-                spacing: 10,
-                children: [
-                  //* Titulo
-                  Text(
-                    "Finalizar Corte",
-                    style: textTheme.headlineMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  //* Description
-                  Text(
-                    "Ingresa los datos",
-                    style: textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              //* Titulo
+              Text(
+                "Finalizar Corte",
+                style: textTheme.headlineMedium,
+                textAlign: TextAlign.center,
               ),
+              //* Description
+              Text(
+                "Ingresa los datos",
+                style: textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
 
-              FutureBuilder(
-                future: _getActiveCutSummary,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return IsselShimmer(width: double.infinity, height: 250);
-                  }
+          FutureBuilder(
+            future: _getActiveCutSummary,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return IsselShimmer(width: double.infinity, height: 250);
+              }
 
-                  if (!snapshot.data!.success) {
-                    return SizedBox(
-                      height: 250,
-                      width: double.infinity,
-                      child: Center(child: Text(snapshot.data!.message!)),
-                    );
-                  }
+              if (!snapshot.data!.success) {
+                return SizedBox(
+                  height: 250,
+                  width: double.infinity,
+                  child: Center(child: Text(snapshot.data!.message!)),
+                );
+              }
 
-                  ActiveCutSummaryEntity cut = snapshot.data!.element!;
+              ActiveCutSummaryEntity cut = snapshot.data!.element!;
 
-                  return Flex(
+              return Flex(
+                direction: Axis.vertical,
+                spacing: 15,
+                children: [
+                  // Cantidad Inicial
+                  Flex(
+                    spacing: 5,
                     direction: Axis.vertical,
-                    spacing: 15,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Cantidad Inicial
-                      Flex(
-                        spacing: 5,
-                        direction: Axis.vertical,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Cantidad inicial",
-                            style: textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              spacing: 10,
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: _CutAmountPill(
-                                    asset: AppAssets.cash,
-                                    amount: cut.openingAmount,
-                                  ),
-                                ),
-                                Spacer(),
-                              ],
-                            ),
-                          ),
-                        ],
+                      Text(
+                        "Cantidad inicial",
+                        style: textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
                       ),
-
-                      // Body
-                      Flex(
-                        spacing: 5,
-                        direction: Axis.vertical,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Totales",
-                            style: textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              spacing: 10,
-                              children: [
-                                Expanded(
-                                  child: _CutAmountPill(
-                                    asset: AppAssets.cash,
-                                    amount: cut.expectedCashTotal,
-                                    highlight: true,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: _CutAmountPill(
-                                    asset: AppAssets.card,
-                                    amount: cut.cardTotal,
-                                    highlight: true,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: _CutAmountPill(
-                                    asset: AppAssets.credit,
-                                    amount: cut.creditTotal,
-                                    highlight: true,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // Cantidades a declarar
-                      Form(
-                        key: _formKey,
-                        child: Flex(
-                          spacing: 5,
-                          direction: Axis.vertical,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(
+                        width: double.infinity,
+                        child: Row(
+                          spacing: 10,
                           children: [
-                            Text(
-                              "Cantidades a declarar",
-                              style: textTheme.bodyMedium,
-                              textAlign: TextAlign.center,
+                            Expanded(
+                              flex: 2,
+                              child: _CutAmountPill(
+                                asset: AppAssets.cash,
+                                amount: cut.openingAmount,
+                              ),
                             ),
-                            SizedBox(
-                              width: double.infinity,
-                              child: Row(
-                                spacing: 10,
-                                children: [
-                                  Expanded(
-                                    child: IsselTextFormField(
-                                      controller: cashCtrl,
-                                      fillColor: colorScheme.surfaceContainer,
-                                      hintText: "Efectivo",
-                                      height: 50,
-                                      inputFormatters: [
-                                        RegexService.positiveNumberFormatter,
-                                      ],
-                                      validator: (value) =>
-                                          RegexService.positiveNumberValidator(
-                                            value,
-                                          ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: IsselTextFormField(
-                                      fillColor: colorScheme.surfaceContainer,
-                                      controller: cardCtrl,
-                                      hintText: "Tarjeta",
-                                      height: 50,
-                                      inputFormatters: [
-                                        RegexService.positiveNumberFormatter,
-                                      ],
-                                      validator: (value) =>
-                                          RegexService.positiveNumberValidator(
-                                            value,
-                                          ),
-                                    ),
-                                  ),
-                                  Expanded(child: SizedBox()),
-                                ],
+                            Spacer(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Body
+                  Flex(
+                    spacing: 5,
+                    direction: Axis.vertical,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Totales",
+                        style: textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            Expanded(
+                              child: _CutAmountPill(
+                                asset: AppAssets.cash,
+                                amount: cut.expectedCashTotal,
+                                highlight: true,
+                              ),
+                            ),
+                            Expanded(
+                              child: _CutAmountPill(
+                                asset: AppAssets.card,
+                                amount: cut.cardTotal,
+                                highlight: true,
+                              ),
+                            ),
+                            Expanded(
+                              child: _CutAmountPill(
+                                asset: AppAssets.credit,
+                                amount: cut.creditTotal,
+                                highlight: true,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ],
-                  );
-                },
-              ),
+                  ),
 
-              // Divisor
-              Divider(color: colorScheme.outline),
-
-              //* Realizar corte
-              IsselButton(
-                text: "Realizar Corte",
-                textColor: colorScheme.onPrimary,
-                color: colorScheme.primary,
-                onTap: () async {
-                  if (!_formKey.currentState!.validate()) {
-                    return;
-                  }
-
-                  final toastService = locator<ToastService>();
-                  final printerService = locator<PrinterService>();
-                  final loaderOverlay = context.loaderOverlay;
-                  final printer = await printerService.getSelectedPrinter();
-
-                  if (printer == null) {
-                    toastService.error("No hay ninguna impresora seleccionada");
-                    return;
-                  }
-
-                  final declaredCashTotal = double.parse(cashCtrl.text);
-                  final declaredCardTotal = double.parse(cardCtrl.text);
-
-                  loaderOverlay.show();
-
-                  CtrlResponse<ClosedCutSummaryEntity> response =
-                      await cashRegisterController.closeCut(
-                        declaredCashTotal,
-                        declaredCardTotal,
-                      );
-
-                  loaderOverlay.hide();
-
-                  if (response.success) {
-                    try {
-                      final ticket = CashCutTicketEntity(
-                        summary: response.element!,
-                        user: authController.session!,
-                        declaredCashTotal: declaredCashTotal,
-                        declaredCardTotal: declaredCardTotal,
-                        closedAt: DateTime.now(),
-                      );
-
-                      await Printing.directPrintPdf(
-                        printer: printer,
-                        format: cashCutTicketPageFormat,
-                        dynamicLayout: false,
-                        usePrinterSettings: true,
-                        onLayout: (format) =>
-                            cashCutTicketPdf(ticket, pageFormat: format),
-                      );
-
-                      await authController.logout();
-                    } catch (_) {
-                      toastService.error(
-                        "El corte se realizo, pero no se pudo imprimir el ticket",
-                      );
-                      await authController.logout();
-                    }
-                  } else {
-                    toastService.error(response.message!);
-                  }
-                },
-              ),
-
-              //* Cancelar
-              IsselButton(
-                text: "Volver",
-                color: Colors.transparent,
-                textColor: colorScheme.onSurface,
-                onTap: () {
-                  Navigator.pop(context, false);
-                },
-              ),
-            ],
+                  // Cantidades a declarar
+                  Form(
+                    key: _formKey,
+                    child: Flex(
+                      spacing: 5,
+                      direction: Axis.vertical,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Cantidades a declarar",
+                          style: textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Row(
+                            spacing: 10,
+                            children: [
+                              Expanded(
+                                child: IsselTextFormField(
+                                  controller: cashCtrl,
+                                  fillColor: colorScheme.surfaceContainer,
+                                  hintText: "Efectivo",
+                                  height: 50,
+                                  inputFormatters: [
+                                    RegexService.positiveNumberFormatter,
+                                  ],
+                                  validator: (value) =>
+                                      RegexService.positiveNumberValidator(
+                                        value,
+                                      ),
+                                ),
+                              ),
+                              Expanded(
+                                child: IsselTextFormField(
+                                  fillColor: colorScheme.surfaceContainer,
+                                  controller: cardCtrl,
+                                  hintText: "Tarjeta",
+                                  height: 50,
+                                  inputFormatters: [
+                                    RegexService.positiveNumberFormatter,
+                                  ],
+                                  validator: (value) =>
+                                      RegexService.positiveNumberValidator(
+                                        value,
+                                      ),
+                                ),
+                              ),
+                              Expanded(child: SizedBox()),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-        ),
+
+          // Divisor
+          Divider(color: colorScheme.outline),
+
+          //* Realizar corte
+          IsselButton(
+            text: "Realizar Corte",
+            textColor: colorScheme.onPrimary,
+            color: colorScheme.primary,
+            onTap: () async {
+              if (!_formKey.currentState!.validate()) {
+                return;
+              }
+
+              final toastService = locator<ToastService>();
+              final printerService = locator<PrinterService>();
+              final loaderOverlay = context.loaderOverlay;
+              final printer = await printerService.getSelectedPrinter();
+
+              if (printer == null) {
+                toastService.error("No hay ninguna impresora seleccionada");
+                return;
+              }
+
+              final declaredCashTotal = double.parse(cashCtrl.text);
+              final declaredCardTotal = double.parse(cardCtrl.text);
+
+              loaderOverlay.show();
+
+              CtrlResponse<ClosedCutSummaryEntity> response =
+                  await cashRegisterController.closeCut(
+                    declaredCashTotal,
+                    declaredCardTotal,
+                  );
+
+              loaderOverlay.hide();
+
+              if (response.success) {
+                try {
+                  final ticket = CashCutTicketEntity(
+                    summary: response.element!,
+                    user: authController.session!,
+                    declaredCashTotal: declaredCashTotal,
+                    declaredCardTotal: declaredCardTotal,
+                    closedAt: DateTime.now(),
+                  );
+
+                  await Printing.directPrintPdf(
+                    printer: printer,
+                    format: cashCutTicketPageFormat,
+                    dynamicLayout: false,
+                    usePrinterSettings: true,
+                    onLayout: (format) =>
+                        cashCutTicketPdf(ticket, pageFormat: format),
+                  );
+
+                  await authController.logout();
+                } catch (_) {
+                  toastService.error(
+                    "El corte se realizo, pero no se pudo imprimir el ticket",
+                  );
+                  await authController.logout();
+                }
+              } else {
+                toastService.error(response.message!);
+              }
+            },
+          ),
+
+          //* Cancelar
+          IsselButton(
+            text: "Volver",
+            color: Colors.transparent,
+            textColor: colorScheme.onSurface,
+            onTap: () {
+              Navigator.pop(context, false);
+            },
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,5 @@
+import '../../../commons/entities/page_result.dart';
+import '../../../commons/paged_list_state.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
@@ -13,7 +15,26 @@ class StatisticsController extends ChangeNotifier {
   LogsApi logsApi;
   SalesApi salesApi;
 
-  StatisticsController({required this.logsApi, required this.salesApi});
+  StatisticsController({required this.logsApi, required this.salesApi}) {
+    salesPaging = PagedListState(
+      onChanged: () {
+        sales = showedSales = salesPaging.items;
+        notifyListeners();
+      },
+    );
+    logsPaging = PagedListState(
+      limit: 50,
+      onChanged: () {
+        logs = showedLogs = logsPaging.items;
+        notifyListeners();
+      },
+    );
+  }
+  late final PagedListState<SaleEntity> salesPaging;
+  late final PagedListState<LogEntity> logsPaging;
+  DateTime? _salesStart, _salesEnd, _logsStart, _logsEnd;
+  String? _saleFolio;
+  int _salesRequest = 0, _logsRequest = 0;
 
   StatisticsEntity? statistics;
   MonthlyGarzaTotalEntity? monthlyGarzaTotalEntity;
@@ -49,108 +70,105 @@ class StatisticsController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> getSales() async {
-    try {
-      List<SaleEntity> tempSells = await salesApi.listSales();
-
-      sales = tempSells;
-      showedSales = tempSells;
-      notifyListeners();
-
-      return CtrlResponse(success: true);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
-    }
+  Future<CtrlResponse> getSales({int page = 1}) {
+    _salesRequest++;
+    final start = _salesStart, end = _salesEnd;
+    _saleFolio = null;
+    return salesPaging.load(
+      (number) =>
+          salesApi.listSalesPage(page: number, startDate: start, endDate: end),
+      page: page,
+    );
   }
 
   Future<CtrlResponse> deleteSaleByFolio(String folio) async {
     try {
       await salesApi.deleteSaleByFolio(folio);
-
-      sales = sales.where((sale) => sale.folio != folio).toList();
-      showedSales = showedSales.where((sale) => sale.folio != folio).toList();
-      notifyListeners();
-
-      return CtrlResponse(success: true);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
-    }
-  }
-
-  Future<CtrlResponse> findSaleByFolio(String folio) async {
-    try {
-      if (folio.isEmpty) {
-        clearSalesDateRange();
-        return CtrlResponse(success: true);
+      if (_saleFolio != null) {
+        salesPaging.replace(const PageResult.empty());
+      } else {
+        await getSales(page: salesPaging.data.page);
       }
-
-      SaleEntity tempSale = await salesApi.findSaleByPhone(folio);
-      showedSales = [tempSale];
-      notifyListeners();
-
       return CtrlResponse(success: true);
     } on AppException catch (e) {
       return CtrlResponse(success: false, message: e.message);
     }
   }
 
-  Future<CtrlResponse> getLogs() async {
-    try {
-      List<LogEntity> tempLogs = await logsApi.listLogs();
-      logs = tempLogs;
-      showedLogs = tempLogs;
-      notifyListeners();
-      return CtrlResponse(success: true);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
-    }
+  Future<CtrlResponse> findSaleByFolio(String folio) {
+    _salesRequest++;
+    _salesStart = _salesEnd = null;
+    if (folio.trim().isEmpty) return getSales();
+    _saleFolio = folio;
+    return salesPaging.load((_) async {
+      final sale = await salesApi.findSaleByPhone(folio);
+      return PageResult(
+        items: [sale],
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+      );
+    });
+  }
+
+  Future<CtrlResponse> getLogs({int page = 1}) {
+    _logsRequest++;
+    final start = _logsStart, end = _logsEnd;
+    return logsPaging.load(
+      (number) =>
+          logsApi.listPage(page: number, startDate: start, endDate: end),
+      page: page,
+    );
   }
 
   Future<CtrlResponse> getSalesByDateRange({
     required DateTime startDate,
     required DateTime endDate,
-  }) async {
-    try {
-      List<SaleEntity> tempSells = await salesApi.listByDateRange(
-        startDate,
-        endDate,
-      );
+  }) => _setSalesRange(startDate, endDate);
 
-      showedSales = tempSells;
-      notifyListeners();
+  Future<CtrlResponse> clearSalesDateRange() => _setSalesRange(null, null);
 
-      return CtrlResponse(success: true);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
+  Future<CtrlResponse> _setSalesRange(DateTime? start, DateTime? end) async {
+    final previous = (_salesStart, _salesEnd, _saleFolio);
+    _salesStart = start;
+    _salesEnd = end;
+    final pending = getSales();
+    final request = _salesRequest;
+    final response = await pending;
+    if (!response.success && request == _salesRequest) {
+      _salesStart = previous.$1;
+      _salesEnd = previous.$2;
+      _saleFolio = previous.$3;
     }
-  }
-
-  void clearSalesDateRange() {
-    showedSales = sales;
-    notifyListeners();
+    return response;
   }
 
   Future<CtrlResponse> getLogsByDateRange({
     required DateTime startDate,
     required DateTime endDate,
-  }) async {
-    try {
-      List<LogEntity> tempLogs = await logsApi.listByDateRange(
-        startDate,
-        endDate,
-      );
+  }) => _setLogsRange(startDate, endDate);
 
-      showedLogs = tempLogs;
-      notifyListeners();
+  Future<CtrlResponse> clearLogsDateRange() => _setLogsRange(null, null);
 
-      return CtrlResponse(success: true);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
+  Future<CtrlResponse> _setLogsRange(DateTime? start, DateTime? end) async {
+    final previous = (_logsStart, _logsEnd);
+    _logsStart = start;
+    _logsEnd = end;
+    final pending = getLogs();
+    final request = _logsRequest;
+    final response = await pending;
+    if (!response.success && request == _logsRequest) {
+      _logsStart = previous.$1;
+      _logsEnd = previous.$2;
     }
+    return response;
   }
 
-  void clearLogsDateRange() {
-    showedLogs = logs;
-    notifyListeners();
+  @override
+  void dispose() {
+    salesPaging.dispose();
+    logsPaging.dispose();
+    super.dispose();
   }
 }

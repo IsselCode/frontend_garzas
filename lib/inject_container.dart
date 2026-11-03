@@ -1,5 +1,6 @@
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
+import 'package:frontend_garzas/core/services/app_preferences.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/printer_service.dart';
 import 'package:frontend_garzas/core/services/server_status_controller.dart';
@@ -23,10 +24,15 @@ import 'package:frontend_garzas/src/admin/data/users_api.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/auth/data/auth_api.dart';
 import 'package:frontend_garzas/src/auth/data/auth_storage.dart';
+import 'package:frontend_garzas/src/auth/views/sign_in_view.dart';
+import 'package:frontend_garzas/src/dispatch/views/finish_dispatch_view.dart';
+import 'package:frontend_garzas/src/sales/views/finish_order_view.dart';
+import 'package:frontend_garzas/src/sales/views/generate_ticket_view.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
 import 'package:frontend_garzas/src/dispatch/data/dispatch_sessions_api.dart';
 import 'package:frontend_garzas/src/dispatch/data/pending_dispatches_api.dart';
 import 'package:get_it/get_it.dart';
+import 'package:frontend_garzas/src/admin/navigation/admin_navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 GetIt locator = GetIt.instance;
@@ -35,10 +41,25 @@ Future<void> injectContainer() async {
   final prefs = await SharedPreferences.getInstance();
 
   locator.registerSingleton<SharedPreferences>(prefs);
+  locator.registerLazySingleton(
+    () => AppPreferences(sharedPreferences: locator()),
+  );
 
-  locator.registerLazySingleton(() => NavigationService());
+  locator.registerLazySingleton(
+    () => NavigationService(
+      routes: adminRoutes,
+      captionOnPrimaryRoutes: const {
+        SignInView,
+        FinishOrderView,
+        GenerateTicketView,
+        FinishDispatchView,
+      },
+    ),
+  );
   locator.registerLazySingleton(() => ToastService());
-  locator.registerLazySingleton(() => TitleBarController());
+  locator.registerLazySingleton(
+    () => TitleBarController(appPreferences: locator()),
+  );
   locator.registerLazySingleton(() => ServerStatusController());
   locator.registerLazySingleton(
     () => PrinterService(sharedPreferences: locator()),
@@ -84,6 +105,7 @@ Future<void> injectContainer() async {
       apiClient: locator(),
       navigationService: locator(),
       titleBarController: locator(),
+      appPreferences: locator(),
     ),
   );
 

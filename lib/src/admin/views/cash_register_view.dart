@@ -1,4 +1,6 @@
+import 'package:frontend_garzas/commons/widgets/paged_list_panel.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:frontend_garzas/commons/widgets/pagination_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/tickets/cash_cut_ticket.dart';
@@ -14,12 +16,11 @@ import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 import '../../../commons/text_back_button.dart';
 import '../../../core/services/toast_service.dart';
 import '../../../inject_container.dart';
-import '../clean/dialogs/date_range_dialog.dart';
+import '../widgets/admin_date_range_fields.dart';
 
 class CashRegisterView extends StatefulWidget {
   const CashRegisterView({super.key});
@@ -37,7 +38,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
   void initState() {
     super.initState();
     CashRegisterController cashRegisterController = context.read();
-    _getCuts = cashRegisterController.getCashRegisterCuts();
+    _getCuts = cashRegisterController.clearSalesDateRange();
   }
 
   @override
@@ -52,12 +53,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
 
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.only(
-          top: kWindowCaptionHeight + 10,
-          left: 10,
-          right: 10,
-          bottom: 10,
-        ),
+        padding: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
@@ -68,7 +64,9 @@ class _CashRegisterViewState extends State<CashRegisterView> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [TextBackButton()],
+                  children: [
+                    if (Navigator.canPop(context)) const TextBackButton(),
+                  ],
                 ),
               ],
             ),
@@ -89,90 +87,61 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                       child: Column(
                         spacing: 10,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Titulo
-                              Text("Cortes", style: textTheme.titleLarge),
-                              // Rango de fecha
-                              IsselPill(
-                                text: _formatSalesDateRange(),
-                                color: colorScheme.surfaceContainer,
-                                onTap: () => _openSalesDateRangeDialog(),
-                              ),
-                            ],
+                          AdminDateRangeFields(
+                            initialRange: _salesDateRange,
+                            onChanged: _applySalesDateRange,
                           ),
                           Expanded(
-                            child: FutureBuilder(
-                              future: _getCuts,
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return ListView.separated(
-                                    itemCount: 5,
-                                    separatorBuilder: (context, index) =>
-                                        const SizedBox(height: 10),
-                                    itemBuilder: (context, index) {
-                                      return IsselShimmer(
-                                        width: double.infinity,
-                                        height: 50,
-                                      );
-                                    },
-                                  );
-                                }
+                            child: PagedListPanel(
+                              state: cashRegisterController.paging,
+                              onPageChanged: (page) => cashRegisterController
+                                  .getCashRegisterCuts(page: page),
+                              child: FutureBuilder(
+                                future: _getCuts,
+                                builder: (context, snapshot) {
+                                  List<CashRegisterEntity> cuts =
+                                      cashRegisterController
+                                          .showedCashRegisterCuts;
 
-                                if (!snapshot.data!.success) {
-                                  return Center(
-                                    child: Text(snapshot.data!.message!),
-                                  );
-                                }
-
-                                if (cashRegisterController
-                                    .showedCashRegisterCuts
-                                    .isEmpty) {
-                                  return Center(
-                                    child: Text("No hay cortes disponibles"),
-                                  );
-                                }
-
-                                List<CashRegisterEntity> cuts =
-                                    cashRegisterController
-                                        .showedCashRegisterCuts;
-
-                                return IsselTableWidget(
-                                  color: colorScheme.surfaceContainer,
-                                  onTapRow: (index) =>
-                                      loadCutSummary(cuts[index]),
-                                  header: IsselHeaderTable(
-                                    titleHeaders: ["Fecha", "Usuario", "Total"],
-                                    colorPills: colorScheme.surfaceContainer,
-                                  ),
-                                  rows: cuts.map((cut) {
-                                    return IsselRowTable(
-                                      cells: [
-                                        IsselPill(
-                                          color: colorScheme.surface,
-                                          text: DateFormat(
-                                            "dd-MM-yy",
-                                          ).format(cut.openedAt),
-                                        ),
-                                        IsselPill(
-                                          color: colorScheme.surface,
-                                          text: cut.openedByUsername,
-                                        ),
-                                        IsselPill(
-                                          color: colorScheme.surface,
-                                          widget: AutoSizeText(
-                                            "\$${(cut.cardTotal + cut.cashTotal).toStringAsFixed(1)}",
-                                            style: textTheme.bodyMedium,
-                                            maxLines: 1,
-                                          ),
-                                        ),
+                                  return IsselTableWidget(
+                                    color: colorScheme.surfaceContainer,
+                                    onTapRow: (index) =>
+                                        loadCutSummary(cuts[index]),
+                                    header: IsselHeaderTable(
+                                      titleHeaders: [
+                                        "Fecha",
+                                        "Usuario",
+                                        "Total",
                                       ],
-                                    );
-                                  }).toList(),
-                                );
-                              },
+                                      colorPills: colorScheme.surfaceContainer,
+                                    ),
+                                    rows: cuts.map((cut) {
+                                      return IsselRowTable(
+                                        cells: [
+                                          IsselPill(
+                                            color: colorScheme.surface,
+                                            text: DateFormat(
+                                              "dd-MM-yy",
+                                            ).format(cut.openedAt),
+                                          ),
+                                          IsselPill(
+                                            color: colorScheme.surface,
+                                            text: cut.openedByUsername,
+                                          ),
+                                          IsselPill(
+                                            color: colorScheme.surface,
+                                            widget: AutoSizeText(
+                                              "\$${(cut.cardTotal + cut.cashTotal).toStringAsFixed(1)}",
+                                              style: textTheme.bodyMedium,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ],
@@ -401,10 +370,10 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                                                   child: IsselInfoField(
                                                     title: "Crédito",
                                                     value:
-                                                    cashRegisterController
-                                                        .selectedCut!
-                                                        .creditTotal
-                                                        .toStringAsFixed(2),
+                                                        cashRegisterController
+                                                            .selectedCut!
+                                                            .creditTotal
+                                                            .toStringAsFixed(2),
                                                   ),
                                                 ),
                                               ],
@@ -445,58 +414,28 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     );
   }
 
-  String _formatSalesDateRange() {
-    if (_salesDateRange == null) {
-      return "Fecha";
-    }
-
-    final formatter = DateFormat("dd/MM/yyyy");
-    return "${formatter.format(_salesDateRange!.start)} - ${formatter.format(_salesDateRange!.end)}";
-  }
-
-  Future<void> _openSalesDateRangeDialog() async {
+  Future<bool> _applySalesDateRange(DateTimeRange? range) async {
     final CashRegisterController cashRegisterController = context.read();
     final ToastService toastService = locator();
-    final DateRangeDialogResult? result =
-        await showDialog<DateRangeDialogResult>(
-          context: context,
-          builder: (context) => DateRangeDialog(
-            initialRange: _salesDateRange,
-            firstDate: DateTime(2020),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
-          ),
-        );
-
-    if (result == null) return;
-
-    if (result.cleared) {
-      cashRegisterController.clearSalesDateRange();
-      setState(() {
-        _salesDateRange = null;
-      });
-      return;
+    if (range == null) {
+      final cleared = await cashRegisterController.clearSalesDateRange();
+      if (!mounted || !cleared.success) return false;
+      setState(() => _salesDateRange = null);
+      return true;
     }
-
-    if (result.range == null) return;
-
     final CtrlResponse response = await cashRegisterController
-        .getCutsByDateRange(
-          startDate: result.range!.start,
-          endDate: result.range!.end,
-        );
-
+        .getCutsByDateRange(startDate: range.start, endDate: range.end);
+    if (!mounted) return false;
     if (response.success) {
       toastService.success("Ventas filtradas correctamente");
     } else {
       toastService.error(
         response.message ?? "No se pudieron filtrar las ventas",
       );
-      return;
+      return false;
     }
-
-    setState(() {
-      _salesDateRange = result.range;
-    });
+    setState(() => _salesDateRange = range);
+    return true;
   }
 
   Future<void> _reprintCutTicket() async {
@@ -626,7 +565,10 @@ class _CashRegisterViewState extends State<CashRegisterView> {
               );
             }
 
-            final sales = response.element ?? const <ClosedCutSaleEntity>[];
+            final sales = context
+                .read<CashRegisterController>()
+                .salesPaging
+                .items;
             if (sales.isEmpty) {
               return IsselPill(
                 text: "No hay ventas registradas en este corte",
@@ -641,6 +583,21 @@ class _CashRegisterViewState extends State<CashRegisterView> {
               separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, index) => _CutSaleTile(sale: sales[index]),
             );
+          },
+        ),
+        PaginationFooter(
+          data: context.watch<CashRegisterController>().salesPaging.data,
+          loading: context.watch<CashRegisterController>().salesPaging.loading,
+          noun: 'ventas',
+          onPageChanged: (page) {
+            final controller = context.read<CashRegisterController>();
+            final cut = controller.selectedCut;
+            if (cut != null) {
+              final pending = controller.getCutSales(cut.id, page: page);
+              setState(() {
+                _getCutSales = pending;
+              });
+            }
           },
         ),
       ],

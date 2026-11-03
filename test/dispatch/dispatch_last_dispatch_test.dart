@@ -443,6 +443,9 @@ void main() {
       loadB.complete(staleB);
       await tester.pump();
       expect(controller.activeSession?.id, 11);
+      expect(controller.activeSession?.dispensedVolume, 7500);
+      // Deliver the async stream event, then render the frame it schedules.
+      await tester.pump();
       expect(find.text('7500.00 / 10000.00 l'), findsOneWidget);
       expect(find.text('Pausar'), findsOneWidget);
 

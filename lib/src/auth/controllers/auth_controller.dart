@@ -5,6 +5,7 @@ import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
+import 'package:frontend_garzas/core/services/app_preferences.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
 import 'package:frontend_garzas/src/admin/controllers/cash_register_controller.dart';
@@ -32,6 +33,7 @@ class AuthController extends ChangeNotifier {
   final ApiClient apiClient;
   final NavigationService navigationService;
   final TitleBarController titleBarController;
+  final AppPreferences appPreferences;
 
   AuthController({
     required this.authApi,
@@ -41,6 +43,7 @@ class AuthController extends ChangeNotifier {
     required this.apiClient,
     required this.navigationService,
     required this.titleBarController,
+    required this.appPreferences,
   }) {
     apiClient.configureAuth(
       accessTokenProvider: () async => _session?.accessToken,
@@ -65,6 +68,7 @@ class AuthController extends ChangeNotifier {
   bool get initialized => _initialized;
   String? get accessToken => _session?.accessToken;
   AppRole? get role => _session?.role;
+  bool get rememberSession => appPreferences.rememberSession;
 
   //! Sessión
 
@@ -104,6 +108,13 @@ class AuthController extends ChangeNotifier {
         return CtrlResponse(success: true, element: _session);
       }
 
+      if (!rememberSession) {
+        _initialized = true;
+        await _clearSession();
+        _navigateToSignIn();
+        return CtrlResponse(success: false);
+      }
+
       final storedSession = authStorage.readSession();
       _initialized = true;
 
@@ -119,7 +130,11 @@ class AuthController extends ChangeNotifier {
         return CtrlResponse(success: true);
       }
 
-      return refreshSession(navigateOnFailure: true);
+      final response = await refreshSession(navigateOnFailure: true);
+      if (response.success) {
+        await _navigateToHome();
+      }
+      return response;
     } finally {
       _setLoading(false);
     }
@@ -141,6 +156,17 @@ class AuthController extends ChangeNotifier {
     _navigateToSignIn();
   }
 
+  Future<bool> setRememberSession(bool value) async {
+    final saved = await appPreferences.setRememberSession(value);
+    if (!saved) return false;
+    final currentSession = _session;
+    final stored = value && currentSession != null
+        ? await authStorage.saveSession(currentSession)
+        : await authStorage.clearSession();
+    notifyListeners();
+    return stored;
+  }
+
   Future<void> navigateToHome() async {
     await _navigateToHome();
   }
@@ -148,7 +174,8 @@ class AuthController extends ChangeNotifier {
   Future<CtrlResponse> _performRefresh({
     required bool navigateOnFailure,
   }) async {
-    final currentSession = _session ?? authStorage.readSession();
+    final currentSession =
+        _session ?? (rememberSession ? authStorage.readSession() : null);
 
     if (currentSession == null) {
       if (navigateOnFailure) {
@@ -195,8 +222,10 @@ class AuthController extends ChangeNotifier {
     titleBarController.setTitle(newSession.displayName);
     _scheduleRefresh();
 
-    if (persist) {
+    if (persist && rememberSession) {
       await authStorage.saveSession(newSession);
+    } else if (!rememberSession) {
+      await authStorage.clearSession();
     }
 
     notifyListeners();

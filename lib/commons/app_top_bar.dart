@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:frontend_garzas/commons/dialogs/exit_to_app_dialog.dart';
-import 'package:frontend_garzas/commons/issel_snap_layouts_caption.dart';
-import 'package:frontend_garzas/commons/title_bar_controller.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
@@ -15,120 +11,182 @@ import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
-const _topBarIconScale = 1.35;
+import 'desktop_window_controls.dart';
+import 'session_actions.dart';
+import 'title_bar_controller.dart';
 
 class AppTopBar extends StatelessWidget {
-  const AppTopBar({super.key});
+  const AppTopBar({
+    super.key,
+    this.section,
+    this.canGoBack = false,
+    this.onMenuPressed,
+    this.backgroundColor,
+    this.onPrimaryBackground = false,
+    this.actionsEnabled = true,
+  });
+
+  final AppRouteInfo? section;
+  final bool canGoBack;
+  final VoidCallback? onMenuPressed;
+  final Color? backgroundColor;
+  final bool onPrimaryBackground;
+  final bool actionsEnabled;
 
   @override
   Widget build(BuildContext context) {
-    final navigationService = locator<NavigationService>();
-    final titleBarController = context.watch<TitleBarController>();
-    final authController = context.watch<AuthController>();
-    final cashRegisterController = context.watch<CashRegisterController>();
+    final title = context.watch<TitleBarController>();
+    final role = context.select<AuthController, AppRole?>((auth) => auth.role);
+    final openCash = context.select<CashRegisterController, bool>(
+      (cash) => cash.openCash,
+    );
+    final navigation = locator<NavigationService>();
+    final colors = Theme.of(context).colorScheme;
+    final iconColor = onPrimaryBackground ? colors.onPrimary : colors.onSurface;
+    final isAuthenticated = role != null;
 
-    return SizedBox(
-      height: Size.fromHeight(kWindowCaptionHeight).height,
-      child: IsselSnapLayoutsCaption(
-        icon: null,
-        title: Material(
-          color: Colors.transparent,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                titleBarController.title.isNotEmpty
-                    ? "¡Hola, ${titleBarController.title}!"
-                    : "",
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
+    final breadcrumbs = section == null
+        ? [
+            IsselBreadcrumbItem(
+              label: isAuthenticated && title.title.isNotEmpty
+                  ? '¡Hola, ${title.title}!'
+                  : '',
+            ),
+          ]
+        : [
+            const IsselBreadcrumbItem(label: 'Administración'),
+            IsselBreadcrumbItem(label: section!.title),
+          ];
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        iconButtonTheme: IconButtonThemeData(
+          style:
+              Theme.of(context).iconButtonTheme.style?.copyWith(
+                foregroundColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.disabled)
+                      ? iconColor.withValues(alpha: 0.38)
+                      : null,
                 ),
+              ) ??
+              IconButton.styleFrom(
+                disabledForegroundColor: iconColor.withValues(alpha: 0.38),
               ),
-              IsselToggle(
-                onChanged: (value) => titleBarController.toggleTheme(),
-                value: titleBarController.isDarkMode,
-                height: 45,
-                width: 50,
-                backColor: Theme.of(context).colorScheme.surface,
+        ),
+        textTheme: Theme.of(context).textTheme.copyWith(
+          titleSmall: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontSize: 16),
+        ),
+      ),
+      child: IsselDesktopCaption(
+        height: 32,
+        backgroundColor: backgroundColor,
+        leading: onMenuPressed == null && !canGoBack
+            ? null
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (onMenuPressed != null)
+                    IsselCaptionButton(
+                      size: 32,
+                      iconSize: 22,
+                      tooltip: 'Abrir o cerrar menú',
+                      icon: const Icon(Icons.menu),
+                      color: iconColor,
+                      onPressed: actionsEnabled ? onMenuPressed : null,
+                    ),
+                  if (canGoBack)
+                    IsselCaptionButton(
+                      size: 32,
+                      iconSize: 22,
+                      tooltip: 'Volver',
+                      icon: const Icon(Icons.arrow_back),
+                      color: iconColor,
+                      onPressed: actionsEnabled ? navigation.goBack : null,
+                    ),
+                ],
               ),
-            ],
+        title: IsselBreadcrumbs(items: breadcrumbs),
+        dragAreaBuilder: (_, child) => DragToMoveArea(child: child),
+        trailing: IsselCaptionButton(
+          size: 32,
+          iconSize: 22,
+          tooltip: title.isDarkMode ? 'Usar tema claro' : 'Usar tema oscuro',
+          color: iconColor,
+          icon: Icon(
+            title.isDarkMode
+                ? Icons.light_mode_outlined
+                : Icons.dark_mode_outlined,
           ),
+          onPressed: actionsEnabled ? title.toggleTheme : null,
         ),
         actions: [
-          if (authController.session != null &&
-              authController.session!.role != AppRole.dispatch)
-            IsselWindowCaptionAction(
-              icon: Transform.scale(
-                scale: _topBarIconScale,
-                child: const Icon(Icons.print_outlined),
-              ),
-              onPressed: () {
-                final dialogContext =
-                    navigationService.navigatorKey.currentContext;
-                if (dialogContext == null) return;
-                showDialog(
-                  context: dialogContext,
-                  builder: (context) => ConfigPrinterDialog(),
-                );
-              },
+          if (isAuthenticated && role != AppRole.dispatch)
+            IsselCaptionButton(
+              size: 32,
+              iconSize: 22,
+              tooltip: 'Configurar impresora',
+              icon: const Icon(Icons.print_outlined),
+              color: iconColor,
+              onPressed: actionsEnabled
+                  ? () => _showDialog(ConfigPrinterDialog())
+                  : null,
             ),
-          if (authController.session != null &&
-              authController.session!.role.canSell)
-            IsselWindowCaptionAction(
-              icon: Transform.scale(
-                scale: _topBarIconScale,
-                child: const Icon(Icons.payment, color: Colors.blue),
-              ),
-              onPressed: () {
-                final dialogContext =
-                    navigationService.navigatorKey.currentContext;
-                if (dialogContext == null) return;
-                showDialog(
-                  context: dialogContext,
-                  builder: (context) => CreditPaymentDialog.init(context),
-                );
-              },
+          if (role?.canSell == true)
+            IsselCaptionButton(
+              size: 32,
+              iconSize: 22,
+              tooltip: 'Registrar pago de crédito',
+              icon: const Icon(Icons.payment),
+              color: iconColor,
+              onPressed: !actionsEnabled
+                  ? null
+                  : () {
+                      final dialogContext =
+                          navigation.navigatorKey.currentContext;
+                      if (dialogContext == null) return;
+                      _showDialog(CreditPaymentDialog.init(dialogContext));
+                    },
             ),
-          if (authController.session != null &&
-              authController.session!.role.canSell &&
-              cashRegisterController.openCash)
-            IsselWindowCaptionAction(
-              icon: Transform.scale(
-                scale: _topBarIconScale,
-                child: const FaIcon(
-                  FontAwesomeIcons.cashRegister,
-                  color: Colors.blue,
-                  size: 16,
-                ),
-              ),
-              onPressed: () {
-                final dialogContext =
-                    navigationService.navigatorKey.currentContext;
-                if (dialogContext == null) return;
-                showDialog(
-                  context: dialogContext,
-                  builder: (context) => CloseCutDialog(),
-                );
-              },
+          if (role?.canSell == true && openCash)
+            IsselCaptionButton(
+              size: 32,
+              iconSize: 22,
+              tooltip: 'Cerrar corte de caja',
+              icon: const Icon(Icons.point_of_sale_outlined),
+              color: iconColor,
+              onPressed: actionsEnabled
+                  ? () => _showDialog(CloseCutDialog())
+                  : null,
             ),
-          if (authController.session != null)
-            IsselWindowCaptionAction(
-              icon: Transform.scale(
-                scale: _topBarIconScale,
-                child: const Icon(Icons.exit_to_app, color: Colors.red),
-              ),
-              onPressed: () {
-                final dialogContext =
-                    navigationService.navigatorKey.currentContext;
-                if (dialogContext == null) return;
-                showDialog(
-                  context: dialogContext,
-                  builder: (context) => ExitToAppDialog(),
-                );
-              },
+          if (isAuthenticated)
+            IsselCaptionButton(
+              size: 32,
+              iconSize: 22,
+              tooltip: 'Cerrar sesión',
+              icon: const Icon(Icons.logout),
+              color: onPrimaryBackground ? colors.onPrimary : colors.error,
+              onPressed: actionsEnabled
+                  ? () {
+                      final dialogContext =
+                          navigation.navigatorKey.currentContext;
+                      if (dialogContext != null) requestLogout(dialogContext);
+                    }
+                  : null,
             ),
         ],
+        windowControls: DesktopWindowControls(
+          brightness: onPrimaryBackground ? Brightness.dark : null,
+        ),
       ),
     );
+  }
+
+  void _showDialog(Widget dialog) {
+    final dialogContext =
+        locator<NavigationService>().navigatorKey.currentContext;
+    if (dialogContext == null) return;
+    showDialog<void>(context: dialogContext, builder: (_) => dialog);
   }
 }

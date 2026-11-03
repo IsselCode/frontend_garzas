@@ -1,12 +1,14 @@
+import 'package:frontend_garzas/commons/widgets/paged_list_panel.dart';
+import '../../../commons/entities/page_result.dart';
+import '../../../commons/paged_list_state.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/text_back_button.dart';
 import 'package:frontend_garzas/inject_container.dart';
-import 'package:frontend_garzas/src/admin/clean/dialogs/date_range_dialog.dart';
+import '../widgets/admin_date_range_fields.dart';
 import 'package:frontend_garzas/src/dispatch/data/pending_dispatches_api.dart';
 import 'package:frontend_garzas/src/dispatch/entities/pending_dispatch_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
-import 'package:window_manager/window_manager.dart';
 
 class PendingPaymentsView extends StatefulWidget {
   const PendingPaymentsView({super.key});
@@ -17,6 +19,7 @@ class PendingPaymentsView extends StatefulWidget {
 
 class _PendingPaymentsViewState extends State<PendingPaymentsView> {
   late Future<List<_PendingPaymentItem>> _getPendingPayments;
+  late final PagedListState<_PendingPaymentItem> _paging;
   _PendingPaymentItem? _selectedPayment;
   DateTimeRange? _dateRange;
   _PaymentStatusFilter _statusFilter = _pendingPaymentStatusFilter;
@@ -24,7 +27,18 @@ class _PendingPaymentsViewState extends State<PendingPaymentsView> {
   @override
   void initState() {
     super.initState();
+    _paging = PagedListState(
+      onChanged: () {
+        if (mounted) setState(() {});
+      },
+    );
     _getPendingPayments = _loadPendingPayments();
+  }
+
+  @override
+  void dispose() {
+    _paging.dispose();
+    super.dispose();
   }
 
   @override
@@ -36,7 +50,7 @@ class _PendingPaymentsViewState extends State<PendingPaymentsView> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(
-          top: kWindowCaptionHeight + 10,
+          top: 10,
           left: 10,
           right: 10,
           bottom: 10,
@@ -45,7 +59,7 @@ class _PendingPaymentsViewState extends State<PendingPaymentsView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
           children: [
-            const TextBackButton(),
+            if (Navigator.canPop(context)) const TextBackButton(),
             Expanded(
               child: Row(
                 spacing: 20,
@@ -65,95 +79,58 @@ class _PendingPaymentsViewState extends State<PendingPaymentsView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 10,
                             children: [
-                              Text(
-                                "Pagos pendientes",
-                                style: textTheme.titleLarge,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              _StatusFilterButton(
+                                selectedStatus: _statusFilter,
+                                onChanged: _setStatusFilter,
                               ),
-                              Row(
-                                children: [
-                                  _StatusFilterButton(
-                                    selectedStatus: _statusFilter,
-                                    onChanged: _setStatusFilter,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    fit: _dateRange == null
-                                        ? FlexFit.loose
-                                        : FlexFit.tight,
-                                    child: _DateFilterButton(
-                                      text: _formatDateRange(),
-                                      expanded: _dateRange != null,
-                                      onTap: _openDateRangeDialog,
-                                    ),
-                                  ),
-                                ],
+                              AdminDateRangeFields(
+                                initialRange: _dateRange,
+                                onChanged: _applyDateRange,
                               ),
                             ],
                           ),
                           Expanded(
-                            child: FutureBuilder<List<_PendingPaymentItem>>(
-                              future: _getPendingPayments,
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
+                            child: PagedListPanel(
+                              state: _paging,
+                              onPageChanged: (page) =>
+                                  _loadPendingPayments(page: page),
+                              child: FutureBuilder<List<_PendingPaymentItem>>(
+                                future: _getPendingPayments,
+                                builder: (context, snapshot) {
+                                  final payments = _paging.items;
+
+                                  if (payments.isEmpty) {
+                                    return Center(
+                                      child: Text(
+                                        "No hay pagos pendientes",
+                                        style: textTheme.bodyMedium?.copyWith(
+                                          color: colorScheme.outline,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
                                   return ListView.separated(
-                                    itemCount: 5,
+                                    itemCount: payments.length,
                                     separatorBuilder: (_, _) =>
                                         const SizedBox(height: 10),
-                                    itemBuilder: (_, _) => const IsselShimmer(
-                                      width: double.infinity,
-                                      height: 76,
-                                    ),
+                                    itemBuilder: (context, index) {
+                                      final payment = payments[index];
+                                      final selected =
+                                          payment == _selectedPayment;
+                                      return _PendingPaymentTile(
+                                        payment: payment,
+                                        selected: selected,
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedPayment = payment;
+                                          });
+                                        },
+                                      );
+                                    },
                                   );
-                                }
-
-                                if (snapshot.hasError) {
-                                  return Center(
-                                    child: Text(
-                                      "No fue posible cargar los pagos pendientes",
-                                      textAlign: TextAlign.center,
-                                      style: textTheme.bodyMedium,
-                                    ),
-                                  );
-                                }
-
-                                final payments = _filterByDate(
-                                  snapshot.data ?? [],
-                                );
-
-                                if (payments.isEmpty) {
-                                  return Center(
-                                    child: Text(
-                                      "No hay pagos pendientes",
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: colorScheme.outline,
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                return ListView.separated(
-                                  itemCount: payments.length,
-                                  separatorBuilder: (_, _) =>
-                                      const SizedBox(height: 10),
-                                  itemBuilder: (context, index) {
-                                    final payment = payments[index];
-                                    final selected =
-                                        payment == _selectedPayment;
-                                    return _PendingPaymentTile(
-                                      payment: payment,
-                                      selected: selected,
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedPayment = payment;
-                                        });
-                                      },
-                                    );
-                                  },
-                                );
-                              },
+                                },
+                              ),
                             ),
                           ),
                         ],
@@ -161,7 +138,7 @@ class _PendingPaymentsViewState extends State<PendingPaymentsView> {
                     ),
                   ),
                   Expanded(
-                    flex: 5,
+                    flex: 3,
                     child: _PendingPaymentDetails(payment: _selectedPayment),
                   ),
                 ],
@@ -173,18 +150,28 @@ class _PendingPaymentsViewState extends State<PendingPaymentsView> {
     );
   }
 
-  Future<List<_PendingPaymentItem>> _loadPendingPayments() async {
-    final pendingDispatchesApi = locator<PendingDispatchesApi>();
-    final selectedStatus = _statusFilter;
-    final pendingDispatches = await pendingDispatchesApi.listPendingDispatches(
-      status: selectedStatus.value,
-    );
-    final items = pendingDispatches
-        .map((dispatch) => _PendingPaymentItem(pendingDispatch: dispatch))
-        .toList();
-
-    items.sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
-    return items;
+  Future<List<_PendingPaymentItem>> _loadPendingPayments({int page = 1}) async {
+    final api = locator<PendingDispatchesApi>();
+    final status = _statusFilter.value;
+    final range = _dateRange;
+    await _paging.load((number) async {
+      final result = await api.listPage(
+        page: number,
+        status: status,
+        startDate: range?.start,
+        endDate: range?.end,
+      );
+      return PageResult(
+        items: result.items
+            .map((item) => _PendingPaymentItem(pendingDispatch: item))
+            .toList(),
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        totalPages: result.totalPages,
+      );
+    }, page: page);
+    return _paging.items;
   }
 
   void _setStatusFilter(_PaymentStatusFilter status) {
@@ -195,61 +182,17 @@ class _PendingPaymentsViewState extends State<PendingPaymentsView> {
     });
   }
 
-  List<_PendingPaymentItem> _filterByDate(List<_PendingPaymentItem> payments) {
-    final range = _dateRange;
-    if (range == null) {
-      return payments;
+  Future<bool> _applyDateRange(DateTimeRange? range) async {
+    final previous = _dateRange;
+    _dateRange = range;
+    await _loadPendingPayments();
+    if (!mounted) return false;
+    if (_paging.error != null) {
+      _dateRange = previous;
+      return false;
     }
-
-    final start = DateTime(
-      range.start.year,
-      range.start.month,
-      range.start.day,
-    );
-    final end = DateTime(range.end.year, range.end.month, range.end.day);
-    final filtered = payments.where((payment) {
-      final date = payment.paymentDate;
-      final day = DateTime(date.year, date.month, date.day);
-      return !day.isBefore(start) && !day.isAfter(end);
-    }).toList();
-
-    return filtered;
-  }
-
-  String _formatDateRange() {
-    if (_dateRange == null) return "Fecha";
-
-    final formatter = DateFormat("dd/MM/yyyy");
-    return "${formatter.format(_dateRange!.start)} - ${formatter.format(_dateRange!.end)}";
-  }
-
-  Future<void> _openDateRangeDialog() async {
-    final result = await showDialog<DateRangeDialogResult>(
-      context: context,
-      builder: (context) => DateRangeDialog(
-        initialRange: _dateRange,
-        firstDate: DateTime(2020),
-        lastDate: DateTime.now().add(const Duration(days: 365)),
-      ),
-    );
-
-    if (!mounted || result == null) return;
-
-    if (result.cleared) {
-      setState(() {
-        _dateRange = null;
-        _selectedPayment = null;
-      });
-      return;
-    }
-
-    final range = result.range;
-    if (range == null) return;
-
-    setState(() {
-      _dateRange = range;
-      _selectedPayment = null;
-    });
+    setState(() => _selectedPayment = null);
+    return true;
   }
 }
 
@@ -345,56 +288,6 @@ class _PendingPaymentTile extends StatelessWidget {
   }
 }
 
-class _DateFilterButton extends StatelessWidget {
-  final String text;
-  final bool expanded;
-  final VoidCallback onTap;
-
-  const _DateFilterButton({
-    required this.text,
-    required this.expanded,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Material(
-      color: colorScheme.surfaceContainer,
-      borderRadius: BorderRadius.circular(100),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                size: 16,
-                color: colorScheme.outline,
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodyMedium,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _StatusFilterButton extends StatelessWidget {
   final _PaymentStatusFilter selectedStatus;
   final ValueChanged<_PaymentStatusFilter> onChanged;
@@ -407,42 +300,20 @@ class _StatusFilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final text = selectedStatus.label;
-
-    return PopupMenuButton<_PaymentStatusFilter>(
-      tooltip: "Filtrar por estado",
-      onSelected: onChanged,
-      itemBuilder: (context) => [
-        for (final status in _paymentStatusFilters)
-          PopupMenuItem<_PaymentStatusFilter>(
-            value: status,
-            child: Text(status.label),
-          ),
-      ],
-      child: Material(
+    return SizedBox(
+      width: 230,
+      child: IsselDropdown<_PaymentStatusFilter>(
+        value: selectedStatus,
+        height: 40,
+        hintText: 'Estado',
         color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(100),
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.filter_list, size: 18, color: colorScheme.outline),
-              const SizedBox(width: 6),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 150),
-                child: Text(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodyMedium,
-                ),
-              ),
-            ],
-          ),
-        ),
+        items: [
+          for (final status in _paymentStatusFilters)
+            DropdownMenuItem(value: status, child: Text(status.label)),
+        ],
+        onChanged: (status) {
+          if (status != null) onChanged(status);
+        },
       ),
     );
   }

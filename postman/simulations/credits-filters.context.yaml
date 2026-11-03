@@ -1,0 +1,23 @@
+purpose:
+  stands_in_for: The read-only admin GET /api/v1/sales/credit/pending endpoint.
+  unblocks: Local verification of the Flutter API client and credit filters without a live backend or credentials.
+assumptions:
+  - id: combined-credit-filters
+    status: supported
+    claim: The documented endpoint accepts pending, paid and all states combined with partial client search, paired timezone-aware creation dates and pagination.
+    reason: The user-provided endpoint contract explicitly defines these parameters; provider runtime behavior was not verified.
+    verification: Read ENDPOINTS_CREDITOS.md on 2026-11-03. A local simulation exercised the real ApiClient, SalesApi and CreditsController for each state, date range, page 2, empty results, literal ñ/%/_/backslash search, and recovery from a synthetic 500 response. Assertions passed; simulation request events confirmed the requests and encoded filters.
+    source: C:/Users/Jesus/PycharmProjects/Backend-Garzas/ENDPOINTS_CREDITOS.md; test/admin/credits_api_simulation_test.dart; postman/mocks/garzas-credits/default.js
+    updated_at: "2026-11-03"
+  - id: backend-authorization
+    status: unknown
+    claim: A live backend enforces active admin accounts and the documented 401, 403 and 422 responses.
+    reason: The local stand-in uses synthetic read-only examples, does not authenticate tokens and does not establish provider authorization behavior. This CLI session has no signed-in account, so the owner's published mock was not searched.
+    verification: No live requests made. The local simulation intentionally models only the credit list contract and a synthetic 500 error; all other paths return 501.
+    source: C:/Users/Jesus/PycharmProjects/Backend-Garzas/ENDPOINTS_CREDITOS.md; postman/mocks/garzas-credits/default.js
+    updated_at: "2026-11-03"
+fingerprints:
+  - id: local-credit-filters
+    date: "2026-11-03"
+    commit: null
+    cli: Postman CLI 1.76.0

@@ -1,3 +1,4 @@
+import 'package:frontend_garzas/commons/dialogs/notched_dialog.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -29,48 +30,43 @@ class _ClientEmployeeBarcodeDialogState
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return Dialog(
-      child: Container(
-        width: 440,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 14,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              "Codigo de empleado",
-              style: textTheme.titleLarge,
-              textAlign: TextAlign.center,
+    return NotchedDialog(
+      icon: Icons.barcode_reader,
+      maxWidth: 440,
+      onClose: () => Navigator.of(context).pop(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 14,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Codigo de empleado",
+            style: textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          Form(
+            key: formKey,
+            child: IsselTextFormField(
+              controller: employeeNameCtrl,
+              hintText: "Nombre del empleado",
+              prefixIcon: Icons.badge_outlined,
+              fillColor: theme.scaffoldBackgroundColor,
+              validator: (value) {
+                final text = value?.trim() ?? "";
+                if (text.isEmpty) return "Campo requerido";
+                return null;
+              },
             ),
-            Form(
-              key: formKey,
-              child: IsselTextFormField(
-                controller: employeeNameCtrl,
-                hintText: "Nombre del empleado",
-                prefixIcon: Icons.badge_outlined,
-                fillColor: theme.scaffoldBackgroundColor,
-                validator: (value) {
-                  final text = value?.trim() ?? "";
-                  if (text.isEmpty) return "Campo requerido";
-                  return null;
-                },
-              ),
-            ),
-            IsselButton(text: "Guardar codigo", height: 50, onTap: saveBarcode),
-            IsselButton(
-              text: "Cancelar",
-              height: 50,
-              color: Colors.transparent,
-              textColor: colorScheme.onSurface,
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+          ),
+          IsselButton(text: "Guardar codigo", height: 50, onTap: saveBarcode),
+          IsselButton(
+            text: "Cancelar",
+            height: 50,
+            color: Colors.transparent,
+            textColor: colorScheme.onSurface,
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
       ),
     );
   }

@@ -156,6 +156,36 @@ class GeneralConfigController extends ChangeNotifier {
     }
   }
 
+  /// Prices and PLC are saved together in one request from General settings.
+  Future<CtrlResponse> updateOperatingSettings({
+    required double potableGalPricing,
+    required double potableLiterPricing,
+    required double pozoGalPricing,
+    required double pozoLiterPricing,
+    required String plcEndpoint,
+  }) async {
+    final previousConfig = generalConfigEntity!;
+    final newConfig = previousConfig.copyWith(
+      potableGalPricing: potableGalPricing,
+      potableLiterPricing: potableLiterPricing,
+      pozoGalPricing: pozoGalPricing,
+      pozoLiterPricing: pozoLiterPricing,
+      plcEndpoint: plcEndpoint,
+    );
+    if (newConfig == previousConfig) return CtrlResponse(success: true);
+
+    generalConfigEntity = newConfig;
+    notifyListeners();
+    try {
+      await generalApi.updateConfig(newConfig);
+      return CtrlResponse(success: true);
+    } on AppException catch (error) {
+      generalConfigEntity = previousConfig;
+      notifyListeners();
+      return CtrlResponse(success: false, message: error.message);
+    }
+  }
+
   Future<CtrlResponse> updatePrices(
     double potableGalPricing,
     double potableLiterPricing,

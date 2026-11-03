@@ -1,6 +1,9 @@
 import 'package:frontend_garzas/commons/entities/user_entity.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/enums/enums.dart';
+import '../../../commons/entities/page_result.dart';
+import '../../../core/services/paginated_api.dart';
+import '../clean/entities/user_statistics.dart';
 
 class UsersApi {
   final ApiClient apiClient;
@@ -12,19 +15,45 @@ class UsersApi {
   final String _deleteUserByIdPath = "/users";
   final String _updateUserByIdPath = "/users";
 
-  Future<List<UserEntity>> listUsers(String? queryUsers) async {
-    List response =
-        await apiClient.get(
-              _getUsersPath,
-              authRequired: true,
-              queryParams: queryUsers == null || queryUsers.trim().isEmpty
-                  ? null
-                  : {'name': queryUsers.trim()},
-            )
-            as List;
+  Future<PageResult<UserEntity>> listPage({
+    int page = 1,
+    int limit = 20,
+    String? name,
+    AppRole? role,
+    bool? isActive,
+  }) => PaginatedApi.get(
+    apiClient,
+    _getUsersPath,
+    UserEntity.fromMap,
+    page: page,
+    limit: limit,
+    filters: {
+      if (name?.trim().isNotEmpty ?? false) 'name': name!.trim(),
+      if (role != null) 'role': role.wireName,
+      'is_active': ?isActive,
+    },
+  );
 
-    return response.map((e) => UserEntity.fromMap(e)).toList();
-  }
+  Future<UserStatistics> getStatistics() async => UserStatistics.fromMap(
+    Map<String, dynamic>.from(
+      await apiClient.get('/statistics/users', authRequired: true) as Map,
+    ),
+  );
+
+  Future<UserEntity> updateStatus(String uid, bool active) async =>
+      UserEntity.fromMap(
+        Map<String, dynamic>.from(
+          await apiClient.patch(
+                '/users/$uid',
+                body: {'is_active': active},
+                authRequired: true,
+              )
+              as Map,
+        ),
+      );
+
+  Future<List<UserEntity>> listUsers(String? queryUsers) =>
+      PaginatedApi.all((page) => listPage(page: page, name: queryUsers));
 
   Future<UserEntity> createUser(
     String username,

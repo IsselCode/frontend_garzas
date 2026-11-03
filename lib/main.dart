@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:frontend_garzas/commons/app_top_bar.dart';
+import 'package:frontend_garzas/commons/app_window_layout.dart';
 import 'package:frontend_garzas/commons/server_unavailable_view.dart';
 import 'package:frontend_garzas/commons/title_bar_controller.dart';
+import 'package:frontend_garzas/core/services/app_preferences.dart';
 import 'package:frontend_garzas/core/services/navigation_service.dart';
 import 'package:frontend_garzas/core/services/server_status_controller.dart';
 import 'package:frontend_garzas/inject_container.dart';
@@ -17,7 +18,6 @@ import 'package:frontend_garzas/src/admin/controllers/users_controller.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
 import 'package:frontend_garzas/src/auth/views/splash_view.dart';
 import 'package:frontend_garzas/src/dispatch/controllers/dispatch_controller.dart';
-import 'package:frontend_garzas/src/sales/views/home_sales_view.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -44,6 +44,9 @@ void main() async {
     titleBarStyle: TitleBarStyle.hidden,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
+    if (locator<AppPreferences>().startMaximized) {
+      await windowManager.maximize();
+    }
     await windowManager.show();
     await windowManager.focus();
   });
@@ -58,6 +61,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => locator<AppPreferences>()),
         ChangeNotifierProvider(
           create: (context) => locator<TitleBarController>(),
         ),
@@ -130,16 +134,18 @@ class MyApp extends StatelessWidget {
                           GlobalCupertinoLocalizations.delegate,
                         ],
                         navigatorKey: navigationService.navigatorKey,
+                        navigatorObservers: [navigationService.observer],
                         builder: (context, child) {
-                          return Stack(
-                            children: [
-                              child!,
-                              if (serverStatusController.serverUnavailable)
-                                const Positioned.fill(
-                                  child: ServerUnavailableView(),
-                                ),
-                              const AppTopBar(),
-                            ],
+                          return AppWindowLayout(
+                            child: Stack(
+                              children: [
+                                Positioned.fill(child: child!),
+                                if (serverStatusController.serverUnavailable)
+                                  const Positioned.fill(
+                                    child: ServerUnavailableView(),
+                                  ),
+                              ],
+                            ),
                           );
                         },
                         home: SplashView(),

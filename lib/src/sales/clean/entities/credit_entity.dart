@@ -24,9 +24,9 @@ class CreditEntity extends Equatable {
       saleFolio: map["sale_folio"],
       clientId: map["client_id"],
       commercialName: map["commercial_name"],
-      total: map["total"],
-      amountPaid: map["amount_paid"],
-      salePendingAmount: map["sale_pending_amount"],
+      total: (map["total"] as num).toDouble(),
+      amountPaid: (map["amount_paid"] as num).toDouble(),
+      salePendingAmount: (map["sale_pending_amount"] as num).toDouble(),
       createdAt: DateTime.parse(map["created_at"]).toLocal(),
     );
   }

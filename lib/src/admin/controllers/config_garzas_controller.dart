@@ -9,18 +9,14 @@ import 'package:frontend_garzas/src/admin/data/garzas_api.dart';
 import '../../../inject_container.dart';
 
 class ConfigGarzasController extends ChangeNotifier {
-
   GarzasApi garzasApi;
 
-  ConfigGarzasController({
-    required this.garzasApi,
-  });
+  ConfigGarzasController({required this.garzasApi});
 
   List<ConfigGarzaEntity> configGarzas = [];
 
   Future<CtrlResponse> loadConfigGarzas() async {
     try {
-
       List<ConfigGarzaEntity> tempConfigGarzas = await garzasApi.listGarzas();
       configGarzas = tempConfigGarzas;
       notifyListeners();
@@ -31,9 +27,16 @@ class ConfigGarzasController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse> updateGarza(BuildContext context, int number, {GarzaType? garzaType, WaterType? waterType, UnitOfMeasurement? unitOfMeasurement,}) async {
-
-    final indexConfig = configGarzas.indexWhere((element) => element.number == number,);
+  Future<CtrlResponse> updateGarza(
+    BuildContext context,
+    int number, {
+    GarzaType? garzaType,
+    WaterType? waterType,
+    UnitOfMeasurement? unitOfMeasurement,
+  }) async {
+    final indexConfig = configGarzas.indexWhere(
+      (element) => element.number == number,
+    );
 
     if (indexConfig == -1) {
       return CtrlResponse(
@@ -57,8 +60,12 @@ class ConfigGarzasController extends ChangeNotifier {
     notifyListeners();
 
     try {
-
-      await garzasApi.updateGarzaByNumber(newConfig.number, newConfig.garzaType, newConfig.waterType, newConfig.unitOfMeasurement);
+      await garzasApi.updateGarzaByNumber(
+        newConfig.number,
+        newConfig.garzaType,
+        newConfig.waterType,
+        newConfig.unitOfMeasurement,
+      );
 
       return CtrlResponse(success: true);
     } on AppException catch (e) {
@@ -70,9 +77,10 @@ class ConfigGarzasController extends ChangeNotifier {
     } catch (_) {
       configGarzas[indexConfig] = previousConfig;
       notifyListeners();
-      return CtrlResponse(success: false, message: "No fue posible actualizar la configuracion de la garza",
+      return CtrlResponse(
+        success: false,
+        message: "No fue posible actualizar la configuracion de la garza",
       );
     }
   }
-
 }

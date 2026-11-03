@@ -1,16 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/app/theme.dart';
+import '../core/services/app_preferences.dart';
 
 class TitleBarController extends ChangeNotifier {
+  TitleBarController({required AppPreferences appPreferences})
+    : _appPreferences = appPreferences,
+      _isDarkMode = appPreferences.darkMode;
 
+  final AppPreferences _appPreferences;
   String _title = "";
   bool _showElements = false;
-  ThemeData _themeData = lightTheme;
+  bool _isDarkMode;
 
   String get title => _title;
   bool get showElements => _showElements;
-  bool get isDarkMode => _themeData == darkTheme;
+  bool get isDarkMode => _isDarkMode;
   ThemeData get currentTheme => isDarkMode ? darkTheme : lightTheme;
 
   //* Name
@@ -22,12 +29,19 @@ class TitleBarController extends ChangeNotifier {
 
   //* Theme
   void toggleTheme() {
-    if (_themeData == lightTheme) {
-      _themeData = darkTheme;
-    } else {
-      _themeData = lightTheme;
-    }
+    unawaited(setDarkMode(!_isDarkMode));
+  }
+
+  Future<bool> setDarkMode(bool value) async {
+    if (_isDarkMode == value) return true;
+    _isDarkMode = value;
     notifyListeners();
+    final saved = await _appPreferences.setDarkMode(value);
+    if (!saved) {
+      _isDarkMode = _appPreferences.darkMode;
+      notifyListeners();
+    }
+    return saved;
   }
 
   //* Show elements
@@ -39,5 +53,4 @@ class TitleBarController extends ChangeNotifier {
 
   void showAllElements() => _setShowElements(true);
   void hideAllElements() => _setShowElements(false);
-
 }

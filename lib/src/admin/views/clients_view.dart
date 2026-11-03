@@ -9,10 +9,10 @@ import 'package:frontend_garzas/src/admin/controllers/clients_controller.dart';
 import 'package:issel_code_widgets/issel_code_widgets.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 import '../../../inject_container.dart';
 import '../../../commons/text_back_button.dart';
 import '../clean/dialogs/create_client_dialog.dart';
+import '../widgets/admin_table_viewport.dart';
 
 class ClientsView extends StatefulWidget {
   const ClientsView({super.key});
@@ -43,59 +43,60 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
 
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.only(
-          top: kWindowCaptionHeight + 10,
-          left: 10,
-          right: 10,
-          bottom: 10,
-        ),
+        padding: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
           children: [
-            // App Bar
-            Column(
-              spacing: 10,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            if (Navigator.canPop(context)) const TextBackButton(),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final search = IsselTextFormField(
+                  focusNode: searchNode,
+                  height: 50,
+                  prefixIcon: Icons.search,
+                  hintText: "Nombre comercial",
+                  onSubmitted: searchClients,
+                );
+                final actions = Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10,
                   children: [
-                    TextBackButton(),
-                    Flex(
-                      direction: Axis.horizontal,
-                      spacing: 10,
-                      children: [
-                        SizedBox(
-                          width: 150,
-                          child: IsselButton(
-                            text: "Código",
-                            height: 50,
-                            onTap: createEmployeeBarcode,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 250,
-                          child: IsselTextFormField(
-                            focusNode: searchNode,
-                            height: 50,
-                            prefixIcon: Icons.search,
-                            hintText: "Nombre comercial",
-                            onSubmitted: searchClients,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 150,
-                          child: IsselButton(
-                            text: "Nuevo",
-                            height: 50,
-                            onTap: createClient,
-                          ),
-                        ),
-                      ],
+                    IsselButton(
+                      text: "Nuevo",
+                      width: 150,
+                      height: 50,
+                      onTap: createClient,
+                    ),
+                    IconButton(
+                      tooltip: 'Generar código de empleado',
+                      onPressed: createEmployeeBarcode,
+                      style: IconButton.styleFrom(
+                        foregroundColor: colorScheme.primary,
+                        minimumSize: const Size(50, 50),
+                      ),
+                      icon: const Icon(Icons.barcode_reader),
                     ),
                   ],
-                ),
-              ],
+                );
+                if (constraints.maxWidth < 560) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: 10,
+                    children: [
+                      search,
+                      Align(alignment: Alignment.centerRight, child: actions),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    SizedBox(width: 300, child: search),
+                    const Spacer(),
+                    actions,
+                  ],
+                );
+              },
             ),
             // Body
             FutureBuilder(
@@ -125,97 +126,99 @@ class _ReportsAndLogsViewState extends State<ClientsView> {
                 List<ClientEntity> clients = clientsController.showedClients;
 
                 return Expanded(
-                  child: IsselTableWidget(
-                    header: IsselHeaderTable(
-                      titleHeaders: [
-                        "Nombre comercial",
-                        "Costo agua potable",
-                        "Costo agua pozo",
-                        "Acciones",
-                      ],
-                    ),
-                    rows: clients.map((client) {
-                      return IsselRowTable(
-                        cells: [
-                          IsselPill(
-                            widget: Text(
-                              client.commercialName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            color: colorScheme.surfaceContainer,
-                            height: 70,
-                            alignment: Alignment.centerLeft,
-                          ),
-                          IsselPill(
-                            height: 70,
-                            widget: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Litro: ${client.potableLiterPricing != 0 ? "\$${client.potableLiterPricing}" : "n/a"}",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  "Gal: ${client.potableGalPricing != 0 ? "\$${client.potableGalPricing}" : "n/a"}",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                            color: colorScheme.surfaceContainer,
-                            alignment: Alignment.centerLeft,
-                          ),
-                          IsselPill(
-                            height: 70,
-                            widget: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Litro: ${client.pozoLiterPricing != 0 ? "\$${client.pozoLiterPricing}" : "n/a"}",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  "Gal: ${client.pozoGalPricing != 0 ? "\$${client.pozoGalPricing}" : "n/a"}",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                            color: colorScheme.surfaceContainer,
-                            alignment: Alignment.centerLeft,
-                          ),
-                          IsselPill(
-                            height: 70,
-                            widget: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              spacing: 5,
-                              children: [
-                                IconButton(
-                                  onPressed: () => editClient(client),
-                                  icon: Icon(
-                                    Icons.edit,
-                                    color: colorScheme.primary,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () => deleteClient(client),
-                                  icon: Icon(
-                                    Icons.delete_outline,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            color: colorScheme.surfaceContainer,
-                          ),
+                  child: AdminTableViewport(
+                    child: IsselTableWidget(
+                      header: IsselHeaderTable(
+                        titleHeaders: [
+                          "Nombre comercial",
+                          "Costo agua potable",
+                          "Costo agua pozo",
+                          "Acciones",
                         ],
-                      );
-                    }).toList(),
+                      ),
+                      rows: clients.map((client) {
+                        return IsselRowTable(
+                          cells: [
+                            IsselPill(
+                              widget: Text(
+                                client.commercialName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              color: colorScheme.surfaceContainer,
+                              height: 70,
+                              alignment: Alignment.centerLeft,
+                            ),
+                            IsselPill(
+                              height: 70,
+                              widget: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Litro: ${client.potableLiterPricing != 0 ? "\$${client.potableLiterPricing}" : "n/a"}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    "Gal: ${client.potableGalPricing != 0 ? "\$${client.potableGalPricing}" : "n/a"}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                              color: colorScheme.surfaceContainer,
+                              alignment: Alignment.centerLeft,
+                            ),
+                            IsselPill(
+                              height: 70,
+                              widget: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Litro: ${client.pozoLiterPricing != 0 ? "\$${client.pozoLiterPricing}" : "n/a"}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    "Gal: ${client.pozoGalPricing != 0 ? "\$${client.pozoGalPricing}" : "n/a"}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                              color: colorScheme.surfaceContainer,
+                              alignment: Alignment.centerLeft,
+                            ),
+                            IsselPill(
+                              height: 70,
+                              widget: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                spacing: 5,
+                                children: [
+                                  IconButton(
+                                    onPressed: () => editClient(client),
+                                    icon: Icon(
+                                      Icons.edit,
+                                      color: colorScheme.primary,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => deleteClient(client),
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: colorScheme.error,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              color: colorScheme.surfaceContainer,
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
                   ),
                 );
               },

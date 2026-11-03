@@ -1,105 +1,168 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
-import 'package:frontend_garzas/core/app/consts.dart';
-import 'package:frontend_garzas/core/services/regex_service.dart';
 import 'package:frontend_garzas/core/services/toast_service.dart';
 import 'package:frontend_garzas/inject_container.dart';
 import 'package:frontend_garzas/src/auth/controllers/auth_controller.dart';
-import 'package:issel_code_widgets/issel_code_widgets.dart';
+import 'package:frontend_garzas/src/auth/widgets/sign_in_form_card.dart';
+import 'package:frontend_garzas/src/auth/widgets/sign_in_welcome.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 
-class SignInView extends StatelessWidget {
-  SignInView({super.key});
+class SignInView extends StatefulWidget {
+  const SignInView({super.key});
 
+  @override
+  State<SignInView> createState() => _SignInViewState();
+}
+
+class _SignInViewState extends State<SignInView> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
-  Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    TextTheme textTheme = theme.textTheme;
-    ColorScheme colorScheme = theme.colorScheme;
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    super.dispose();
+  }
 
-    return Scaffold(
-      body: Row(
-        children: [
-          Expanded(
-            child: Center(
-              child: SizedBox(
-                width: 320,
-                child: Column(
-                  spacing: 30,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Inicio de sesi\u00f3n", style: textTheme.titleLarge),
-                    Form(
-                      key: formKey,
-                      child: Flex(
-                        direction: Axis.vertical,
-                        spacing: 20,
-                        children: [
-                          IsselTextFormField(
-                            controller: email,
-                            hintText: "Usuario",
-                            height: 60,
-                            inputFormatters: [RegexService.usernameFormatter],
-                            validator: (value) => RegexService.usernameValidator(value),
-                          ),
-                          IsselTextFormField(
-                            controller: password,
-                            hintText: "Contrase\u00f1a",
-                            obscureText: true,
-                            validator: (value) {
-                              if ((value ?? "").isEmpty) {
-                                return 'La contrase\u00f1a es obligatoria';
-                              }
-                              return null;
-                            },
-                          ),
-                          IsselButton(
-                            text: "Ingresar",
-                            onTap: () => signIn(context),
-                          ),
-                        ],
-                      ),
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    // PPG's type scale is scoped to this view; Garzas keeps its app-wide theme.
+    final loginTheme = theme.copyWith(
+      textTheme: theme.textTheme.copyWith(
+        bodyMedium: theme.textTheme.bodyMedium?.copyWith(fontSize: 15),
+        headlineSmall: theme.textTheme.headlineSmall?.copyWith(fontSize: 28),
+      ),
+    );
+
+    return Theme(
+      data: loginTheme,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [colorScheme.primary, colorScheme.secondary],
+              stops: const [0.10, 0.85],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: 0.60,
+                    child: Image.asset(
+                      'assets/images/login_pattern.png',
+                      fit: BoxFit.cover,
+                      excludeFromSemantics: true,
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: AppGradients.primaryToSecondary
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 30,
-                children: [
-                  Text(
-                    "\u00a1Hola, Bienvenido!",
-                    style: textTheme.titleLarge?.copyWith(
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 400,
-                    child: Text(
-                      "Accede con tus credenciales asignadas para ingresar al sistema.",
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onPrimary,
+              SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isLandscape =
+                        constraints.maxWidth > constraints.maxHeight;
+                    final isWide = isLandscape || constraints.maxWidth >= 860;
+                    final isCompactLandscape =
+                        isLandscape && constraints.maxWidth < 860;
+                    final verticalPadding = isCompactLandscape
+                        ? 16.0
+                        : isWide
+                        ? 40.0
+                        : 24.0;
+                    final contentHeight =
+                        (constraints.maxHeight - verticalPadding * 2).clamp(
+                          0.0,
+                          constraints.maxHeight,
+                        );
+                    final card = SignInFormCard(
+                      formKey: formKey,
+                      userController: email,
+                      passwordController: password,
+                      onLogin: () => signIn(context),
+                      maxHeight: isWide
+                          ? (constraints.maxHeight - 80).clamp(0.0, 420.0)
+                          : null,
+                    );
+
+                    return Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1040),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isCompactLandscape
+                                ? 16
+                                : isWide
+                                ? 40
+                                : 24,
+                            vertical: verticalPadding,
+                          ),
+                          child: isWide
+                              ? SizedBox(
+                                  height: contentHeight,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        child: Center(
+                                          child: ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxWidth: isCompactLandscape
+                                                  ? 260
+                                                  : 360,
+                                            ),
+                                            child: const SignInWelcome(),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: isCompactLandscape ? 24 : 100,
+                                      ),
+                                      Expanded(
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: SizedBox(
+                                            width: isCompactLandscape
+                                                ? 320
+                                                : 400,
+                                            child: card,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : SingleChildScrollView(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      const SignInWelcome(compact: true),
+                                      const SizedBox(height: 28),
+                                      card,
+                                    ],
+                                  ),
+                                ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    );
+                  },
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

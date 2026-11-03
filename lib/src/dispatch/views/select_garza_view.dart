@@ -1,3 +1,4 @@
+import 'package:frontend_garzas/commons/dialogs/notched_dialog.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -278,66 +279,61 @@ class _PendingDispatchLimitDialogState
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return Dialog(
-      child: Container(
-        width: 390,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            spacing: 15,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Limite de seguridad',
-                style: textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                'Ingresa el limite en ${widget.unitOfMeasurement.dp.toLowerCase()} para esta garza automatica.',
-                style: textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              IsselTextFormField(
-                controller: _quantityController,
-                focusNode: _quantityFocus,
-                hintText: widget.unitOfMeasurement.dp,
-                prefixIcon: Icons.water_drop_outlined,
-                fillColor: theme.scaffoldBackgroundColor,
-                textAlign: TextAlign.center,
-                inputFormatters: <TextInputFormatter>[
-                  RegexService.positiveNumberFormatter,
-                ],
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Ingresa la cantidad';
-                  }
+    return NotchedDialog(
+      icon: Icons.water_drop_outlined,
+      maxWidth: 390,
+      onClose: () => Navigator.of(context).pop(),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          spacing: 15,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Limite de seguridad',
+              style: textTheme.headlineMedium,
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              'Ingresa el limite en ${widget.unitOfMeasurement.dp.toLowerCase()} para esta garza automatica.',
+              style: textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            IsselTextFormField(
+              controller: _quantityController,
+              focusNode: _quantityFocus,
+              hintText: widget.unitOfMeasurement.dp,
+              prefixIcon: Icons.water_drop_outlined,
+              fillColor: theme.scaffoldBackgroundColor,
+              textAlign: TextAlign.center,
+              inputFormatters: <TextInputFormatter>[
+                RegexService.positiveNumberFormatter,
+              ],
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Ingresa la cantidad';
+                }
 
-                  final quantity = double.tryParse(value.trim());
-                  if (quantity == null || quantity <= 0) {
-                    return 'Ingresa un valor positivo';
-                  }
+                final quantity = double.tryParse(value.trim());
+                if (quantity == null || quantity <= 0) {
+                  return 'Ingresa un valor positivo';
+                }
 
-                  return null;
-                },
-                onSubmitted: (_) => _submit(),
-              ),
-              Divider(color: colorScheme.outline),
-              IsselButton(text: 'Continuar', height: 50, onTap: _submit),
-              IsselButton(
-                text: 'Volver',
-                height: 50,
-                color: Colors.transparent,
-                textColor: colorScheme.onSurface,
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
+                return null;
+              },
+              onSubmitted: (_) => _submit(),
+            ),
+            Divider(color: colorScheme.outline),
+            IsselButton(text: 'Continuar', height: 50, onTap: _submit),
+            IsselButton(
+              text: 'Volver',
+              height: 50,
+              color: Colors.transparent,
+              textColor: colorScheme.onSurface,
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
         ),
       ),
     );
@@ -433,42 +429,37 @@ class _CustomerEmployeeDialogState extends State<CustomerEmployeeDialog> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return Dialog(
-      child: Container(
-        width: 430,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
-          children: [
-            Text(
-              'Empleado del cliente',
-              style: textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            IsselTextFormField(
-              controller: controller,
-              focusNode: focusNode,
-              hintText: 'Nombre o gafete',
-              prefixIcon: Icons.badge_outlined,
-              fillColor: theme.scaffoldBackgroundColor,
-              onSubmitted: (_) => _submit(),
-            ),
-            IsselButton(text: 'Continuar', height: 50, onTap: _submit),
-            IsselButton(
-              text: 'Cerrar',
-              height: 50,
-              color: Colors.transparent,
-              textColor: colorScheme.onSurface,
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+    return NotchedDialog(
+      icon: Icons.badge_outlined,
+      maxWidth: 430,
+      onClose: () => Navigator.of(context).pop(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          Text(
+            'Empleado del cliente',
+            style: textTheme.titleLarge,
+            textAlign: TextAlign.center,
+          ),
+          IsselTextFormField(
+            controller: controller,
+            focusNode: focusNode,
+            hintText: 'Nombre o gafete',
+            prefixIcon: Icons.badge_outlined,
+            fillColor: theme.scaffoldBackgroundColor,
+            onSubmitted: (_) => _submit(),
+          ),
+          IsselButton(text: 'Continuar', height: 50, onTap: _submit),
+          IsselButton(
+            text: 'Cerrar',
+            height: 50,
+            color: Colors.transparent,
+            textColor: colorScheme.onSurface,
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
       ),
     );
   }

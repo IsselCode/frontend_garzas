@@ -1,47 +1,43 @@
-import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
-import 'package:frontend_garzas/src/admin/clean/entities/log_entity.dart';
+import 'package:frontend_garzas/core/services/paginated_api.dart';
+import 'package:frontend_garzas/commons/entities/page_result.dart';
 import 'package:frontend_garzas/core/utils/date_range_query.dart';
+import '../clean/entities/log_entity.dart';
 
 class LogsApi {
+  LogsApi({required this.apiClient});
   final ApiClient apiClient;
 
-  LogsApi({required this.apiClient});
-
-  final String _logsPath = "/logs";
-  final String _logsByDateRangePath = "/logs/range";
-
-  Future<List<LogEntity>> listLogs() async {
-    try {
-      List response = await apiClient.get(_logsPath, authRequired: true);
-
-      return response.map((e) => LogEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
+  Future<PageResult<LogEntity>> listPage({
+    int page = 1,
+    int limit = 50,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) {
+    final ranged = startDate != null && endDate != null;
+    return PaginatedApi.get(
+      apiClient,
+      ranged ? '/logs/range' : '/logs',
+      LogEntity.fromMap,
+      page: page,
+      limit: limit,
+      filters: ranged
+          ? DateRangeQuery.fromDates(startDate: startDate, endDate: endDate)
+          : {},
+    );
   }
 
+  Future<List<LogEntity>> listLogs() =>
+      PaginatedApi.all((page) => listPage(page: page, limit: 200));
   Future<List<LogEntity>> listByDateRange(
     DateTime startDate,
     DateTime endDate,
-  ) async {
-    try {
-      List response = await apiClient.get(
-        _logsByDateRangePath,
-        authRequired: true,
-        queryParams: DateRangeQuery.fromDates(
-          startDate: startDate,
-          endDate: endDate,
-        ),
-      );
-
-      return response.map((e) => LogEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
+  ) => PaginatedApi.all(
+    (page) => listPage(
+      page: page,
+      limit: 200,
+      startDate: startDate,
+      endDate: endDate,
+    ),
+  );
 }

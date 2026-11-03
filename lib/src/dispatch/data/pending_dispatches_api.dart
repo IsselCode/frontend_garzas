@@ -1,3 +1,6 @@
+import 'package:frontend_garzas/core/utils/date_range_query.dart';
+import 'package:frontend_garzas/commons/entities/page_result.dart';
+import 'package:frontend_garzas/core/services/paginated_api.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
 import 'package:frontend_garzas/core/services/api_client.dart';
 import 'package:frontend_garzas/src/admin/clean/entities/sale_entity.dart';
@@ -12,31 +15,39 @@ class PendingDispatchesApi {
 
   final String _pendingDispatchesPath = '/pending-dispatches';
 
+  Future<PageResult<PendingDispatchEntity>> listPage({
+    int page = 1,
+    int limit = 20,
+    String? status,
+    String? plateOrUnitReference,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) => PaginatedApi.get(
+    apiClient,
+    _pendingDispatchesPath,
+    PendingDispatchEntity.fromMap,
+    page: page,
+    limit: limit,
+    filters: {
+      'status': ?status,
+      if (plateOrUnitReference?.trim().isNotEmpty ?? false)
+        'plate_or_unit_reference': plateOrUnitReference!.trim(),
+      if (startDate != null && endDate != null)
+        ...DateRangeQuery.fromDates(startDate: startDate, endDate: endDate),
+    },
+  );
+
   Future<List<PendingDispatchEntity>> listPendingDispatches({
     String? status,
     String? plateOrUnitReference,
-  }) async {
-    try {
-      final queryParams = <String, dynamic>{};
-      if (status != null) queryParams['status'] = status;
-      if (plateOrUnitReference != null &&
-          plateOrUnitReference.trim().isNotEmpty) {
-        queryParams['plate_or_unit_reference'] = plateOrUnitReference.trim();
-      }
-
-      final List response = await apiClient.get(
-        _pendingDispatchesPath,
-        authRequired: true,
-        queryParams: queryParams.isEmpty ? null : queryParams,
-      );
-
-      return response.map((e) => PendingDispatchEntity.fromMap(e)).toList();
-    } on AppException {
-      rethrow;
-    } catch (e) {
-      throw AppException(message: e.toString());
-    }
-  }
+  }) => PaginatedApi.all(
+    (page) => listPage(
+      page: page,
+      limit: 100,
+      status: status,
+      plateOrUnitReference: plateOrUnitReference,
+    ),
+  );
 
   Future<PendingDispatchEntity> createPendingDispatch({
     required String plateOrUnitReference,

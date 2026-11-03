@@ -1,3 +1,5 @@
+import 'package:frontend_garzas/commons/dialogs/notched_dialog.dart';
+import 'package:frontend_garzas/commons/widgets/paged_list_panel.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -43,6 +45,7 @@ class _PendingDispatchesViewState extends State<PendingDispatchesView> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<DispatchController>();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -69,76 +72,64 @@ class _PendingDispatchesViewState extends State<PendingDispatchesView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child:
-                                FutureBuilder<
-                                  CtrlResponse<List<PendingDispatchEntity>>
-                                >(
-                                  future: _pendingDispatches,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const IsselShimmer(
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                      );
-                                    }
-
-                                    final response = snapshot.data;
-                                    if (response == null || !response.success) {
-                                      return Center(
-                                        child: Text(
-                                          response?.message ??
-                                              'No fue posible cargar los despachos',
-                                        ),
-                                      );
-                                    }
-
-                                    final pendingDispatches =
-                                        response.element ?? [];
-                                    if (pendingDispatches.isEmpty) {
-                                      return Center(
-                                        child: Text(
-                                          'No hay despachos pendientes',
-                                          style: scaledTextStyle(
-                                            textTheme.titleMedium,
-                                            scaleFactor,
-                                            color: colorScheme.outline,
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                    return ScrollConfiguration(
-                                      behavior: const MaterialScrollBehavior()
-                                          .copyWith(
-                                            dragDevices: {
-                                              PointerDeviceKind.touch,
-                                              PointerDeviceKind.mouse,
-                                            },
-                                          ),
-                                      child: ListView.separated(
-                                        itemCount: pendingDispatches.length,
-                                        separatorBuilder: (_, _) =>
-                                            SizedBox(height: 12 * scaleFactor),
-                                        itemBuilder: (context, index) {
-                                          final pendingDispatch =
-                                              pendingDispatches[index];
-                                          return _PendingDispatchTile(
-                                            pendingDispatch: pendingDispatch,
-                                            scaleFactor: scaleFactor,
-                                            onTap: () => _openPendingDispatch(
-                                              pendingDispatch,
+                            child: PagedListPanel(
+                              state: controller.pendingPaging,
+                              onPageChanged: (page) =>
+                                  controller.listPendingDispatches(page: page),
+                              child:
+                                  FutureBuilder<
+                                    CtrlResponse<List<PendingDispatchEntity>>
+                                  >(
+                                    future: _pendingDispatches,
+                                    builder: (context, snapshot) {
+                                      final pendingDispatches =
+                                          controller.pendingPaging.items;
+                                      if (pendingDispatches.isEmpty) {
+                                        return Center(
+                                          child: Text(
+                                            'No hay despachos pendientes',
+                                            style: scaledTextStyle(
+                                              textTheme.titleMedium,
+                                              scaleFactor,
+                                              color: colorScheme.outline,
                                             ),
-                                            onCancel: () =>
-                                                _cancelPendingDispatch(
-                                                  pendingDispatch,
-                                                ),
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
+                                          ),
+                                        );
+                                      }
+
+                                      return ScrollConfiguration(
+                                        behavior: const MaterialScrollBehavior()
+                                            .copyWith(
+                                              dragDevices: {
+                                                PointerDeviceKind.touch,
+                                                PointerDeviceKind.mouse,
+                                              },
+                                            ),
+                                        child: ListView.separated(
+                                          itemCount: pendingDispatches.length,
+                                          separatorBuilder: (_, _) => SizedBox(
+                                            height: 12 * scaleFactor,
+                                          ),
+                                          itemBuilder: (context, index) {
+                                            final pendingDispatch =
+                                                pendingDispatches[index];
+                                            return _PendingDispatchTile(
+                                              pendingDispatch: pendingDispatch,
+                                              scaleFactor: scaleFactor,
+                                              onTap: () => _openPendingDispatch(
+                                                pendingDispatch,
+                                              ),
+                                              onCancel: () =>
+                                                  _cancelPendingDispatch(
+                                                    pendingDispatch,
+                                                  ),
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                            ),
                           ),
                         ],
                       ),
@@ -487,45 +478,14 @@ class _CancelPendingDispatchDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-
-    return Dialog(
-      child: Container(
-        width: 380,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          spacing: 15,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Cancelar despacho',
-              style: textTheme.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              'Deseas cancelar el despacho pendiente de ${pendingDispatch.plateOrUnitReference}?',
-              style: textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            Divider(color: colorScheme.outline),
-            IsselButton(
-              text: 'Cancelar despacho',
-              color: Colors.red,
-              onTap: () => Navigator.pop(context, true),
-            ),
-            IsselButton(
-              text: 'Volver',
-              onTap: () => Navigator.pop(context, false),
-            ),
-          ],
-        ),
-      ),
+    return NotchedConfirmationDialog(
+      icon: Icons.cancel_outlined,
+      title: 'Cancelar despacho',
+      message:
+          'Deseas cancelar el despacho pendiente de ${pendingDispatch.plateOrUnitReference}?',
+      confirmText: 'Cancelar despacho',
+      cancelText: 'Volver',
+      destructive: true,
     );
   }
 }
@@ -563,123 +523,113 @@ class _CreatePendingDispatchDialogState
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return Dialog(
-      child: Container(
-        width: 460,
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 12,
-            children: [
-              Text(
-                'Crear despacho pendiente',
-                style: textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              IsselTextFormField(
-                controller: _employeeController,
-                focusNode: _employeeFocus,
-                hintText: 'Empleado del cliente',
-                prefixIcon: Icons.badge_outlined,
-                fillColor: theme.scaffoldBackgroundColor,
-                onSubmitted: (_) => _referenceFocus.requestFocus(),
-              ),
-              IsselTextFormField(
-                controller: _referenceController,
-                focusNode: _referenceFocus,
-                hintText: 'Placa o unidad',
-                prefixIcon: Icons.local_shipping_outlined,
-                fillColor: theme.scaffoldBackgroundColor,
-                validator: _requiredValidator,
-                onSubmitted: (_) => _submit(),
-              ),
-              Text('Tipo de agua', style: textTheme.bodyMedium),
-              Row(
-                spacing: 10,
-                children: [
-                  Expanded(
-                    child: IsselPill(
-                      text: 'Potable',
-                      textColor: _waterType == WaterType.potable
-                          ? colorScheme.onPrimary
-                          : colorScheme.onSurface,
-                      color: _waterType == WaterType.potable
-                          ? colorScheme.primary
-                          : colorScheme.surfaceContainer,
-                      onTap: () =>
-                          setState(() => _waterType = WaterType.potable),
+    return NotchedDialog(
+      icon: Icons.local_shipping_outlined,
+      maxWidth: 460,
+      onClose: () => Navigator.of(context).pop(),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: [
+            Text(
+              'Crear despacho pendiente',
+              style: textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            IsselTextFormField(
+              controller: _employeeController,
+              focusNode: _employeeFocus,
+              hintText: 'Empleado del cliente',
+              prefixIcon: Icons.badge_outlined,
+              fillColor: theme.scaffoldBackgroundColor,
+              onSubmitted: (_) => _referenceFocus.requestFocus(),
+            ),
+            IsselTextFormField(
+              controller: _referenceController,
+              focusNode: _referenceFocus,
+              hintText: 'Placa o unidad',
+              prefixIcon: Icons.local_shipping_outlined,
+              fillColor: theme.scaffoldBackgroundColor,
+              validator: _requiredValidator,
+              onSubmitted: (_) => _submit(),
+            ),
+            Text('Tipo de agua', style: textTheme.bodyMedium),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
+                  child: IsselPill(
+                    text: 'Potable',
+                    textColor: _waterType == WaterType.potable
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface,
+                    color: _waterType == WaterType.potable
+                        ? colorScheme.primary
+                        : colorScheme.surfaceContainer,
+                    onTap: () => setState(() => _waterType = WaterType.potable),
+                  ),
+                ),
+                Expanded(
+                  child: IsselPill(
+                    text: 'Pozo',
+                    textColor: _waterType == WaterType.pozo
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface,
+                    color: _waterType == WaterType.pozo
+                        ? colorScheme.primary
+                        : colorScheme.surfaceContainer,
+                    onTap: () => setState(() => _waterType = WaterType.pozo),
+                  ),
+                ),
+              ],
+            ),
+            Text('Unidad de medida', style: textTheme.bodyMedium),
+            Row(
+              spacing: 10,
+              children: [
+                Expanded(
+                  child: IsselPill(
+                    text: 'Litros',
+                    textColor: _unitOfMeasurement == UnitOfMeasurement.liters
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface,
+                    color: _unitOfMeasurement == UnitOfMeasurement.liters
+                        ? colorScheme.primary
+                        : colorScheme.surfaceContainer,
+                    onTap: () => setState(
+                      () => _unitOfMeasurement = UnitOfMeasurement.liters,
                     ),
                   ),
-                  Expanded(
-                    child: IsselPill(
-                      text: 'Pozo',
-                      textColor: _waterType == WaterType.pozo
-                          ? colorScheme.onPrimary
-                          : colorScheme.onSurface,
-                      color: _waterType == WaterType.pozo
-                          ? colorScheme.primary
-                          : colorScheme.surfaceContainer,
-                      onTap: () => setState(() => _waterType = WaterType.pozo),
+                ),
+                Expanded(
+                  child: IsselPill(
+                    text: 'Galones',
+                    textColor: _unitOfMeasurement == UnitOfMeasurement.gallons
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface,
+                    color: _unitOfMeasurement == UnitOfMeasurement.gallons
+                        ? colorScheme.primary
+                        : colorScheme.surfaceContainer,
+                    onTap: () => setState(
+                      () => _unitOfMeasurement = UnitOfMeasurement.gallons,
                     ),
                   ),
-                ],
-              ),
-              Text('Unidad de medida', style: textTheme.bodyMedium),
-              Row(
-                spacing: 10,
-                children: [
-                  Expanded(
-                    child: IsselPill(
-                      text: 'Litros',
-                      textColor: _unitOfMeasurement == UnitOfMeasurement.liters
-                          ? colorScheme.onPrimary
-                          : colorScheme.onSurface,
-                      color: _unitOfMeasurement == UnitOfMeasurement.liters
-                          ? colorScheme.primary
-                          : colorScheme.surfaceContainer,
-                      onTap: () => setState(
-                        () => _unitOfMeasurement = UnitOfMeasurement.liters,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: IsselPill(
-                      text: 'Galones',
-                      textColor: _unitOfMeasurement == UnitOfMeasurement.gallons
-                          ? colorScheme.onPrimary
-                          : colorScheme.onSurface,
-                      color: _unitOfMeasurement == UnitOfMeasurement.gallons
-                          ? colorScheme.primary
-                          : colorScheme.surfaceContainer,
-                      onTap: () => setState(
-                        () => _unitOfMeasurement = UnitOfMeasurement.gallons,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              IsselButton(
-                text: 'Seleccionar garza',
-                height: 50,
-                onTap: _submit,
-              ),
-              IsselButton(
-                text: 'Cerrar',
-                height: 50,
-                color: Colors.transparent,
-                textColor: colorScheme.onSurface,
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            IsselButton(text: 'Seleccionar garza', height: 50, onTap: _submit),
+            IsselButton(
+              text: 'Cerrar',
+              height: 50,
+              color: Colors.transparent,
+              textColor: colorScheme.onSurface,
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
         ),
       ),
     );

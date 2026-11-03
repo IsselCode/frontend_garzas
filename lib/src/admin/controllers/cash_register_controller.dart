@@ -1,3 +1,4 @@
+import '../../../commons/paged_list_state.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/core/errors/exceptions.dart';
@@ -10,24 +11,36 @@ import 'package:frontend_garzas/src/sales/clean/entities/closed_cut_summary_enti
 class CashRegisterController extends ChangeNotifier {
   CashRegisterApi cashRegisterApi;
 
-  CashRegisterController({required this.cashRegisterApi});
+  CashRegisterController({required this.cashRegisterApi}) {
+    paging = PagedListState(
+      onChanged: () {
+        cashRegisterCuts = showedCashRegisterCuts = paging.items;
+        notifyListeners();
+      },
+    );
+    salesPaging = PagedListState(onChanged: notifyListeners);
+  }
+  late final PagedListState<CashRegisterEntity> paging;
+  late final PagedListState<ClosedCutSaleEntity> salesPaging;
+  DateTime? _start, _end;
+  int _request = 0;
 
   List<CashRegisterEntity> cashRegisterCuts = [];
   List<CashRegisterEntity> showedCashRegisterCuts = [];
   List<SummaryEntity> summaries = [];
   CashRegisterEntity? selectedCut;
 
-  Future<CtrlResponse> getCashRegisterCuts() async {
-    try {
-      List<CashRegisterEntity> tempCuts = await cashRegisterApi
-          .listCashRegisterCuts();
-      cashRegisterCuts = tempCuts;
-      showedCashRegisterCuts = tempCuts;
-      notifyListeners();
-      return CtrlResponse(success: true);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
-    }
+  Future<CtrlResponse> getCashRegisterCuts({int page = 1}) {
+    _request++;
+    final start = _start, end = _end;
+    return paging.load(
+      (number) => cashRegisterApi.listCutsPage(
+        page: number,
+        startDate: start,
+        endDate: end,
+      ),
+      page: page,
+    );
   }
 
   Future<CtrlResponse> loadCutSummary(CashRegisterEntity cut) async {
@@ -55,37 +68,47 @@ class CashRegisterController extends ChangeNotifier {
     }
   }
 
-  Future<CtrlResponse<List<ClosedCutSaleEntity>>> getCutSales(int cutId) async {
-    try {
-      final sales = await cashRegisterApi.getSalesByCutId(cutId);
-      return CtrlResponse(success: true, element: sales);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
-    }
+  Future<CtrlResponse<List<ClosedCutSaleEntity>>> getCutSales(
+    int cutId, {
+    int page = 1,
+  }) async {
+    final result = await salesPaging.load(
+      (number) => cashRegisterApi.getSalesPageByCutId(cutId, page: number),
+      page: page,
+    );
+    return CtrlResponse(
+      success: result.success,
+      message: result.message,
+      element: salesPaging.items,
+    );
   }
 
   Future<CtrlResponse> getCutsByDateRange({
     required DateTime startDate,
     required DateTime endDate,
-  }) async {
-    try {
-      List<CashRegisterEntity> tempCuts = await cashRegisterApi.listByDateRange(
-        startDate,
-        endDate,
-      );
+  }) => _setRange(startDate, endDate);
 
-      showedCashRegisterCuts = tempCuts;
-      notifyListeners();
+  Future<CtrlResponse> clearSalesDateRange() => _setRange(null, null);
 
-      return CtrlResponse(success: true);
-    } on AppException catch (e) {
-      return CtrlResponse(success: false, message: e.message);
+  Future<CtrlResponse> _setRange(DateTime? start, DateTime? end) async {
+    final previous = (_start, _end);
+    _start = start;
+    _end = end;
+    final pending = getCashRegisterCuts();
+    final request = _request;
+    final response = await pending;
+    if (!response.success && request == _request) {
+      _start = previous.$1;
+      _end = previous.$2;
     }
+    return response;
   }
 
-  void clearSalesDateRange() {
-    showedCashRegisterCuts = cashRegisterCuts;
-    notifyListeners();
+  @override
+  void dispose() {
+    paging.dispose();
+    salesPaging.dispose();
+    super.dispose();
   }
 
   //* Sales

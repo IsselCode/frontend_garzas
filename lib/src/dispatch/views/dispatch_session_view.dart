@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:frontend_garzas/commons/dialogs/notched_dialog.dart';
 import 'package:frontend_garzas/commons/ctrl_response.dart';
 import 'package:frontend_garzas/commons/text_back_button.dart';
 import 'package:frontend_garzas/core/app/consts.dart';
@@ -453,8 +454,6 @@ class _DispatchTimerDisplay extends StatelessWidget {
   }
 
   void _showTimerInfo(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -462,65 +461,36 @@ class _DispatchTimerDisplay extends StatelessWidget {
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              width: 380,
-              margin: const EdgeInsets.all(24),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 24,
-                    offset: Offset(0, 10),
-                  ),
-                ],
+        return NotchedDialog(
+          icon: Icons.sync_rounded,
+          maxWidth: 420,
+          onClose: () => Navigator.of(context).pop(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Acerca del tiempo',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 58,
-                    height: 58,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.sync_rounded,
-                      color: colorScheme.onPrimaryContainer,
-                      size: 30,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Acerca del tiempo',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'El tiempo oficial del despacho lo conserva el servidor. '
-                    'Este contador lo muestra y se actualiza automáticamente '
-                    'para mantenerse coordinado con los demás equipos.\n\n'
-                    'Por la conexión, puede tardar un instante en reflejar el '
-                    'valor más reciente.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 20),
-                  FilledButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Entendido'),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              Text(
+                'El tiempo oficial del despacho lo conserva el servidor. '
+                'Este contador lo muestra y se actualiza automáticamente '
+                'para mantenerse coordinado con los demás equipos.\n\n'
+                'Por la conexión, puede tardar un instante en reflejar el '
+                'valor más reciente.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-            ),
+              const SizedBox(height: 20),
+              IsselButton(
+                text: 'Entendido',
+                height: 48,
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ],
           ),
         );
       },
